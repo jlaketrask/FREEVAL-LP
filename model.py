@@ -28,6 +28,7 @@ WTT = lambda i, p: Th * (L[i]/WS(i, p))  # Wave travel time
 ONRD = [[1000 if el_i in Ntilde else 0 for el_p in xrange(P)] for el_i in xrange(NS)]  # Demand flow rate for ONR at node i in interval p
 ONRC = [[[2400 if el_i in Ntilde else 0 for el_P in xrange(P)] for el_t in xrange(S)] for el_i in xrange(NS)]  # Geometric capacity of ONR at node i in period t in interval p
 RM = [[2400 if el_i in Ntilde else 0 for el_P in xrange(P)] for el_i in xrange(NS)]  # Ramp metering rate of node i during interval p (veh/h)
+OFRD = [[1000 if el_i in Ftilde else 0 for el_p in xrange(P)] for el_i in xrange(NS)]  # Demand flow rate for OFR at node i in interval p
 
 ######## Creating Gurobi Model
 # Initializing model instance
@@ -82,6 +83,9 @@ for el_i in xrange(NS):
 MO3 = []  # Max mainline output 3: limited by the presence of qued vech at the upstream in up segment i while the queue clears from the downstream end of segment i
 for el_i in xrange(NS):
     MO3.append([[hcm.addVar(vtype=gbp.GRB.CONTINUOUS, name='MO3'+str(el_i)+str(el_t)+str(el_p)) for el_p in xrange(P)] for el_t in xrange(S)])
+NV = []  # NV in segment i at step t in interval p
+for el_i in xrange(NS):
+    NV.append([[hcm.addVar(vtype=gbp.GRB.CONTINUOUS, name='NV'+str(el_i)+str(el_t)+str(el_p)) for el_p in xrange(P)] for el_t in xrange(S+1)])
 
 # Integrating variables into model
 hcm.update()
@@ -90,5 +94,30 @@ hcm.update()
 #hcm.setObjective()
 
 # Adding equality/inquality constraints
+ED_I = []
+bigM = max(max(SC), max(SD)+max(ONRD))  # TODO should be okay
+for el_i in xrange(NS):
+    ED_I.append([])
+    for el_p in xrange(P):
+        # Creating binary variables
+        ED_I[el_i].append([hcm.addVar(vtype=gbp.GRB.BINARY, name='ED_I'+str(ii)+str(el_i)+str(el_p)) for ii in xrange(2)])  # TODO put with initial variable declaration
+        hcm.update()
+        # Min constraint #1
+        hcm.addConstr(SC[el_i][el_p] - ED[el_i-1][el_p] - ONRD[el_i][el_p] + OFRD[el_i][el_p] <= bigM*ED_I[el_i][el_p][0], name="ED_M1"+str(el_i)+str(el_p))  # TODO init values for ED?
+        # Min constraint #2
+        hcm.addConstr(ED[el_i-1][el_p] + ONRD[el_i][el_p] - OFRD[el_i][el_p] - SC[el_i][el_p] <= bigM*ED_I[el_i][el_p][1], name="ED_M2"+str(el_i)+str(el_p))
+        # Constraint that one has to be true
+        hcm.addConstr(ED_I[el_i][el_p][0] + ED_I[el_i][el_p][1] == 1, name="ED_O"+str(el_i)+str(el_p))
+        # Constraint assigning minimum value to EDip
+        bigM1 = 10000  # TODO calculate real value
+        bigM2 = 10000  # TODO calculate real value
+        hcm.addConstr(ED[el_i][el_p] - SC[el_i][el_p] <= bigM1*ED_I[el_i][el_p][0], name='ED_D1'+str(el_i)+str(el_p))
+        hcm.addConstr(SC[el_i][el_p] - ED[el_i][el_p] <= bigM1*ED_I[el_i][el_p][0], name='ED_D2'+str(el_i)+str(el_p))
+        hcm.addConstr(ED[el_i][el_p] - ED[el_i-1][el_p] - ONRD[el_i][el_p] + OFRD[el_i][el_p] <= bigM2*ED_I[el_i][el_p][1], name='ED_D3'+str(el_i)+str(el_p))
+        hcm.addConstr(ED[el_i-1][el_p] + ONRD[el_i][el_p] - OFRD[el_i][el_p] - ED[el_i][el_p] <= bigM2*ED_I[el_i][el_p][1], name='ED_D4'+str(el_i)+str(el_p))
 
-hcm.addConstr()
+
+# hcm.update()
+for el_i in xrange(NS):
+    for el_p in xrange(P):
+        hcm.addConstr(NV[el_i][el_t][el_p] == KB[el_i][el_p]*L[el_i] + UV[el_i][S-1][el_p-1], name='NV_D'+str(el_i)+str(0)+str(el_p))
