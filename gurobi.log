@@ -1,0 +1,146 @@
+
+Gurobi 5.6.3 (win64) logging started 10/31/14 13:59:42
+
+
+Gurobi 5.6.3 (win64) logging started 10/31/14 15:43:28
+
+Optimize a model with 9 rows, 7 columns and 22 nonzeros
+Found heuristic solution: objective 3
+Presolve removed 9 rows and 7 columns
+Presolve time: 0.02s
+
+Explored 0 nodes (0 simplex iterations) in 0.07 seconds
+Thread count was 1 (of 8 available processors)
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 3.000000000000e+00, best bound 3.000000000000e+00, gap 0.0%
+Optimize a model with 9 rows, 7 columns and 22 nonzeros
+Found heuristic solution: objective 3
+Presolve removed 9 rows and 7 columns
+Presolve time: 0.00s
+
+Explored 0 nodes (0 simplex iterations) in 0.00 seconds
+Thread count was 1 (of 8 available processors)
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 3.000000000000e+00, best bound 3.000000000000e+00, gap 0.0%
+Optimize a model with 9 rows, 5 columns and 22 nonzeros
+Found heuristic solution: objective 2
+Presolve removed 9 rows and 5 columns
+Presolve time: 0.00s
+
+Explored 0 nodes (0 simplex iterations) in 0.00 seconds
+Thread count was 1 (of 8 available processors)
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 2.000000000000e+00, best bound 2.000000000000e+00, gap 0.0%
+Optimize a model with 9 rows, 5 columns and 22 nonzeros
+Found heuristic solution: objective 2
+Presolve removed 9 rows and 5 columns
+Presolve time: 0.00s
+
+Explored 0 nodes (0 simplex iterations) in 0.00 seconds
+Thread count was 1 (of 8 available processors)
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 2.000000000000e+00, best bound 2.000000000000e+00, gap 0.0%
+Optimize a model with 9 rows, 5 columns and 22 nonzeros
+Found heuristic solution: objective 3
+Presolve removed 9 rows and 5 columns
+Presolve time: 0.00s
+
+Explored 0 nodes (0 simplex iterations) in 0.00 seconds
+Thread count was 1 (of 8 available processors)
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 3.000000000000e+00, best bound 3.000000000000e+00, gap 0.0%
+Optimize a model with 9 rows, 5 columns and 22 nonzeros
+Found heuristic solution: objective 3
+Presolve removed 9 rows and 5 columns
+Presolve time: 0.00s
+
+Explored 0 nodes (0 simplex iterations) in 0.00 seconds
+Thread count was 1 (of 8 available processors)
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 3.000000000000e+00, best bound 3.000000000000e+00, gap 0.0%
+Optimize a model with 9 rows, 5 columns and 18 nonzeros
+Found heuristic solution: objective -0
+Presolve removed 9 rows and 5 columns
+Presolve time: 0.00s
+
+Explored 0 nodes (0 simplex iterations) in 0.00 seconds
+Thread count was 1 (of 8 available processors)
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 8.881784197001e-16, best bound 8.881784197001e-16, gap 0.0%
+Optimize a model with 9 rows, 5 columns and 18 nonzeros
+Found heuristic solution: objective 1
+Presolve removed 9 rows and 5 columns
+Presolve time: 0.00s
+
+Explored 0 nodes (0 simplex iterations) in 0.00 seconds
+Thread count was 1 (of 8 available processors)
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 1.000000000000e+00, best bound 1.000000000000e+00, gap 0.0%
+Optimize a model with 9 rows, 5 columns and 22 nonzeros
+Found heuristic solution: objective 5
+Presolve removed 9 rows and 5 columns
+Presolve time: 0.00s
+
+Explored 0 nodes (0 simplex iterations) in 0.00 seconds
+Thread count was 1 (of 8 available processors)
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 5.000000000000e+00, best bound 5.000000000000e+00, gap 0.0%
+Optimize a model with 9 rows, 5 columns and 22 nonzeros
+Found heuristic solution: objective 1
+Presolve removed 9 rows and 5 columns
+Presolve time: 0.00s
+
+Explored 0 nodes (0 simplex iterations) in 0.00 seconds
+Thread count was 1 (of 8 available processors)
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 1.000000000000e+00, best bound 1.000000000000e+00, gap 0.0%
+Optimize a model with 9 rows, 5 columns and 22 nonzeros
+Found heuristic solution: objective 1
+Presolve removed 9 rows and 5 columns
+Presolve time: 0.00s
+
+Explored 0 nodes (0 simplex iterations) in 0.00 seconds
+Thread count was 1 (of 8 available processors)
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 1.000000000000e+00, best bound 1.000000000000e+00, gap 0.0%
+Optimize a model with 9 rows, 5 columns and 22 nonzeros
+Found heuristic solution: objective 5
+Presolve removed 9 rows and 5 columns
+Presolve time: 0.00s
+
+Explored 0 nodes (0 simplex iterations) in 0.00 seconds
+Thread count was 1 (of 8 available processors)
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 5.000000000000e+00, best bound 5.000000000000e+00, gap 0.0%
+Optimize a model with 9 rows, 5 columns and 22 nonzeros
+Found heuristic solution: objective 5
+Presolve removed 9 rows and 5 columns
+Presolve time: 0.00s
+
+Explored 0 nodes (0 simplex iterations) in 0.00 seconds
+Thread count was 1 (of 8 available processors)
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 5.000000000000e+00, best bound 5.000000000000e+00, gap 0.0%
+Optimize a model with 9 rows, 5 columns and 22 nonzeros
+Found heuristic solution: objective 5
+Presolve removed 9 rows and 5 columns
+Presolve time: 0.00s
+
+Explored 0 nodes (0 simplex iterations) in 0.00 seconds
+Thread count was 1 (of 8 available processors)
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 5.000000000000e+00, best bound 5.000000000000e+00, gap 0.0%
