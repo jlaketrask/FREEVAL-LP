@@ -23,10 +23,10 @@ def generate_min_constrs(model, var1, var2, var3, M, M1, M2, label1, label2):
     model.update()
 
     # Constraints setting indicator varibles
-    model.addConstr(var2 - var3 <= M*temp_binary_vars[0], name=label1+'_Max1'+label2)
-    model.addConstr(var3 - var2 <= M*temp_binary_vars[1], name=label1+'_Max2'+label2)
+    model.addConstr(var2 - var3 <= M*temp_binary_vars[0], name=label1+'_Min1'+label2)
+    model.addConstr(var3 - var2 <= M*temp_binary_vars[1], name=label1+'_Min2'+label2)
     # Sum of indicator variables must be 1
-    model.addConstr(temp_binary_vars[0]+temp_binary_vars[1] == 1, name=label1+'_Max3'+label2)
+    model.addConstr(temp_binary_vars[0]+temp_binary_vars[1] == 1, name=label1+'_Min3'+label2)
     # Constraints assigning min value
     model.addConstr(var1 - var2 <= M1*temp_binary_vars[0], name=label1+'_D1'+label2)
     model.addConstr(var2 - var1 <= M1*temp_binary_vars[0], name=label1+'_D2'+label2)
