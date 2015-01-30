@@ -601,5 +601,20 @@ for el_i in xrange(NS - 1):  # TODO Check NS minus 1?
                               name = "3.84b"+str(el_i)+str(el_t)+str(el_p))
 hcm.update()
 
+# Step 20: Calculate density of queue on segment
+for el_i in xrange(NS):  # TODO -1?
+    for el_t in xrange(S):  # Todo account for "t-1"
+        for el_p in xrange(P):
+            hcm.addConstr(KQ[el_i][el_t][el_p] == KJ - ((KJ-KC)/SC[el_i][el_p])*SF[el_i+1][el_t-1][el_p],
+                          name="6.85"+str(el_i)+str(el_t)+str(el_p))
+hcm.update()
+
+# Step 21: Calculate Mainline Output 2
+for el_i in xrange(NS):  # TODO -1?
+    for el_t in xrange(S):  # Todo account for "t-1" (MF/OFRF/ONRF/NV)
+        for el_p in xrange(P):
+            hcm.addConstr(MO2(el_i, el_t, el_p) == MF[el_i+1][el_t-1][el_p] + OFRF[el_i+1][el_t-1][el_p]
+                - ONRF[el_i][el_t-1][el_p]+(L[el_i]*KQ[el_i][el_t][el_p]) - NV[el_i][el_t-1][el_p])
+
 # Calculate WTT and WS
 # Set Lower/Upper Bounds
