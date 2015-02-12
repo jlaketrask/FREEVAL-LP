@@ -1,6 +1,7 @@
 from __future__ import division
 import gurobipy as gbp
 from pylab import *
+from aux_functions import compute_segment_demand, compute_estimated_demand, compute_background_density
 from constraintGenerator import generate_max_constrs, generate_min_constrs, sum_add_t, sum_sum_add_t_p
 __author__ = 'jltrask'
 
@@ -10,6 +11,7 @@ NS = 7  # number of segments
 Stilde = [el for el in xrange(7)]
 Ftilde = [5]  # List of OFR segments
 Ntilde = [2]  # List of ONR segments
+Wtilde = []   # List of Weave segments
 P = 4  # number of time intervals (periods) in the analysis period
 Ptilde = [el for el in xrange(P)]  # List of time intervals
 S = 4 * 15  # Number of time steps in a single interval (each step is 15 seconds)
@@ -21,8 +23,7 @@ KC = 45  # Ideal Density at capacity
 KJ = 190  # Facility-wide jam density
 L = [2640 for el in xrange(NS)]  # Length of each segment
 SC = ones((NS, P))  # Segment capacity of segment i in interval p
-mainline_demand = 4000
-SD = mainline_demand*ones((NS, P))  # Segment demand for segment i in time interval p
+mainline_demand = [4000 for p in xrange(P)]
 N = 3 * ones((NS, P))  # Number of open lanes in segment i in interval p
 WS = lambda i, p: SC[i][p]/(N[i][p] * (KJ-KC))  # Wave speed for segment i in interval p
 WTT = lambda i, p: Th * (L[i]/WS(i, p))  # Wave travel time
@@ -30,6 +31,7 @@ ONRD = [[1000 if el_i in Ntilde else 0 for el_p in xrange(P)] for el_i in xrange
 ONRC = [[[2400 if el_i in Ntilde else 0 for el_p in xrange(P)] for el_t in xrange(S)] for el_i in xrange(NS)]  # Geometric capacity of ONR at node i in period t in interval p
 RM = [[2400 if el_i in Ntilde else 0 for el_p in xrange(P)] for el_i in xrange(NS)]  # Ramp metering rate of node i during interval p (veh/h)
 OFRD = [[1000 if el_i in Ftilde else 0 for el_p in xrange(P)] for el_i in xrange(NS)]  # Demand flow rate for OFR at node i in interval p
+SD = compute_segment_demand(NS, mainline_demand, ONRD, OFRD) # Segment demand for segment i in time interval p
 
 ######## Auxiliary Functions
 def generate_sc(i,t,p):
@@ -46,13 +48,13 @@ def generate_sc(i,t,p):
 hcm = gbp.Model("hcm-test")
 
 # Creating linear decision variables
-EDv = []  # Expected dmand that would arrive at segment i over inteval p
-for el_i in xrange(NS):
-    EDv.append([hcm.addVar(vtype=gbp.GRB.CONTINUOUS, name='ED' + str(el_i) + str(el_p)) for el_p in xrange(P)])
-ED = lambda i, p: min(SD[0][p], SC[0][p]) if i is 0 else EDv[i][p]
-KB = []  # Background density of segment i during time interval p
-for el_i in xrange(NS):
-    KB.append([hcm.addVar(vtype=gbp.GRB.CONTINUOUS, name='KB' + str(el_i) + str(el_p)) for el_p in xrange(P)])
+#EDv = []  # Expected dmand that would arrive at segment i over inteval p
+#for el_i in xrange(NS):
+#    EDv.append([hcm.addVar(vtype=gbp.GRB.CONTINUOUS, name='ED' + str(el_i) + str(el_p)) for el_p in xrange(P)])
+#ED = lambda i, p: min(SD[0][p], SC[0][p]) if i is 0 else EDv[i][p]
+#KB = []  # Background density of segment i during time interval p
+#for el_i in xrange(NS):
+#    KB.append([hcm.addVar(vtype=gbp.GRB.CONTINUOUS, name='KB' + str(el_i) + str(el_p)) for el_p in xrange(P)])
 KQ = []  # Queue density: vechicle density in the queue on segment i in step t in interval p
 for el_i in xrange(NS):
     KQ.append([[hcm.addVar(vtype=gbp.GRB.CONTINUOUS, name='KQ'+str(el_i)+str(el_t)+str(el_p)) for el_p in xrange(P)] for el_t in xrange(S)])
@@ -132,6 +134,12 @@ for el_i in xrange(NS):
     NVv.append([[hcm.addVar(vtype=gbp.GRB.CONTINUOUS, name='NV'+str(el_i)+str(el_t)+str(el_p)) for el_p in xrange(P)] for el_t in xrange(S+1)])
 NV = lambda i, t, p: NVv[i][t+1][p]
 
+# Precomputing known values
+# (1) Estimated demand (ED) and background density (KB)
+ED = compute_estimated_demand(SC, SD)
+KB = compute_background_density(ED, Ftilde, Ntilde)
+
+# (2) Wave Trave Time and Wave Speed
 
 # Integrating variables into model
 hcm.update()
