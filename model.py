@@ -341,7 +341,7 @@ for el_i in xrange(NS):
             #ONRO_A[el_i][el_t][el_p].append(hcm.addVar(vtype=gbp.GRB.CONTINUOUS, name='ONRO_A6'+str(el_i)+str(el_t)+str(el_p)))
 hcm.update()
 
-for el_i in xrange(NS):
+for el_i in xrange(NS - 1):  # Minus 1 because last segment cannot be an on-ramp
     for el_t in xrange(S):
         for el_p in xrange(P):
             if el_t is 0:
