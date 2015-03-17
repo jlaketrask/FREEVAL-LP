@@ -8,27 +8,90 @@ __author__ = 'jltrask'
 
 init_time = time.time()
 ######## Model Parameters
-# Indices and basic Freeway geometry parameters
-NS = 11  # number of segments
+# # Indices and basic Freeway geometry parameters
+# NS = 11  # number of segments
+# Stilde = [el for el in xrange(NS)]
+# Ftilde = [3,5,9]  # List of OFR segments
+# Ntilde = [1,5,7]  # List of ONR segments
+# Wtilde = [5]   # List of Weave segments
+# P = 5  # number of time intervals (periods) in the analysis period
+# Ptilde = [el for el in xrange(P)]  # List of time intervals
+# S = 4 * 15  # Number of time steps in a single interval (each step is 15 seconds)
+# Ttilde = [el for el in xrange(S)]  # List of time steps
+# Th = 240  # Number of time steps in 1 hour
+# alpha = 5  # %
+#
+# facility_data = read_facility_data_from_file("gp_example_1_facility_data.csv", NS, P)
+#
+# # Constants
+# KC = 45  # Ideal Density at capacity
+# KJ = 190  # Facility-wide jam density
+# L = [5280,1500,2280,1500,5280,2640,5280,1140,360,1140,5280]  # Length of each segment
+# SC = facility_data["SC"]  # Segment capacity of segment i in interval p
+# mainline_demand = [4505, 4955, 5225, 4685, 3785]
+# N = facility_data["NL"]  # Number of open lanes in segment i in interval p
+# WS = lambda i, p: SC[i][p]/(N[i][p] * (KJ-KC))  # Wave speed for segment i in interval p
+# WTT = lambda i, p: int(round(Th * (L[i]/5280.0/WS(i, p))))  # Wave travel time
+# ONRD = facility_data["ONRD"]  # Demand flow rate for ONR at node i in interval p
+# ONRCv = facility_data["ONRC"]
+# ONRC = lambda i, t, p: ONRCv[i][p]  # Geometric capacity of ONR at node i in period t in interval p
+# RM = facility_data["RM"]  # Ramp metering rate of node i during interval p (veh/h)
+# OFRD = facility_data["OFRD"]  # Demand flow rate for OFR at node i in interval p
+# SD = compute_segment_demand(NS, mainline_demand, ONRD, OFRD) # Segment demand for segment i in time interval p
+
+
+# Simple Test Case 1
+# NS = 3  # number of segments
+# Stilde = [el for el in xrange(NS)]
+# Ftilde = []  # List of OFR segments
+# Ntilde = []  # List of ONR segments
+# Wtilde = []   # List of Weave segments
+# P = 2  # number of time intervals (periods) in the analysis period
+# Ptilde = [el for el in xrange(P)]  # List of time intervals
+# S = 4 * 15  # Number of time steps in a single interval (each step is 15 seconds)
+# Ttilde = [el for el in xrange(S)]  # List of time steps
+# Th = 240  # Number of time steps in 1 hour
+# alpha = 5  # %
+#
+# facility_data = read_facility_data_from_file("simple_test_case_1.csv", NS, P)
+#
+# # Constants
+# KC = 45  # Ideal Density at capacity
+# KJ = 190  # Facility-wide jam density
+# L = [2640,2640,2640]  # Length of each segment
+# SC = facility_data["SC"]  # Segment capacity of segment i in interval p
+# mainline_demand = [4000,4000]
+# N = facility_data["NL"]  # Number of open lanes in segment i in interval p
+# WS = lambda i, p: SC[i][p]/(N[i][p] * (KJ-KC))  # Wave speed for segment i in interval p
+# WTT = lambda i, p: int(round(Th * (L[i]/5280.0/WS(i, p))))  # Wave travel time
+# ONRD = facility_data["ONRD"]  # Demand flow rate for ONR at node i in interval p
+# ONRCv = facility_data["ONRC"]
+# ONRC = lambda i, t, p: ONRCv[i][p]  # Geometric capacity of ONR at node i in period t in interval p
+# RM = facility_data["RM"]  # Ramp metering rate of node i during interval p (veh/h)
+# OFRD = facility_data["OFRD"]  # Demand flow rate for OFR at node i in interval p
+# SD = compute_segment_demand(NS, mainline_demand, ONRD, OFRD) # Segment demand for segment i in time interval p
+
+# Simple Test Case 2
+NS = 3  # number of segments
 Stilde = [el for el in xrange(NS)]
-Ftilde = [3,5,9]  # List of OFR segments
-Ntilde = [1,5,7]  # List of ONR segments
-Wtilde = [5]   # List of Weave segments
-P = 5  # number of time intervals (periods) in the analysis period
+Ftilde = []  # List of OFR segments
+Ntilde = []  # List of ONR segments
+Wtilde = []   # List of Weave segments
+P = 2  # number of time intervals (periods) in the analysis period
 Ptilde = [el for el in xrange(P)]  # List of time intervals
 S = 4 * 15  # Number of time steps in a single interval (each step is 15 seconds)
 Ttilde = [el for el in xrange(S)]  # List of time steps
 Th = 240  # Number of time steps in 1 hour
 alpha = 5  # %
 
-facility_data = read_facility_data_from_file("gp_example_1_facility_data.csv", NS, P)
+facility_data = read_facility_data_from_file("simple_test_case_2.csv", NS, P)
 
 # Constants
 KC = 45  # Ideal Density at capacity
 KJ = 190  # Facility-wide jam density
-L = [5280,1500,2280,1500,5280,2640,5280,1140,360,1140,5280]  # Length of each segment
+L = [2640,2640,2640]  # Length of each segment
 SC = facility_data["SC"]  # Segment capacity of segment i in interval p
-mainline_demand = [4505, 4955, 5225, 4685, 3785]
+mainline_demand = [4000,4000]
 N = facility_data["NL"]  # Number of open lanes in segment i in interval p
 WS = lambda i, p: SC[i][p]/(N[i][p] * (KJ-KC))  # Wave speed for segment i in interval p
 WTT = lambda i, p: int(round(Th * (L[i]/5280.0/WS(i, p))))  # Wave travel time
@@ -69,10 +132,10 @@ for el_i in xrange(NS):
     MFv.append([[hcm.addVar(vtype=gbp.GRB.CONTINUOUS, name='MF'+str(el_i)+str(el_t)+str(el_p)) for el_p in xrange(P)] for el_t in xrange(S)])
 def MF(i, t, p):
     if i >= NS:
-        return 0
+        return SC[NS - 1][p]
     elif t <  0:
         if p is 0:
-            return 0
+            return SC[i][0]
         else:
             return MFv[i][S+t][p-1]
     else:
@@ -99,7 +162,9 @@ ONRFv = []  # Actual ONR flow rate that can cross on ramp node i during step t i
 for el_i in xrange(NS):
     ONRFv.append([[hcm.addVar(vtype=gbp.GRB.CONTINUOUS, name='ONRF'+str(el_i)+str(el_t)+str(el_p)) for el_p in xrange(P)] for el_t in xrange(S)])
 def ONRF(i, t, p):
-    if t<0:
+    if i >= NS:
+        return 0
+    elif t<0:
         if p is 0:
             return 0
         else:
@@ -170,7 +235,7 @@ for el_i in xrange(NS):
 def MO2(i, t, p):
     if t < 0:
         if p is 0:
-            return 999999                  # TODO correcct?
+            return 9999                  # TODO correcct?
         else:
             return MO2v[i][S+t][p-1]
     else:
@@ -181,7 +246,7 @@ for el_i in xrange(NS):
 def MO3(i, t, p):
     if t < 0:
         if p is 0:
-            return 999999             # TODO correcct?
+            return 9999             # TODO correcct?
         else:
             return MO3v[i][S+t][p-1]
     else:
@@ -293,7 +358,7 @@ sum_nv = 0
 for el_i in xrange(NS):
     for el_t in xrange(S):
         for el_p in xrange(P):
-            sum_nv += NVv[el_i][el_t][el_p]
+            sum_nv += ((1/5280.0) * NV(el_i, el_t, el_p))
 
 hcm.setObjective(sum_nv, gbp.GRB.MINIMIZE)
 hcm.update()
@@ -440,6 +505,7 @@ for el_i in xrange(NS):
 
 #hcm.update()
 
+
 # Step 9: Calculate Mainline Input
 for el_i in xrange(1,NS):                               # TODO start loop at 0?
     for el_t in xrange(S):
@@ -546,6 +612,7 @@ for el_i in xrange(NS - 1):  # Minus 1 because last segment cannot be an on-ramp
                           - ONRO[el_i][el_t][el_p]
                           <= big_m*ONRF_I[el_i][el_t][el_p][1],
                           name="ONRF_IF2"+str(el_i)+str(el_t)+str(el_p))
+
             # Step 14: If ONRO < ONRI,
             # ONRF = ONRO
             hcm.addConstr(ONRF(el_i, el_t, el_p)
@@ -582,6 +649,7 @@ for el_i in xrange(NS - 1):  # Minus 1 because last segment cannot be an on-ramp
                           <= -1*big_m2*ONRF_I[el_i][el_t][el_p][1],
                           name="ONRF_E4"+str(el_i)+str(el_t)+str(el_p))
 
+
             # Step 16: Calculate Mainline Output (1)
             generate_min_constrs(hcm, MO1_I[el_i][el_t][el_p][0:2],
                                  MO1_A[el_i][el_t][el_p][0],
@@ -595,6 +663,7 @@ for el_i in xrange(NS - 1):  # Minus 1 because last segment cannot be an on-ramp
                                  MO3(el_i, el_t-1, el_p),           # TODO t = -1
                                  10000, 10000, 10000,
                                  'MO1_MIN2', str(el_i)+str(el_t)+str(el_p))
+
 
 # Step 17: Queue present on segment?
 # I_UV = [] # Array to hold binary indicator variables
@@ -763,7 +832,6 @@ for el_i in xrange(NS - 1):  # TODO Check NS minus 1?
                 hcm.addConstr(MO3(el_i,el_t,el_p) - M_MO3[el_i][el_t][el_p][15]
                     <= M_MO3[el_i][el_t][el_p][15]*(I_UV[el_i][el_t][el_p]),
                               name = "3.84b"+str(el_i)+str(el_t)+str(el_p))
-#hcm.update()
 
 # Step 20: Calculate density of queue on segment
 for el_i in xrange(NS):  # TODO -1?
@@ -777,7 +845,10 @@ for el_i in xrange(NS):  # TODO -1?
 for el_i in xrange(NS):  # TODO -1?
     for el_t in xrange(S):  # Todo account for "t-1" (MF/OFRF/ONRF/NV) (NV fixed)
         for el_p in xrange(P):
-            hcm.addConstr(MO2(el_i, el_t, el_p) == MF(el_i+1, el_t-1, el_p) + OFRF(el_i+1, el_t-1, el_p)
+            if not front_clearing_queue_present[el_i][el_p]:
+                hcm.addConstr(MO2(el_i,el_t,el_p) == SC[el_i][el_p], name="3.86"+str(el_i)+str(el_t)+str(el_p))
+            else :
+                hcm.addConstr(MO2(el_i, el_t, el_p) == MF(el_i+1, el_t-1, el_p) + OFRF(el_i+1, el_t-1, el_p)
                 - ONRF(el_i, el_t-1, el_p)+(L[el_i]*KQ[el_i][el_t][el_p]) - NV(el_i, el_t-1, el_p),
                           name="3.86"+str(el_i)+str(el_t)+str(el_p))
 
@@ -944,12 +1015,12 @@ for el_i in xrange(1, NS):
 #hcm.update()
 
 # Step 25: Update number of vehicles and unserved vehicles on the segment
-for el_i in xrange(1, NS):  # TODO: NS-1 correct? If so specify value for NV[0][t][p] & UV[0] (0?)
+for el_i in xrange(0, NS):  # TODO: NS-1 correct? If so specify value for NV[0][t][p] & UV[0] (0?)
     for el_t in xrange(S):
         for el_p in xrange(P):
             # Constraint determining number of vehicles on the segment
-            hcm.addConstr(NV(el_i-1, el_t, el_p) == NV(el_i-1, el_t-1, el_p) + MFv[el_i-1][el_t][el_p]
-                  + ONRF(el_i-1, el_t, el_p) - MFv[el_i][el_t][el_p] - OFRF(el_i, el_t, el_p),
+            hcm.addConstr(NV(el_i-1, el_t, el_p) == NV(el_i-1, el_t-1, el_p) + MF(el_i-1, el_t, el_p)
+                  + ONRF(el_i-1, el_t, el_p) - MF(el_i, el_t, el_p) - OFRF(el_i, el_t, el_p),
                           name="3.113" +str(el_i)+str(el_t)+str(el_p))
 
             # Constraint updating the number of unserved vehicles
@@ -963,5 +1034,12 @@ print("Model Built: "+str(model_build_time - init_time))
 hcm.optimize()
 optimize_finish_time = time.time()
 print("Model Solved: "+str(optimize_finish_time - model_build_time))
+
+varCount = 0
+for p in xrange(P):
+    for t in xrange(1,61):
+        for i in xrange(NS):
+            varCount+=1
+            print(str(varCount) + ", "+ str(i)+ ", " + str(p)+ ", " + str(t - 1)+ ", " + str(NVv[i][t][p].X/5280.0))
 
 # Set Lower/Upper Bounds
