@@ -7939,3 +7939,23 @@ Thread count was 1 (of 4 available processors)
 
 Model is infeasible
 Best objective -, best bound -, gap -
+
+Gurobi 6.0.0 (win64) logging started 03/23/15 16:56:22
+
+
+Gurobi 6.0.0 (win64) logging started 03/23/15 16:56:35
+
+Optimize a model with 22146 rows, 23766 columns and 59368 nonzeros
+Coefficient statistics:
+  Matrix range    [2e-02, 1e+04]
+  Objective range [1e+00, 1e+00]
+  Bounds range    [0e+00, 0e+00]
+  RHS range       [1e+00, 1e+04]
+Presolve removed 6963 rows and 18534 columns
+Presolve time: 0.11s
+
+Explored 0 nodes (0 simplex iterations) in 0.19 seconds
+Thread count was 1 (of 4 available processors)
+
+Model is infeasible
+Best objective -, best bound -, gap -

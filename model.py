@@ -460,7 +460,12 @@ for el_i in xrange(NS):
             # ASSUMED NO DEFICIT IN THE FIRST PERIOD
             hcm.addConstr(DEF[el_i][el_t][0] == 0.0, name='DEF_E'+str(el_i)+str(el_t)+str(el_p))
             for el_p in xrange(1,P):
-                a1 = sum_sd + sum_sum_add_t_p(MFv, ONRFv, el_i-1, S, el_p-1) + sum_add_t(MFv, ONRFv, el_i-1, el_t, el_p)
+                a1 = 0
+                if el_t is 0:
+                    a1 = mainline_demand[el_p-1] / Th * S - sum([MF(el_i-1, el, el_p) for el in xrange(S)]) - sum([ONRF(el_i-1, el, el_p) for el in xrange(S)])
+                else:
+                    a1 = DEF[el_i][el_t-1][el_p] - MF(el_i-1, el_t-1, el_p) - ONRF(el_i-1, el_t-1, el_p)
+                # a1 = sum_sd + sum_sum_add_t_p(MFv, ONRFv, el_i-1, S, el_p-1) + sum_add_t(MFv, ONRFv, el_i-1, el_t, el_p)
                 sum_sd += SD[el_i-1][el_p] # Updating sum of segment demand
                 big_m = 10000  # TODO calculate
                 big_m1 = 10000  # TODO calculate
