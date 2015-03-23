@@ -38,15 +38,15 @@ def generate_min_constrs(model, binary_vars, var1, var2, var3, M, M1, M2, label1
 def sum_sum_add_t_p(var_list1, var_list2, i, t, p):
     # Sums at i, from 0 through t, from 0 through p (inclusive)
     sum = 0
-    for el_p in xrange(p+1):
-        for el_t in xrange(t+1):
+    for el_p in xrange(p):
+        for el_t in xrange(t):
             sum = sum + var_list1[i][el_t][el_p] + var_list2[i][el_t][el_p]
     return sum
 
 def sum_add_t(var_list1, var_list2, i, t, p):
     # Sums at i, from 0 through t (inclusive), at p
     sum = 0
-    for el_t in xrange(t+1):
+    for el_t in xrange(t):
         sum = sum + var_list1[i][el_t][p] + var_list2[i][el_t][p]
     return sum
 
