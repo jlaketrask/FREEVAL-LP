@@ -693,7 +693,7 @@ for el_i in xrange(NS):
 
                 big_m = 10000  # TODO calculate
                 big_m11 = 10000 # TODO calculate
-                big_m12 = 10000 # TODO calculate
+                big_m12 = 1000 # TODO calculate
                 big_m2 = 10000 # TODO calculate
                 hcm.addConstr(ONRF_I[el_i][el_t][el_p][0]+ONRF_I[el_i][el_t][el_p][1] == 1,
                               name='ONRF_A_E'+str(el_i)+str(el_t)+str(el_p))
@@ -709,44 +709,47 @@ for el_i in xrange(NS):
                               <= big_m*ONRF_I[el_i][el_t][el_p][1],
                               name="ONRF_IF2"+str(el_i)+str(el_t)+str(el_p))
 
-                # # Step 14: If ONRO < ONRI,
-                # # ONRF = ONRO
-                # hcm.addConstr(ONRF(el_i, el_t, el_p)
-                #               - ONRO[el_i][el_t][el_p]
-                #               <= big_m11*ONRF_I[el_i][el_t][el_p][1],
-                #               name="ONRF_E1"+str(el_i)+str(el_t)+str(el_p))
-                # hcm.addConstr(ONRF(el_i, el_t, el_p)
-                #               - ONRO[el_i][el_t][el_p]
-                #               >= -1*big_m11*ONRF_I[el_i][el_t][el_p][1],
-                #               name="ONRF_E2"+str(el_i)+str(el_t)+str(el_p))
-                # # Update number of vehs in the ramp queue
-                # # ONRQ = ONRQt-1 + ONRI - ONRO
-                # hcm.addConstr(ONRQ(el_i, el_t, el_p)
-                #               - ONRQ(el_i, el_t-1, el_p)
-                #               - ONRI[el_i][el_t][el_p]
-                #               + ONRO[el_i][el_t][el_p]
-                #               <= big_m12*ONRF_I[el_i][el_t][el_p][1],
-                #               name="ONRQ_E1"+str(el_i)+str(el_t)+str(el_p))
-                # hcm.addConstr(ONRQ(el_i, el_t, el_p)
-                #               - ONRQ(el_i, el_t-1, el_p)
-                #               - ONRI[el_i][el_t][el_p]
-                #               + ONRO[el_i][el_t][el_p]
-                #               >= -1*big_m12*ONRF_I[el_i][el_t][el_p][1],
-                #               name="ONRQ_E2"+str(el_i)+str(el_t)+str(el_p))
-
+                # Step 14: If ONRO < ONRI,
+                # ONRF = ONRO
+                hcm.addConstr(ONRF(el_i, el_t, el_p)
+                              - ONRO[el_i][el_t][el_p]
+                              <= big_m11*ONRF_I[el_i][el_t][el_p][0],
+                              name="ONRF_E1"+str(el_i)+str(el_t)+str(el_p))
+                hcm.addConstr(ONRF(el_i, el_t, el_p)
+                              - ONRO[el_i][el_t][el_p]
+                              >= -1*big_m11*ONRF_I[el_i][el_t][el_p][0],
+                              name="ONRF_E2"+str(el_i)+str(el_t)+str(el_p))
+                # Update number of vehs in the ramp queue
+                # ONRQ = ONRQt-1 + ONRI - ONRO
+                hcm.addConstr(ONRQ(el_i, el_t, el_p)
+                              - ONRQ(el_i, el_t-1, el_p)
+                              - ONRI[el_i][el_t][el_p]
+                              + ONRO[el_i][el_t][el_p]
+                              <= big_m12*ONRF_I[el_i][el_t][el_p][0],
+                              name="ONRQ_E1"+str(el_i)+str(el_t)+str(el_p))
+                hcm.addConstr(ONRQ(el_i, el_t, el_p)
+                              - ONRQ(el_i, el_t-1, el_p)
+                              - ONRI[el_i][el_t][el_p]
+                              + ONRO[el_i][el_t][el_p]
+                              >= -1*big_m12*ONRF_I[el_i][el_t][el_p][0],
+                              name="ONRQ_E2"+str(el_i)+str(el_t)+str(el_p))
+                hcm.addConstr(ONRQ(el_i, el_t, el_p) <= big_m12*ONRF_I[el_i][el_t][el_p][1],
+                              name="ONRQ_E3"+str(el_i)+str(el_t)+str(el_p))
+                hcm.addConstr(ONRQ(el_i, el_t, el_p) >= -1*big_m12*ONRF_I[el_i][el_t][el_p][1],
+                              name="ONRQ_E4"+str(el_i)+str(el_t)+str(el_p))
 
                 # Step 15: If ONRI < ONRO
                 # ONRF = ONRI
-                # hcm.addConstr(ONRF(el_i, el_t, el_p)
-                #               - ONRI[el_i][el_t][el_p]
-                #               <= big_m2*ONRF_I[el_i][el_t][el_p][0],
-                #               name="ONRF_E3"+str(el_i)+str(el_t)+str(el_p))
-                # hcm.addConstr(ONRF(el_i, el_t, el_p)
-                #               - ONRI[el_i][el_t][el_p]
-                #               >= -1*big_m2*ONRF_I[el_i][el_t][el_p][0],
-                #               name="ONRF_E4"+str(el_i)+str(el_t)+str(el_p))
-                hcm.addConstr(ONRF(el_i, el_t, el_p) == ONRI[el_i][el_t][el_p])
-                hcm.addConstr(ONRQ(el_i,el_t,el_p) == 0.0)
+                hcm.addConstr(ONRF(el_i, el_t, el_p)
+                              - ONRI[el_i][el_t][el_p]
+                              <= big_m2*ONRF_I[el_i][el_t][el_p][1],
+                              name="ONRF_E3"+str(el_i)+str(el_t)+str(el_p))
+                hcm.addConstr(ONRF(el_i, el_t, el_p)
+                              - ONRI[el_i][el_t][el_p]
+                              >= -1*big_m2*ONRF_I[el_i][el_t][el_p][1],
+                              name="ONRF_E4"+str(el_i)+str(el_t)+str(el_p))
+                #hcm.addConstr(ONRF(el_i, el_t, el_p) == ONRI[el_i][el_t][el_p])
+                #hcm.addConstr(ONRQ(el_i,el_t,el_p) == 0.0)
     else:
         for el_t in xrange(S):
             for el_p in xrange(P):
@@ -1170,12 +1173,13 @@ for p in xrange(P):
                   + ", " + str(MF(i,t, p).X/240.0)
                   + ", " + str(MI[i][t][p].X/240.0)
                   + ", " + str(MO1(i,t, p).X/240.0)
-                  #+ ", " + str(MO2(i,t, p).X/240.0)
-                  #+ ", " + str(MO3(i,t, p).X/240.0)
-                  + ", " + str(ONRI[i][t][p].X)
+                  + ", " + str(MO2(i,t, p).X/240.0)
+                  + ", " + str(MO3(i,t, p).X/240.0)
+                  #+ ", " + str(ONRI[i][t][p].X)
                   #+ ", " + str(ONRD[i][p])
                   #+ ", " + str(ONRQ(i,t, p).X)
-                  + ", " + str(ONRF_I[el_i][el_t][el_p][0].X)
+                  #+ ", " + str(ONRF_I[i][t][p][0].X)
+                  #+ ", " + str(ONRF_I[i][t][p][1].X)
                   #+ ", " + str(ONRO[i][t][p].X)
                   + ", " + str(ONRF(i,t, p).X)
                   + ", " + str(OFRF(i,t, p).X/240.0))
