@@ -737,18 +737,21 @@ for el_i in xrange(NS):
 
                 # Step 15: If ONRI < ONRO
                 # ONRF = ONRI
-                hcm.addConstr(ONRF(el_i, el_t, el_p)
-                              - ONRI[el_i][el_t][el_p]
-                              <= big_m2*ONRF_I[el_i][el_t][el_p][0],
-                              name="ONRF_E3"+str(el_i)+str(el_t)+str(el_p))
-                hcm.addConstr(ONRF(el_i, el_t, el_p)
-                              - ONRI[el_i][el_t][el_p]
-                              >= -1*big_m2*ONRF_I[el_i][el_t][el_p][0],
-                              name="ONRF_E4"+str(el_i)+str(el_t)+str(el_p))
+                # hcm.addConstr(ONRF(el_i, el_t, el_p)
+                #               - ONRI[el_i][el_t][el_p]
+                #               <= big_m2*ONRF_I[el_i][el_t][el_p][0],
+                #               name="ONRF_E3"+str(el_i)+str(el_t)+str(el_p))
+                # hcm.addConstr(ONRF(el_i, el_t, el_p)
+                #               - ONRI[el_i][el_t][el_p]
+                #               >= -1*big_m2*ONRF_I[el_i][el_t][el_p][0],
+                #               name="ONRF_E4"+str(el_i)+str(el_t)+str(el_p))
+                hcm.addConstr(ONRF(el_i, el_t, el_p) == ONRI[el_i][el_t][el_p])
+                hcm.addConstr(ONRQ(el_i,el_t,el_p) == 0.0)
     else:
         for el_t in xrange(S):
             for el_p in xrange(P):
                 hcm.addConstr(ONRF(el_i,el_t,el_p) == 0.0, name='ONRF'+str(el_i)+str(el_t)+str(el_p))
+                hcm.addConstr(ONRQ(el_i,el_t,el_p) == 0.0)
 
 print("Step 15 Done")
 for el_i in xrange(NS):
@@ -1172,7 +1175,7 @@ for p in xrange(P):
                   + ", " + str(ONRI[i][t][p].X)
                   #+ ", " + str(ONRD[i][p])
                   #+ ", " + str(ONRQ(i,t, p).X)
-                  #+ ", " + str(ONRF_I[el_i][el_t][el_p][0].X)
+                  + ", " + str(ONRF_I[el_i][el_t][el_p][0].X)
                   #+ ", " + str(ONRO[i][t][p].X)
                   + ", " + str(ONRF(i,t, p).X)
                   + ", " + str(OFRF(i,t, p).X/240.0))

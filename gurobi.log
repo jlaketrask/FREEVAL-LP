@@ -8936,3 +8936,68 @@ Thread count was 8 (of 8 available processors)
 
 Optimal solution found (tolerance 1.00e-04)
 Best objective 3.944803920000e+04, best bound 3.944803920000e+04, gap 0.0%
+
+Gurobi 5.6.3 (win64) logging started 03/24/15 13:10:27
+
+Optimize a model with 84140 rows, 79220 columns and 226829 nonzeros
+Presolve removed 46068 rows and 60538 columns
+Presolve time: 0.41s
+Presolved: 38072 rows, 18682 columns, 91454 nonzeros
+Variable types: 10779 continuous, 7903 integer (7903 binary)
+Total elapsed time = 0.99s
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+*    0     0               0    39448.039200 39448.0392  0.00%     -    1s
+
+Explored 0 nodes (9149 simplex iterations) in 1.15 seconds
+Thread count was 8 (of 8 available processors)
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 3.944803920000e+04, best bound 3.944803920000e+04, gap 0.0%
+
+Gurobi 5.6.3 (win64) logging started 03/24/15 13:26:52
+
+Optimize a model with 83900 rows, 79220 columns and 225869 nonzeros
+Presolve removed 57963 rows and 66604 columns
+Presolve time: 0.58s
+Presolved: 25937 rows, 12616 columns, 65244 nonzeros
+Variable types: 7985 continuous, 4631 integer (4631 binary)
+
+Root relaxation: objective 3.944804e+04, 6813 iterations, 0.05 seconds
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+*    0     0               0    39448.039200 39448.0392  0.00%     -    1s
+
+Explored 0 nodes (10850 simplex iterations) in 1.38 seconds
+Thread count was 8 (of 8 available processors)
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 3.944803920000e+04, best bound 3.944803919999e+04, gap 0.0000%
+
+Gurobi 5.6.3 (win64) logging started 03/24/15 13:29:16
+
+
+Gurobi 5.6.3 (win64) logging started 03/24/15 13:29:50
+
+Optimize a model with 85100 rows, 79220 columns and 227069 nonzeros
+Presolve removed 62560 rows and 67947 columns
+Presolve time: 0.68s
+Presolved: 22540 rows, 11273 columns, 55079 nonzeros
+Variable types: 7109 continuous, 4164 integer (4164 binary)
+
+Root relaxation: objective 3.944804e+04, 4599 iterations, 0.04 seconds
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+*    0     0               0    39448.039200 39448.0392  0.00%     -    1s
+
+Explored 0 nodes (9288 simplex iterations) in 1.41 seconds
+Thread count was 8 (of 8 available processors)
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 3.944803920000e+04, best bound 3.944803919999e+04, gap 0.0000%
