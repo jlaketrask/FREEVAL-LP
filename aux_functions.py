@@ -73,7 +73,14 @@ def read_facility_data_from_file(fname, NS, P):
         ONRC[seg, per] = float(tokens[7])
         RM[seg, per] = float(tokens[8])
         OFRD[seg, per] = float(tokens[9])
-    return {"KB":KB.tolist(),"SC":SC.tolist(),"NL":NL.tolist(),"ONRD":ONRD.tolist(),"ONRC":ONRC.tolist(),"RM":RM.tolist(),"OFRD":OFRD.tolist()}
+    facility = {"KB":KB.tolist(),
+                "SC":SC.tolist(),
+                "NL":NL.tolist(),
+                "ONRD":ONRD.tolist(),
+                "ONRC":ONRC.tolist(),
+                "RM":RM.tolist(),
+                "OFRD":OFRD.tolist()}
+    return facility
 
 def unified_speed_eqn(volume, ffs, base_seg_capacity=None, breakpoint=None, a=2):
     if base_seg_capacity is None:
