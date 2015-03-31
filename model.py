@@ -136,60 +136,28 @@ init_time = time.time()
 # OFRD = facility_data["OFRD"]  # Demand flow rate for OFR at node i in interval p
 # SD = compute_segment_demand(NS, mainline_demand, ONRD, OFRD) # Segment demand for segment i in time interval p
 
-# Simple Test Case 4
-NS = 5  # number of segments
-Stilde = [el for el in xrange(NS)]
-Ftilde = [3]  # List of OFR segments
-Ntilde = [1]  # List of ONR segments
-Wtilde = []   # List of Weave segments
-P = 4  # number of time intervals (periods) in the analysis period
-Ptilde = [el for el in xrange(P)]  # List of time intervals
-S = 4 * 15  # Number of time steps in a single interval (each step is 15 seconds)
-Ttilde = [el for el in xrange(S)]  # List of time steps
-Th = 240  # Number of time steps in 1 hour
-alpha = 5  # %
-
-facility_data = read_facility_data_from_file("simple_test_case_4.csv", NS, P)
-
-# Constants
-KC = 45  # Ideal Density at capacity
-KJ = 190  # Facility-wide jam density
-L = [2640,2640,2640,2640,2640]  # Length of each segment
-L = [el_l/5280.0 for el_l in L]
-SC = facility_data["SC"]  # Segment capacity of segment i in interval p
-mainline_demand = [4000,4000,4000,4000]
-N = facility_data["NL"]  # Number of open lanes in segment i in interval p
-WS = lambda i, p: SC[i][p]/(N[i][p] * (KJ-KC))  # Wave speed for segment i in interval p
-WTT = lambda i, p: int(round(Th * (L[i]/5280.0/WS(i, p))))  # Wave travel time
-ONRD = facility_data["ONRD"]  # Demand flow rate for ONR at node i in interval p
-ONRCv = facility_data["ONRC"]
-ONRC = lambda i, t, p: ONRCv[i][p]  # Geometric capacity of ONR at node i in period t in interval p
-RM = facility_data["RM"]  # Ramp metering rate of node i during interval p (veh/h)
-OFRD = facility_data["OFRD"]  # Demand flow rate for OFR at node i in interval p
-SD = compute_segment_demand(NS, mainline_demand, ONRD, OFRD) # Segment demand for segment i in time interval p
-
-# GP Example 1
-# NS = 11  # number of segments
+# # Simple Test Case 4
+# NS = 5  # number of segments
 # Stilde = [el for el in xrange(NS)]
-# Ftilde = [3,5,9]  # List of OFR segments
-# Ntilde = [1,5,7]  # List of ONR segments
-# Wtilde = [5]   # List of Weave segments
-# P = 5  # number of time intervals (periods) in the analysis period
+# Ftilde = [3]  # List of OFR segments
+# Ntilde = [1]  # List of ONR segments
+# Wtilde = []   # List of Weave segments
+# P = 4  # number of time intervals (periods) in the analysis period
 # Ptilde = [el for el in xrange(P)]  # List of time intervals
 # S = 4 * 15  # Number of time steps in a single interval (each step is 15 seconds)
 # Ttilde = [el for el in xrange(S)]  # List of time steps
 # Th = 240  # Number of time steps in 1 hour
 # alpha = 5  # %
 #
-# facility_data = read_facility_data_from_file("gp_ex1_data.csv", NS, P)
+# facility_data = read_facility_data_from_file("simple_test_case_4.csv", NS, P)
 #
 # # Constants
 # KC = 45  # Ideal Density at capacity
 # KJ = 190  # Facility-wide jam density
-# L = [5280,1500,2280,1500,5280,2640,5280,1140,360,1140,5280]  # Length of each segment
+# L = [2640,2640,2640,2640,2640]  # Length of each segment
 # L = [el_l/5280.0 for el_l in L]
 # SC = facility_data["SC"]  # Segment capacity of segment i in interval p
-# mainline_demand = [4505,4955,5255,4685,3785]
+# mainline_demand = [4000,4000,4000,4000]
 # N = facility_data["NL"]  # Number of open lanes in segment i in interval p
 # WS = lambda i, p: SC[i][p]/(N[i][p] * (KJ-KC))  # Wave speed for segment i in interval p
 # WTT = lambda i, p: int(round(Th * (L[i]/5280.0/WS(i, p))))  # Wave travel time
@@ -199,6 +167,38 @@ SD = compute_segment_demand(NS, mainline_demand, ONRD, OFRD) # Segment demand fo
 # RM = facility_data["RM"]  # Ramp metering rate of node i during interval p (veh/h)
 # OFRD = facility_data["OFRD"]  # Demand flow rate for OFR at node i in interval p
 # SD = compute_segment_demand(NS, mainline_demand, ONRD, OFRD) # Segment demand for segment i in time interval p
+
+# GP Example 1
+NS = 11  # number of segments
+Stilde = [el for el in xrange(NS)]
+Ftilde = [3,5,9]  # List of OFR segments
+Ntilde = [1,5,7]  # List of ONR segments
+Wtilde = [5]   # List of Weave segments
+P = 5  # number of time intervals (periods) in the analysis period
+Ptilde = [el for el in xrange(P)]  # List of time intervals
+S = 4 * 15  # Number of time steps in a single interval (each step is 15 seconds)
+Ttilde = [el for el in xrange(S)]  # List of time steps
+Th = 240  # Number of time steps in 1 hour
+alpha = 5  # %
+
+facility_data = read_facility_data_from_file("gp_ex1_data.csv", NS, P)
+
+# Constants
+KC = 45  # Ideal Density at capacity
+KJ = 190  # Facility-wide jam density
+L = [5280,1500,2280,1500,5280,2640,5280,1140,360,1140,5280]  # Length of each segment
+L = [el_l/5280.0 for el_l in L]
+SC = facility_data["SC"]  # Segment capacity of segment i in interval p
+mainline_demand = [4505,4955,5255,4685,3785]
+N = facility_data["NL"]  # Number of open lanes in segment i in interval p
+WS = lambda i, p: SC[i][p]/(N[i][p] * (KJ-KC))  # Wave speed for segment i in interval p
+WTT = lambda i, p: int(round(Th * (L[i]/5280.0/WS(i, p))))  # Wave travel time
+ONRD = facility_data["ONRD"]  # Demand flow rate for ONR at node i in interval p
+ONRCv = facility_data["ONRC"]
+ONRC = lambda i, t, p: ONRCv[i][p]  # Geometric capacity of ONR at node i in period t in interval p
+RM = facility_data["RM"]  # Ramp metering rate of node i during interval p (veh/h)
+OFRD = facility_data["OFRD"]  # Demand flow rate for OFR at node i in interval p
+SD = compute_segment_demand(NS, mainline_demand, ONRD, OFRD) # Segment demand for segment i in time interval p
 
 ######## Auxiliary Functions
 def generate_sc(i,t,p):
@@ -289,8 +289,10 @@ ONRO = []  # Max output flow rate that can enter the merge point from ONR node i
 for el_i in xrange(NS):
     ONRO.append([[hcm.addVar(vtype=gbp.GRB.CONTINUOUS, name='ONRO'+str(el_i)+str(el_t)+str(el_p)) for el_p in xrange(P)] for el_t in xrange(S)])
 DEF = []  # Deficit in flow at segment i at time step t in interval p
+DEF_A = []
 for el_i in xrange(NS):
     DEF.append([[hcm.addVar(vtype=gbp.GRB.CONTINUOUS, name='DEF'+str(el_i)+str(el_t)+str(el_p)) for el_p in xrange(P)] for el_t in xrange(S)])
+    DEF_A.append([[hcm.addVar(lb=-1*gbp.GRB.INFINITY, ub=gbp.GRB.INFINITY, vtype=gbp.GRB.CONTINUOUS, name='DEF'+str(el_i)+str(el_t)+str(el_p)) for el_p in xrange(P)] for el_t in xrange(S)])
 OFRFv = []  # Actual flow that can exit at OFR node i during step t in interval p
 for el_i in xrange(NS):
     OFRFv.append([[hcm.addVar(vtype=gbp.GRB.CONTINUOUS, name='OFRF'+str(el_i)+str(el_t)+str(el_p)) for el_p in xrange(P)] for el_t in xrange(S)])
@@ -525,19 +527,24 @@ for el_i in xrange(NS):
             sum_sd = SD[el_i-1][0]  # Sum of segment demand in previous segment
             for el_p in xrange(1,P):
                 a1 = 0
-                if el_t is 0:
-                    hcm.addConstr(DEF[el_i][el_t][el_p] == 0.0, name='DEF_E'+str(el_i)+str(el_t)+str(el_p)) # Uncomment for force Def=0
-                    #a1 = sum_sd - sum_sum_add_t_p(MFv, ONRFv, el_i-1, S, el_p-1) + sum_add_t(MFv, ONRFv, el_i-1, el_t, el_p)
-                else:
-                    hcm.addConstr(DEF[el_i][el_t][el_p] == 0.0, name='DEF_E'+str(el_i)+str(el_t)+str(el_p)) # Uncomment for force Def=0
-                    #a1 = DEF[el_i][el_t-1][el_p] - MF(el_i-1, el_t-1, el_p) - ONRF(el_i-1, el_t-1, el_p)
-                # a1 = sum_sd + sum_sum_add_t_p(MFv, ONRFv, el_i-1, S, el_p-1) + sum_add_t(MFv, ONRFv, el_i-1, el_t, el_p)
-                sum_sd += SD[el_i-1][el_p] # Updating sum of segment demand
+                # if el_t is 0:
+                #     #hcm.addConstr(DEF[el_i][el_t][el_p] == 0.0, name='DEF_E'+str(el_i)+str(el_t)+str(el_p)) # Uncomment for force Def=0
+                #     #a1 = sum_sd - sum_sum_add_t_p(MFv, ONRFv, el_i-1, S, el_p-1) + sum_add_t(MFv, ONRFv, el_i-1, el_t, el_p)
+                #     #a1 = sum_sd - sum([sum([MF(el_i-1, el, el2) + ONRF(el_i-1, el, el2) for el in xrange(S)]) for el2 in xrange(el_p)])
+                #     #a1 = sum_sd - sum([MF(el_i-1, el, el_p-1) for el in xrange(S)]) - sum([ONRF(el_i-1, el, el_p-1) for el in xrange(S)])
+                #     print(a1)
+                # else:
+                #     #hcm.addConstr(DEF[el_i][el_t][el_p] == 0.0, name='DEF_E'+str(el_i)+str(el_t)+str(el_p)) # Uncomment for force Def=0
+                #     a1 = DEF[el_i][el_t-1][el_p] - MF(el_i-1, el_t-1, el_p) - ONRF(el_i-1, el_t-1, el_p)
+                a1 = sum(SD[el_i-1][0:el_p])*(1/240.0) + sum([MF(el_i-1, el, el_p)*(1/240.0) + ONRF(el_i-1, el, el_p)*(1/240.0) for el in xrange(el_t)]) - sum([sum([MF(el_i-1, el, el2)*(1/240.0) + ONRF(el_i-1, el, el2)*(1/240.0) for el in xrange(S)]) for el2 in xrange(el_p)])
+                #print(a1)
                 big_m = 10000  # TODO calculate
                 big_m1 = 10000  # TODO calculate
                 big_m2 = 10000  # TODO calculate
+                hcm.addConstr(DEF_A[el_i][el_t][el_p] == a1, name="DEF_TEMP_A"+str(el_i)+str(el_t)+str(el_p))
                 generate_max_constrs(hcm, DEF_I[el_i][el_t][el_p], DEF[el_i][el_t][el_p], 0, a1, big_m, big_m1, big_m2, 'DEF_E', str(el_i)+str(el_t)+str(el_p))
-                # hcm.addConstr(DEF[el_i][el_t][el_p] == 0.0, name="DEF_TEMP"+str(el_i)+str(el_t)+str(el_p))
+                sum_sd += SD[el_i-1][el_p] # Updating sum of segment demand
+                #hcm.addConstr(DEF[el_i][el_t][el_p] == 0.0, name="DEF_TEMP"+str(el_i)+str(el_t)+str(el_p))
                 # Step 7: If there is a deficit (DEF[i,t,p]>0), use OFR flow with Deficit method
                 # Creating the binary indicator variables
                 #OFRF_I[el_i][el_t].append([hcm.addVar(vtype=gbp.GRB.BINARY, name='OFRF_I'+str(el)+str(el_i)+str(el_t)+str(el_p)) for el in xrange(4)])
@@ -547,6 +554,8 @@ for el_i in xrange(NS):
                 big_m1_1 = 10000  # TODO calculate
                 big_m1_2 = 10000  # TODO calculate
                 big_m2 = 10000  # TODO calculate
+                hcm.addConstr(OFRF_I[el_i][el_t][el_p][0] + OFRF_I[el_i][el_t][el_p][1] == 1.0,
+                              name='OFRF_IF_DEF0'+str(el_i)+str(el_t)+str(el_p))
                 hcm.addConstr(DEF[el_i][el_t][el_p] <= big_m*OFRF_I[el_i][el_t][el_p][0],
                               name='OFRF_IF_DEF1'+str(el_i)+str(el_t)+str(el_p))  # OFRF_I0i,t,p = 1 iplies there is a deficit
                 hcm.addConstr(-1*DEF[el_i][el_t][el_p] <= big_m*OFRF_I[el_i][el_t][el_p][1],
@@ -1181,8 +1190,9 @@ for p in xrange(P):
                   #+ ", " + str(ONRF_I[i][t][p][0].X)
                   #+ ", " + str(ONRF_I[i][t][p][1].X)
                   #+ ", " + str(ONRO[i][t][p].X)
-                  + ", " + str(ONRF(i,t, p).X)
-                  + ", " + str(OFRF(i,t, p).X/240.0))
+                  + ", " + str(ONRF(i,t, p).X/240.0)
+                  + ", " + str(OFRF(i,t, p).X/240.0)
+                  + ", " + str(DEF_A[i][t][p].X))
 
 
 # Set Lower/Upper Bounds
