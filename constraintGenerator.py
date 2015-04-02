@@ -1,7 +1,7 @@
 import gurobipy as gbp
 
 
-def generate_max_constrs(model, binary_vars, var1, var2, var3, M, M1, M2, label1, label2):
+def generate_max_constrs(model, binary_vars, var1, var2, var3, M, M1, M2, label1, label2, use_sos=False):
     #temp_binary_vars = [model.addVar(vtype=gbp.GRB.BINARY, name=label1+'_I'+label2) for v in xrange(2)]
     #model.update()
 
@@ -9,7 +9,10 @@ def generate_max_constrs(model, binary_vars, var1, var2, var3, M, M1, M2, label1
     model.addConstr(var2 - var3 <= M*binary_vars[0], name=label1+'_Max1'+label2)
     model.addConstr(var3 - var2 <= M*binary_vars[1], name=label1+'_Max2'+label2)
     # Sum of indicator variables must be 1
-    model.addConstr(binary_vars[0]+binary_vars[1] == 1, name=label1+'_Max3'+label2)
+    if use_sos:
+        model.addSOS(gbp.GRB.SOS_TYPE1, [binary_vars[0], binary_vars[1]])
+    else:
+        model.addConstr(binary_vars[0]+binary_vars[1] == 1, name=label1+'_Max3'+label2)
     # Constraints assigning min value
     model.addConstr(var1 - var2 <= M1*binary_vars[1], name=label1+'_D1'+label2)
     model.addConstr(var2 - var1 <= M1*binary_vars[1], name=label1+'_D2'+label2)
@@ -18,7 +21,7 @@ def generate_max_constrs(model, binary_vars, var1, var2, var3, M, M1, M2, label1
     #model.update()
 
 
-def generate_min_constrs(model, binary_vars, var1, var2, var3, M, M1, M2, label1, label2):
+def generate_min_constrs(model, binary_vars, var1, var2, var3, M, M1, M2, label1, label2, use_sos=False):
     #temp_binary_vars = [model.addVar(vtype=gbp.GRB.BINARY, name=label1+'_I'+label2) for v in xrange(2)]
     #model.update()
 
@@ -26,7 +29,10 @@ def generate_min_constrs(model, binary_vars, var1, var2, var3, M, M1, M2, label1
     model.addConstr(var2 - var3 <= M*binary_vars[0], name=label1+'_Min1'+label2)
     model.addConstr(var3 - var2 <= M*binary_vars[1], name=label1+'_Min2'+label2)
     # Sum of indicator variables must be 1
-    model.addConstr(binary_vars[0]+binary_vars[1] == 1, name=label1+'_Min3'+label2)
+    if use_sos:
+        model.addSOS(gbp.GRB.SOS_TYPE1, [binary_vars[0], binary_vars[1]])
+    else:
+        model.addConstr(binary_vars[0]+binary_vars[1] == 1, name=label1+'_Min3'+label2)
     # Constraints assigning min value
     model.addConstr(var1 - var2 <= M1*binary_vars[0], name=label1+'_D1'+label2)
     model.addConstr(var2 - var1 <= M1*binary_vars[0], name=label1+'_D2'+label2)
