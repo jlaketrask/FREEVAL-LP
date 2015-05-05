@@ -1,5 +1,5 @@
 from __future__ import division
-from pylab import *
+from numpy import *
 
 def compute_segment_demand(num_seg, mainline_demand, ONRD, OFRD):
     SD = []

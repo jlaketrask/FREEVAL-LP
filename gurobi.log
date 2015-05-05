@@ -43586,3 +43586,154 @@ Root relaxation: objective 3.944804e+04, 22530 iterations, 1.02 seconds
  698942 495292 45188.1493   64   47          - 39448.0483     -   56.7 47569s
  699062 495347 47921.2979   70   55          - 39448.0483     -   56.7 47578s
  699165 495364 48405.6363   74   57          - 39448.0483     -   56.7 47586s
+
+Gurobi 5.6.3 (win64) logging started 05/05/15 13:44:57
+
+Optimize a model with 87680 rows, 81620 columns and 243532 nonzeros
+Presolve removed 38250 rows and 60653 columns
+Presolve time: 1.23s
+Presolved: 49430 rows, 20967 columns, 139098 nonzeros
+Variable types: 13899 continuous, 7068 integer (7068 binary)
+
+Root relaxation: objective 3.944804e+04, 22530 iterations, 1.00 seconds
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0 39448.0394    0  299          - 39448.0394     -      -    4s
+     0     0 39448.0394    0  400          - 39448.0394     -      -    5s
+     0     0 39448.0409    0  871          - 39448.0404     -      -    8s
+     0     0 39448.0439    0 1008          - 39448.0439     -      -   11s
+
+Gurobi 5.6.3 (win64) logging started 05/05/15 13:45:28
+
+Optimize a model with 91280 rows, 81620 columns and 255772 nonzeros
+Presolve removed 41544 rows and 61367 columns
+Presolve time: 1.13s
+Presolved: 49736 rows, 20253 columns, 139465 nonzeros
+Variable types: 13159 continuous, 7094 integer (7094 binary)
+
+Root relaxation: objective 3.944804e+04, 23067 iterations, 1.37 seconds
+Total elapsed time = 5.10s
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0 39448.0397    0  365          - 39448.0397     -      -    5s
+     0     0 39448.0397    0  906          - 39448.0397     -      -    6s
+     0     0 39448.0398    0  194          - 39448.0398     -      -   10s
+     0     0 39448.0406    0   76          - 39448.0406     -      -   11s
+     0     0 39448.0407    0   54          - 39448.0407     -      -   13s
+     0     0 39448.0407    0   50          - 39448.0407     -      -   14s
+     0     0 39448.0407    0   59          - 39448.0407     -      -   15s
+     0     0 39448.0407    0   49          - 39448.0407     -      -   16s
+     0     0 39448.0407    0   50          - 39448.0407     -      -   16s
+     0     0 39448.0407    0   52          - 39448.0407     -      -   17s
+     0     0 39448.0407    0   50          - 39448.0407     -      -   18s
+
+Gurobi 5.6.3 (win64) logging started 05/05/15 13:49:42
+
+
+Gurobi 5.6.3 (win64) logging started 05/05/15 13:57:42
+
+Optimize a model with 91280 rows, 81620 columns and 255772 nonzeros
+Presolve removed 41544 rows and 61367 columns
+Presolve time: 1.17s
+Presolved: 49736 rows, 20253 columns, 139465 nonzeros
+Variable types: 13159 continuous, 7094 integer (7094 binary)
+
+Root relaxation: objective 3.944804e+04, 23067 iterations, 1.36 seconds
+Total elapsed time = 5.15s
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0 39448.0397    0  365          - 39448.0397     -      -    5s
+     0     0 39448.0397    0  906          - 39448.0397     -      -    7s
+     0     0 39448.0398    0  194          - 39448.0398     -      -   10s
+     0     0 39448.0406    0   76          - 39448.0406     -      -   11s
+     0     0 39448.0407    0   54          - 39448.0407     -      -   13s
+     0     0 39448.0407    0   50          - 39448.0407     -      -   14s
+     0     0 39448.0407    0   59          - 39448.0407     -      -   15s
+
+Gurobi 5.6.3 (win64) logging started 05/05/15 14:00:05
+
+
+Gurobi Optimizer version 5.6.3 build v5.6.3rc2 (win64)
+Copyright (c) 2013, Gurobi Optimization, Inc.
+
+
+ERROR 10003: Unable to open file 'hcm.ps' for input
+
+
+Gurobi 5.6.3 (win64) logging started 05/05/15 14:00:08
+
+
+Gurobi Optimizer version 5.6.3 build v5.6.3rc2 (win64)
+Copyright (c) 2013, Gurobi Optimization, Inc.
+
+Warning: duplicate nonzeros for column KQ000 and row 3.86000.
+Warning: duplicate nonzeros for column KQ001 and row 3.86001.
+Warning: duplicate nonzeros for column KQ002 and row 3.86002.
+Warning: duplicate nonzeros for column KQ003 and row 3.86003.
+Warning: duplicate nonzeros for column KQ010 and row 3.86010.
+Warning: duplicate nonzeros for column KQ011 and row 3.86011.
+Warning: duplicate nonzeros for column KQ012 and row 3.86012.
+Warning: duplicate nonzeros for column KQ013 and row 3.86013.
+Warning: duplicate nonzeros for column KQ020 and row 3.86020.
+Warning: duplicate nonzeros for column KQ021 and row 3.86021.
+Warning: duplicate nonzeros for column KQ022 and row 3.86022.
+Warning: duplicate nonzeros for column KQ023 and row 3.86023.
+Warning: duplicate nonzeros for column KQ030 and row 3.86030.
+Warning: duplicate nonzeros for column KQ031 and row 3.86031.
+Warning: duplicate nonzeros for column KQ032 and row 3.86032.
+Warning: duplicate nonzeros for column KQ033 and row 3.86033.
+Warning: duplicate nonzeros for column KQ040 and row 3.86040.
+Warning: duplicate nonzeros for column KQ041 and row 3.86041.
+Warning: duplicate nonzeros for column KQ042 and row 3.86042.
+Warning: duplicate nonzeros for column KQ043 and row 3.86043.
+Warning: duplicate nonzeros for column KQ050 and row 3.86050.
+Warning: duplicate nonzeros for column KQ051 and row 3.86051.
+Warning: duplicate nonzeros for column KQ052 and row 3.86052.
+Warning: duplicate nonzeros for column KQ053 and row 3.86053.
+Warning: duplicate nonzeros for column KQ060 and row 3.86060.
+Read MPS format model from file hcm.mps
+Reading time = 0.28 seconds
+hcm-test: 91280 rows, 81620 columns, 235145 nonzeros
+Optimize a model with 91280 rows, 81620 columns and 235145 nonzeros
+Presolve removed 22735 rows and 53322 columns
+Presolve time: 0.05s
+
+Explored 0 nodes (0 simplex iterations) in 0.23 seconds
+Thread count was 1 (of 8 available processors)
+
+Model is infeasible
+Best objective -, best bound -, gap -
+
+Gurobi 5.6.3 (win64) logging started 05/05/15 14:00:43
+
+
+Gurobi 5.6.3 (win64) logging started 05/05/15 16:45:26
+
+
+Gurobi 5.6.3 (win64) logging started 05/05/15 16:46:10
+
+Optimize a model with 91280 rows, 81620 columns and 255772 nonzeros
+Presolve removed 41544 rows and 61367 columns
+Presolve time: 1.84s
+Presolved: 49736 rows, 20253 columns, 139465 nonzeros
+Variable types: 13159 continuous, 7094 integer (7094 binary)
+
+Root relaxation: objective 3.944804e+04, 23067 iterations, 2.38 seconds
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0 39448.0397    0  365          - 39448.0397     -      -    9s
+     0     0 39448.0397    0  906          - 39448.0397     -      -   11s
+     0     0 39448.0398    0  194          - 39448.0398     -      -   17s
+     0     0 39448.0406    0   76          - 39448.0406     -      -   19s
+     0     0 39448.0407    0   54          - 39448.0407     -      -   22s
+     0     0 39448.0407    0   50          - 39448.0407     -      -   24s
+     0     0 39448.0407    0   59          - 39448.0407     -      -   25s
+     0     0 39448.0407    0   49          - 39448.0407     -      -   27s

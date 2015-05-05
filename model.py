@@ -1,7 +1,7 @@
 from __future__ import division
 import time
 import gurobipy as gbp
-from pylab import *
+from numpy import *
 from aux_functions import compute_segment_demand, compute_estimated_demand, compute_background_density, read_facility_data_from_file
 from constraintGenerator import generate_max_constrs, generate_min_constrs, sum_add_t, sum_sum_add_t_p
 __author__ = 'jltrask'
@@ -1349,8 +1349,8 @@ for el_i in xrange(NS):
 
 
 print("step 22 done")
-hcm.update()
-hcm.optimize()
+#hcm.update()
+#hcm.optimize()
 # Step 23: First segment?
 # Step 24: Calculate segment flow
 for el_i in xrange(NS):
@@ -1378,38 +1378,39 @@ hcm.update()
 model_build_time=time.time()
 print("Model Built: "+str(model_build_time - init_time))
 #hcm.setParam(gbp.GRB.param.ConcurrentMIP, 4)
+# hcm.write("hcm.mst")
 hcm.optimize()
-optimize_finish_time = time.time()
-print("Model Solved: "+str(optimize_finish_time - model_build_time))
-
-varCount = 0
-for p in xrange(P):
-    for t in xrange(S):
-        for i in xrange(NS):
-            varCount+=1
-            print(str(varCount)
-                  + ", "+ str(i)
-                  + ", " + str(p)
-                  + ", " + str(t)
-                  + ", " + str(NV(i,t, p).X)
-                  + ", " + str(MF(i,t, p).X/240.0)
-                  + ", " + str(MI[i][t][p].X/240.0)
-                  + ", " + str(MO1(i,t, p).X/240.0)
-                  + ", " + str(MO2(i,t, p).X/240.0)
-                  + ", " + str(MO3(i,t, p).X/240.0)
-                  #+ ", " + str(ONRI[i][t][p].X)
-                  #+ ", " + str(ONRD[i][p])
-                  #+ ", " + str(ONRQ(i,t, p).X)
-                  #+ ", " + str(ONRF_I[i][t][p][0].X)
-                  #+ ", " + str(ONRF_I[i][t][p][1].X)
-                  #+ ", " + str(ONRO[i][t][p].X)
-                  + ", " + str(ONRF(i,t, p).X/240.0)
-                  + ", " + str(OFRF(i,t, p).X/240.0)
-                  + ", " + str(DEF_A[i][t][p].X)
-                  + ", " + str(DEF[i][t][p].X)
-                  + ", " + str(UV(i,t,p).X)
-                  + ", " + str(I_UV[i][t][p][0].X)
-                  + ", " + str(I_UV[i][t][p][1].X))
+# optimize_finish_time = time.time()
+# print("Model Solved: "+str(optimize_finish_time - model_build_time))
+#
+# varCount = 0
+# for p in xrange(P):
+#     for t in xrange(S):
+#         for i in xrange(NS):
+#             varCount+=1
+#             print(str(varCount)
+#                   + ", "+ str(i)
+#                   + ", " + str(p)
+#                   + ", " + str(t)
+#                   + ", " + str(NV(i,t, p).X)
+#                   + ", " + str(MF(i,t, p).X/240.0)
+#                   + ", " + str(MI[i][t][p].X/240.0)
+#                   + ", " + str(MO1(i,t, p).X/240.0)
+#                   + ", " + str(MO2(i,t, p).X/240.0)
+#                   + ", " + str(MO3(i,t, p).X/240.0)
+#                   #+ ", " + str(ONRI[i][t][p].X)
+#                   #+ ", " + str(ONRD[i][p])
+#                   #+ ", " + str(ONRQ(i,t, p).X)
+#                   #+ ", " + str(ONRF_I[i][t][p][0].X)
+#                   #+ ", " + str(ONRF_I[i][t][p][1].X)
+#                   #+ ", " + str(ONRO[i][t][p].X)
+#                   + ", " + str(ONRF(i,t, p).X/240.0)
+#                   + ", " + str(OFRF(i,t, p).X/240.0)
+#                   + ", " + str(DEF_A[i][t][p].X)
+#                   + ", " + str(DEF[i][t][p].X)
+#                   + ", " + str(UV(i,t,p).X)
+#                   + ", " + str(I_UV[i][t][p][0].X)
+#                   + ", " + str(I_UV[i][t][p][1].X))
 
 
 # Set Lower/Upper Bounds
