@@ -8,7 +8,7 @@ __author__ = 'jltrask'
 
 use_sos = False
 def_const_type = 0
-example_problem  = 6
+example_problem  = 8
 
 init_time = time.time()
 ######## Model Parameters
@@ -293,10 +293,10 @@ elif example_problem is 8:
     # Constants
     KC = 45  # Ideal Density at capacity
     KJ = 190  # Facility-wide jam density
-    L = [2640,2640,2640,2640]  # Length of each segment
+    L = [2640,2640,2640, 2640,2640]  # Length of each segment
     L = [el_l/5280.0 for el_l in L]
     SC = facility_data["SC"]  # Segment capacity of segment i in interval p
-    mainline_demand = [6000,6000, 6000, 6000]
+    mainline_demand = [6000,6000]
     N = facility_data["NL"]  # Number of open lanes in segment i in interval p
     WS = lambda i, p: SC[i][p]/(N[i][p] * (KJ-KC))  # Wave speed for segment i in interval p
     WTT = lambda i, p: int(round(Th * (L[i]/5280.0/WS(i, p))))  # Wave travel time
