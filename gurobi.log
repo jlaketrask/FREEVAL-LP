@@ -44012,3 +44012,25 @@ Root relaxation: objective 3.221323e+04, 12436 iterations, 0.40 seconds
      0     0 32213.2344    0  227          - 32213.2344      -     -    2s
      0     0 32213.2345    0  584          - 32213.2345      -     -    2s
      0     0 32213.2349    0  393          - 32213.2349      -     -    4s
+
+Gurobi 6.0.0 (win64) logging started 05/13/15 12:59:16
+
+Optimize a model with 91280 rows, 81620 columns and 255772 nonzeros
+Coefficient statistics:
+  Matrix range    [4e-03, 1e+04]
+  Objective range [1e+00, 1e+00]
+  Bounds range    [0e+00, 0e+00]
+  RHS range       [1e-03, 1e+04]
+Presolve removed 31806 rows and 56650 columns
+Presolve time: 0.81s
+Presolved: 59474 rows, 24970 columns, 161147 nonzeros
+Variable types: 13990 continuous, 10980 integer (10980 binary)
+
+Root relaxation: objective 6.442647e+04, 25728 iterations, 1.39 seconds
+Total elapsed time = 5.20s
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0 64426.4688    0  527          - 64426.4688      -     -    6s
+     0     0 64426.4689    0 1314          - 64426.4689      -     -    8s

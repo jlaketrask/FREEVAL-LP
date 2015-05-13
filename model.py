@@ -8,7 +8,7 @@ __author__ = 'jltrask'
 
 use_sos = False
 def_const_type = 0
-example_problem  = 8
+example_problem  = 9
 
 init_time = time.time()
 ######## Model Parameters
@@ -314,7 +314,7 @@ elif example_problem is 9:
     Ftilde = [3]  # List of OFR segments
     Ntilde = [1]  # List of ONR segments
     Wtilde = []   # List of Weave segments
-    P = 2  # number of time intervals (periods) in the analysis period
+    P = 4  # number of time intervals (periods) in the analysis period
     Ptilde = [el for el in xrange(P)]  # List of time intervals
     S = 4 * 15  # Number of time steps in a single interval (each step is 15 seconds)
     Ttilde = [el for el in xrange(S)]  # List of time steps
