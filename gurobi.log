@@ -44058,3 +44058,34 @@ Root relaxation: objective 3.253331e+04, 10684 iterations, 0.31 seconds
      0     0 32533.3053    0   80          - 32533.3053     -      -    5s
      0     0 32533.3053    0  105          - 32533.3053     -      -    6s
      0     0 32533.3053    0  105          - 32533.3053     -      -    6s
+
+Gurobi 5.6.3 (win64) logging started 05/13/15 15:27:29
+
+Optimize a model with 91280 rows, 81620 columns and 255772 nonzeros
+Presolve removed 39569 rows and 60465 columns
+Presolve time: 1.01s
+Presolved: 51711 rows, 21155 columns, 143386 nonzeros
+Variable types: 11954 continuous, 9201 integer (9201 binary)
+
+Root relaxation: objective 6.506661e+04, 20927 iterations, 1.17 seconds
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0 65066.6100    0  402          - 65066.6100     -      -    4s
+     0     0 65066.6100    0 1201          - 65066.6100     -      -    5s
+     0     0 65066.6106    0  794          - 65066.6106     -      -    9s
+     0     0 65066.6106    0  640          - 65066.6106     -      -   11s
+     0     0 65066.6106    0  585          - 65066.6106     -      -   13s
+     0     0 65066.6111    0  783          - 65066.6111     -      -   15s
+     0     0 65066.6115    0  651          - 65066.6115     -      -   17s
+     0     0 65066.6115    0  586          - 65066.6115     -      -   18s
+     0     0 65066.6115    0  609          - 65066.6115     -      -   20s
+     0     0 65066.6115    0  541          - 65066.6115     -      -   22s
+     0     0 65066.6115    0  575          - 65066.6115     -      -   29s
+     0     0 65066.6115    0  545          - 65066.6115     -      -   29s
+     0     0 65066.6115    0  343          - 65066.6115     -      -   37s
+     0     0 65066.6115    0 1016          - 65066.6115     -      -   39s
+     0     0 65066.6118    0  923          - 65066.6118     -      -   43s
+     0     0 65066.6135    0 1009          - 65066.6135     -      -   46s
+     0     0 65066.6152    0 1001          - 65066.6152     -      -   49s
