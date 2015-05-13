@@ -44034,3 +44034,27 @@ Total elapsed time = 5.20s
 
      0     0 64426.4688    0  527          - 64426.4688      -     -    6s
      0     0 64426.4689    0 1314          - 64426.4689      -     -    8s
+
+Gurobi 5.6.3 (win64) logging started 05/13/15 15:05:05
+
+Optimize a model with 45070 rows, 40810 columns and 125798 nonzeros
+Presolve removed 19417 rows and 30224 columns
+Presolve time: 0.42s
+Presolved: 25653 rows, 10586 columns, 70691 nonzeros
+Variable types: 6009 continuous, 4577 integer (4577 binary)
+
+Root relaxation: objective 3.253331e+04, 10684 iterations, 0.31 seconds
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0 32533.3050    0  200          - 32533.3050     -      -    1s
+     0     0 32533.3051    0  582          - 32533.3051     -      -    2s
+     0     0 32533.3053    0   76          - 32533.3053     -      -    3s
+     0     0 32533.3053    0   92          - 32533.3053     -      -    3s
+     0     0 32533.3053    0   77          - 32533.3053     -      -    4s
+     0     0 32533.3053    0   79          - 32533.3053     -      -    4s
+     0     0 32533.3053    0   82          - 32533.3053     -      -    5s
+     0     0 32533.3053    0   80          - 32533.3053     -      -    5s
+     0     0 32533.3053    0  105          - 32533.3053     -      -    6s
+     0     0 32533.3053    0  105          - 32533.3053     -      -    6s

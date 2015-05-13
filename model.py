@@ -7,6 +7,7 @@ from constraintGenerator import generate_max_constrs, generate_min_constrs, sum_
 __author__ = 'jltrask'
 
 use_sos = False
+printFile = False
 def_const_type = 0
 example_problem  = 9
 
@@ -281,7 +282,7 @@ elif example_problem is 8:
     Ftilde = [3]  # List of OFR segments
     Ntilde = [1]  # List of ONR segments
     Wtilde = []   # List of Weave segments
-    P = 2  # number of time intervals (periods) in the analysis period
+    P = 4  # number of time intervals (periods) in the analysis period
     Ptilde = [el for el in xrange(P)]  # List of time intervals
     S = 4 * 15  # Number of time steps in a single interval (each step is 15 seconds)
     Ttilde = [el for el in xrange(S)]  # List of time steps
@@ -296,7 +297,7 @@ elif example_problem is 8:
     L = [2640,2640,2640, 2640,2640]  # Length of each segment
     L = [el_l/5280.0 for el_l in L]
     SC = facility_data["SC"]  # Segment capacity of segment i in interval p
-    mainline_demand = [6000,6000]
+    mainline_demand = [6000,6000,6000,6000]
     N = facility_data["NL"]  # Number of open lanes in segment i in interval p
     WS = lambda i, p: SC[i][p]/(N[i][p] * (KJ-KC))  # Wave speed for segment i in interval p
     WTT = lambda i, p: int(round(Th * (L[i]/5280.0/WS(i, p))))  # Wave travel time
@@ -314,7 +315,7 @@ elif example_problem is 9:
     Ftilde = [3]  # List of OFR segments
     Ntilde = [1]  # List of ONR segments
     Wtilde = []   # List of Weave segments
-    P = 4  # number of time intervals (periods) in the analysis period
+    P = 2  # number of time intervals (periods) in the analysis period
     Ptilde = [el for el in xrange(P)]  # List of time intervals
     S = 4 * 15  # Number of time steps in a single interval (each step is 15 seconds)
     Ttilde = [el for el in xrange(S)]  # List of time steps
@@ -329,7 +330,7 @@ elif example_problem is 9:
     L = [2640,2640,2640, 2640,2640]  # Length of each segment
     L = [el_l/5280.0 for el_l in L]
     SC = facility_data["SC"]  # Segment capacity of segment i in interval p
-    mainline_demand = [6000,6000,6000,6000]
+    mainline_demand = [6000,6000]
     N = facility_data["NL"]  # Number of open lanes in segment i in interval p
     WS = lambda i, p: SC[i][p]/(N[i][p] * (KJ-KC))  # Wave speed for segment i in interval p
     WTT = lambda i, p: int(round(Th * (L[i]/5280.0/WS(i, p))))  # Wave travel time
@@ -1549,33 +1550,64 @@ optimize_finish_time = time.time()
 print("Model Solved: "+str(optimize_finish_time - model_build_time))
 #
 varCount = 0
-for p in xrange(P):
-    for t in xrange(S):
-        for i in xrange(NS):
-            varCount+=1
-            print(str(varCount)
-                  + ", "+ str(i)
-                  + ", " + str(p)
-                  + ", " + str(t)
-                  + ", " + str(NV(i,t, p).X)
-                  + ", " + str(MF(i,t, p).X/240.0)
-                  + ", " + str(MI[i][t][p].X/240.0)
-                  + ", " + str(MO1(i,t, p).X/240.0)
-                  + ", " + str(MO2(i,t, p).X/240.0)
-                  + ", " + str(MO3(i,t, p).X/240.0)
-                  #+ ", " + str(ONRI[i][t][p].X)
-                  #+ ", " + str(ONRD[i][p])
-                  #+ ", " + str(ONRQ(i,t, p).X)
-                  #+ ", " + str(ONRF_I[i][t][p][0].X)
-                  #+ ", " + str(ONRF_I[i][t][p][1].X)
-                  #+ ", " + str(ONRO[i][t][p].X)
-                  + ", " + str(ONRF(i,t, p).X/240.0)
-                  + ", " + str(OFRF(i,t, p).X/240.0)
-                  + ", " + str(DEF_A[i][t][p].X)
-                  + ", " + str(DEF[i][t][p].X)
-                  + ", " + str(UV(i,t,p).X)
-                  + ", " + str(I_UV[i][t][p][0].X)
-                  + ", " + str(I_UV[i][t][p][1].X))
+if printFile:
+    f = open("output.txt", "w")
+    for p in xrange(P):
+        for t in xrange(S):
+            for i in xrange(NS):
+                varCount+=1
+                f.write(str(varCount)
+                      + ", "+ str(i)
+                      + ", " + str(p)
+                      + ", " + str(t)
+                      + ", " + str(NV(i,t, p).X)
+                      + ", " + str(MF(i,t, p).X/240.0)
+                      + ", " + str(MI[i][t][p].X/240.0)
+                      + ", " + str(MO1(i,t, p).X/240.0)
+                      + ", " + str(MO2(i,t, p).X/240.0)
+                      + ", " + str(MO3(i,t, p).X/240.0)
+                      #+ ", " + str(ONRI[i][t][p].X)
+                      #+ ", " + str(ONRD[i][p])
+                      #+ ", " + str(ONRQ(i,t, p).X)
+                      #+ ", " + str(ONRF_I[i][t][p][0].X)
+                      #+ ", " + str(ONRF_I[i][t][p][1].X)
+                      #+ ", " + str(ONRO[i][t][p].X)
+                      + ", " + str(ONRF(i,t, p).X/240.0)
+                      + ", " + str(OFRF(i,t, p).X/240.0)
+                      + ", " + str(DEF_A[i][t][p].X)
+                      + ", " + str(DEF[i][t][p].X)
+                      + ", " + str(UV(i,t,p).X)
+                      + ", " + str(I_UV[i][t][p][0].X)
+                      + ", " + str(I_UV[i][t][p][1].X)+"\n")
+    f.close()
+else:
+    for p in xrange(P):
+        for t in xrange(S):
+            for i in xrange(NS):
+                varCount+=1
+                print(str(varCount)
+                      + ", "+ str(i)
+                      + ", " + str(p)
+                      + ", " + str(t)
+                      + ", " + str(NV(i,t, p).X)
+                      + ", " + str(MF(i,t, p).X/240.0)
+                      + ", " + str(MI[i][t][p].X/240.0)
+                      + ", " + str(MO1(i,t, p).X/240.0)
+                      + ", " + str(MO2(i,t, p).X/240.0)
+                      + ", " + str(MO3(i,t, p).X/240.0)
+                      #+ ", " + str(ONRI[i][t][p].X)
+                      #+ ", " + str(ONRD[i][p])
+                      #+ ", " + str(ONRQ(i,t, p).X)
+                      #+ ", " + str(ONRF_I[i][t][p][0].X)
+                      #+ ", " + str(ONRF_I[i][t][p][1].X)
+                      #+ ", " + str(ONRO[i][t][p].X)
+                      + ", " + str(ONRF(i,t, p).X/240.0)
+                      + ", " + str(OFRF(i,t, p).X/240.0)
+                      + ", " + str(DEF_A[i][t][p].X)
+                      + ", " + str(DEF[i][t][p].X)
+                      + ", " + str(UV(i,t,p).X)
+                      + ", " + str(I_UV[i][t][p][0].X)
+                      + ", " + str(I_UV[i][t][p][1].X))
 
 
 # Set Lower/Upper Bounds
