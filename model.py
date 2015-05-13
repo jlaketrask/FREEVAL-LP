@@ -241,6 +241,39 @@ elif example_problem is 6:
     OFRD = facility_data["OFRD"]  # Demand flow rate for OFR at node i in interval p
     SD = compute_segment_demand(NS, mainline_demand, ONRD, OFRD) # Segment demand for segment i in time interval p
 
+elif example_problem is 7:
+    # Simple Test Case 5
+    NS = 4  # number of segments
+    Stilde = [el for el in xrange(NS)]
+    Ftilde = [2]  # List of OFR segments
+    Ntilde = [1]  # List of ONR segments
+    Wtilde = []   # List of Weave segments
+    P = 4  # number of time intervals (periods) in the analysis period
+    Ptilde = [el for el in xrange(P)]  # List of time intervals
+    S = 4 * 15  # Number of time steps in a single interval (each step is 15 seconds)
+    Ttilde = [el for el in xrange(S)]  # List of time steps
+    Th = 240  # Number of time steps in 1 hour
+    alpha = 5  # %
+
+    facility_data = read_facility_data_from_file("simple_test_case_7.csv", NS, P)
+
+    # Constants
+    KC = 45  # Ideal Density at capacity
+    KJ = 190  # Facility-wide jam density
+    L = [2640,2640,2640,2640]  # Length of each segment
+    L = [el_l/5280.0 for el_l in L]
+    SC = facility_data["SC"]  # Segment capacity of segment i in interval p
+    mainline_demand = [6000,6000, 6000, 6000]
+    N = facility_data["NL"]  # Number of open lanes in segment i in interval p
+    WS = lambda i, p: SC[i][p]/(N[i][p] * (KJ-KC))  # Wave speed for segment i in interval p
+    WTT = lambda i, p: int(round(Th * (L[i]/5280.0/WS(i, p))))  # Wave travel time
+    ONRD = facility_data["ONRD"]  # Demand flow rate for ONR at node i in interval p
+    ONRCv = facility_data["ONRC"]
+    ONRC = lambda i, t, p: ONRCv[i][p]  # Geometric capacity of ONR at node i in period t in interval p
+    RM = facility_data["RM"]  # Ramp metering rate of node i during interval p (veh/h)
+    OFRD = facility_data["OFRD"]  # Demand flow rate for OFR at node i in interval p
+    SD = compute_segment_demand(NS, mainline_demand, ONRD, OFRD) # Segment demand for segment i in time interval p
+
 elif example_problem is 10:
     # Simple Test Oversat (queue contained)
     NS = 5  # number of segments
@@ -1443,7 +1476,7 @@ print("step 25 done")
 hcm.update()
 model_build_time=time.time()
 print("Model Built: "+str(model_build_time - init_time))
-#hcm.setParam(gbp.GRB.param.ConcurrentMIP, 4)
+#hcm.setParam(gbp.GRB.param.ConcurrentMIP, 32)
 # hcm.write("hcm.mst")
 hcm.optimize()
 optimize_finish_time = time.time()
