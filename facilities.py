@@ -255,7 +255,7 @@ def extract(example_problem):
         Ftilde = [3]  # List of OFR segments
         Ntilde = [1]  # List of ONR segments
         Wtilde = []   # List of Weave segments
-        P = 2  # number of time intervals (periods) in the analysis period
+        P = 4  # number of time intervals (periods) in the analysis period
         Ptilde = [el for el in xrange(P)]  # List of time intervals
         S = 4 * 15  # Number of time steps in a single interval (each step is 15 seconds)
         Ttilde = [el for el in xrange(S)]  # List of time steps
@@ -270,7 +270,7 @@ def extract(example_problem):
         L = [2640,2640,2640,2640,2640]  # Length of each segment
         L = [el_l/5280.0 for el_l in L]
         SC = facility_data["SC"]  # Segment capacity of segment i in interval p
-        mainline_demand = [6000,6000]
+        mainline_demand = [6000,6000,6000,6000]
         N = facility_data["NL"]  # Number of open lanes in segment i in interval p
         WS = lambda i, p: SC[i][p]/(N[i][p] * (KJ-KC))  # Wave speed for segment i in interval p
         WTT = lambda i, p: int(round(Th * (L[i]/5280.0/WS(i, p))))  # Wave travel time
