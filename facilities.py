@@ -250,10 +250,10 @@ def extract(example_problem):
 
     elif example_problem is 7:
         # Simple Test Case 5
-        NS = 4  # number of segments
+        NS = 5  # number of segments
         Stilde = [el for el in xrange(NS)]
-        Ftilde = []  # List of OFR segments
-        Ntilde = [2]  # List of ONR segments
+        Ftilde = [3]  # List of OFR segments
+        Ntilde = [1]  # List of ONR segments
         Wtilde = []   # List of Weave segments
         P = 4  # number of time intervals (periods) in the analysis period
         Ptilde = [el for el in xrange(P)]  # List of time intervals
@@ -267,7 +267,7 @@ def extract(example_problem):
         # Constants
         KC = 45  # Ideal Density at capacity
         KJ = 190  # Facility-wide jam density
-        L = [2640,2640,5280,2640]  # Length of each segment
+        L = [2640,2640,2640,2640,2640]  # Length of each segment
         L = [el_l/5280.0 for el_l in L]
         SC = facility_data["SC"]  # Segment capacity of segment i in interval p
         mainline_demand = [6000,6000,6000,6000]
