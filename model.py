@@ -9,7 +9,7 @@ __author__ = 'jltrask'
 use_sos = False
 printFile = False
 def_const_type = 0
-example_problem  = 7
+example_problem  = 13
 
 init_time = time.time()
 
@@ -688,26 +688,8 @@ print("step 18 done")
 #                   + ", " + str(UV(i,t,p).X)
 #                   + ", " + str(I_UV[i][t][p][0].X)
 #                   + ", " + str(I_UV[i][t][p][1].X))
+
 # Steps 19: Calculate Mainline Output 3
-# MO3_A = [] # 4D array holding Auxiliary variables for step 19
-# MO3_I = [] # 4D array holding indicator variables for step 19
-# for el_i in xrange(NS):
-#     MO3_A.append([])
-#     MO3_I.append([])
-#     for el_t in xrange(S):
-#         MO3_A[el_i].append([])
-#         MO3_I[el_i].append([])
-#         for el_p in xrange(P):
-#             # Creating auxiliary variables
-#             MO3_A[el_i][el_t].append([hcm.addVar(vtype=gbp.GRB.CONTINUOUS,
-#                                                       name='MO3_A'+str(el)+str(el_i)+str(el_t)+str(el_p)) for el in xrange(4)])
-#             # Creating Binary Indicator Variables
-#             MO3_I[el_i][el_t].append([hcm.addVar(vtype=gbp.GRB.BINARY,
-#                                                       name='MO3_I'+str(el)+str(el_i)+str(el_t)+str(el_p)) for el in xrange(8)])
-# # Updating Model
-# hcm.update()
-
-
 M_MO3=[]
 for el_i in xrange(NS - 1):  # TODO Check NS minus 1?
     M_MO3.append([])
