@@ -8,8 +8,8 @@ __author__ = 'jltrask'
 
 use_sos = False
 printFile = False
-def_const_type = 0
-example_problem  = 13
+def_const_type = 1
+example_problem  = 2
 
 init_time = time.time()
 
@@ -334,50 +334,34 @@ hcm.update()
 # hcm.update()
 #################################################################################################################################################################################################################
 
-#Step 2: initialize the Freeway Facility
-##### Need to calculate KB from Undersat
+###################################################### Eq 25-7 #########################################################
+# Step 2: initialize the Freeway Facility
 # Updateing # of vehicles - note t goes from 0 to S (i.e. S+1 steps) for NV, with 0 being  "before" interval p starts.
+##### Need to calculate KB from Undersat
 for el_i in xrange(NS):
     for el_p in xrange(P):  # Note that the lambda function on UV accounts for the case p = -1 (UV = 0 in that case)
         hcm.addConstr(NV(el_i, -1, el_p) == KB[el_i][el_p]*L[el_i] + UV(el_i, S-1, el_p-1), name='NV_E'+str(el_i)+str(0)+str(el_p))
 #hcm.update()
 print("step 2 done")
+########################################################################################################################
 
-
-for el_i in xrange(NS):
-    for el_t in xrange(S):
-        for el_p in xrange(P):
-            # Constraint determining number of vehicles on the segment
-            hcm.addConstr(NV(el_i, el_t, el_p) == NV(el_i, el_t-1, el_p) + MF(el_i, el_t, el_p)
-                        + ONRF(el_i, el_t, el_p) - MF(el_i+1, el_t, el_p) - OFRF(el_i+1 , el_t, el_p),
-                        name="3.113" +str(el_i)+str(el_t)+str(el_p))
-
-            # Constraint updating the number of unserved vehicles
-            hcm.addConstr(UV(el_i, el_t, el_p) == NV(el_i, el_t, el_p) - KB[el_i][el_p]*L[el_i],
-                          name = "3.114"+str(el_i)+str(el_t)+str(el_p))
 
 # Steps 3-4: Begin "loops" of all segments, all time steps
 # Steps 5-8: OFR Segment constraints
-#OFRF_I = []
-big_m = 10000  # TODO calculate
-big_m1 = 10000  # TODO calculate
-big_m2 = 10000  # TODO calculate
-#big_m = 10000  # TODO calculate
+big_m = 100000  # TODO calculate
+big_m1 = 100000  # TODO calculate
+big_m2 = 100000  # TODO calculate
 big_m1_1 = 10000  # TODO calculate
 big_m1_2 = 10000  # TODO calculate
-#big_m2 = 10000  # TODO calculate
 def_zero_tol = 0.001
+###################################################### Eq 25-22#########################################################
 for el_i in xrange(NS):
-    #OFRF_I.append([])
     if el_i in Ftilde:  # Check if OFR at segment
-        # Calculate possible deficit from upstream queue
-        # Note el_i-1 okay because the first segment cannot be an off-ramp
+        # Calculate possible deficit from upstream queue (Note el_i-1 okay because the first segment cannot be OFR)
         for el_t in xrange(S):
-            # ASSUMED NO DEFICIT IN THE FIRST PERIOD
-            hcm.addConstr(DEF[el_i][el_t][0] == 0.0, name='DEF_E'+str(el_i)+str(el_t)+str(0))
+            hcm.addConstr(DEF[el_i][el_t][0] == 0.0, name='DEF_E'+str(el_i)+str(el_t)+str(0)) # ASSUMED NO DEFICIT IN THE FIRST PERIOD
             for el_p in xrange(1,P):
-                if def_const_type is 0:
-                    # Updated DEF_A equations
+                if def_const_type is 0: # Updated DEF_A equations
                     a1 = 0
                     if el_t is 0:
                         a1 = sum(SD[el_i-1][0:el_p])*(1/240.0) # Add Segment demand from first to previous period
@@ -385,16 +369,28 @@ for el_i in xrange(NS):
                         hcm.addConstr(DEF_A[el_i][el_t][el_p] == a1, name="DEF_TEMP_A"+str(el_i)+str(el_t)+str(el_p))
                     else:
                         hcm.addConstr(DEF_A[el_i][el_t][el_p] == DEF_A[el_i][el_t-1][el_p] + MF(el_i-1, el_t-1, el_p)*(1/240.0) + ONRF(el_i-1, el_t-1, el_p)*(1/240.0), name="DEF_TEMP_A"+str(el_i)+str(el_t)+str(el_p))
-                elif def_const_type is 1:
-                    #### DEPRECATED FULL DEF CALCULATION EQUATIONS ####
-                    a1 = sum(SD[el_i-1][0:el_p])*(1/240.0) + sum([MF(el_i-1, el, el_p)*(1/240.0) + ONRF(el_i-1, el, el_p)*(1/240.0) for el in xrange(el_t)]) - sum([sum([MF(el_i-1, el, el2)*(1/240.0) + ONRF(el_i-1, el, el2)*(1/240.0) for el in xrange(S)]) for el2 in xrange(el_p)])
-                    hcm.addConstr(DEF_A[el_i][el_t][el_p] == a1, name="DEF_TEMP_A"+str(el_i)+str(el_t)+str(el_p))
+                    #### Setting DEF to be max of DEF_A and 0
+                    # Checking to see if DEF_A is greater than 0
+                    hcm.addConstr(DEF_A[el_i][el_t][el_p] <= big_m * DEF_I[el_i][el_t][el_p][0],
+                              name='DEF_E1'+str(el_i)+str(el_t)+str(el_p)) # To check if a1>=0
+                    hcm.addConstr(-DEF_A[el_i][el_t][el_p] <= big_m * (1 - DEF_I[el_i][el_t][el_p][0]),
+                              name='DEF_E2'+str(el_i)+str(el_t)+str(el_p)) # To check if a1>=0
+                    # Setting DEF to be a1 (when DEF_A[el_i][el_t][el_p][0] = 1)
+                    hcm.addConstr(DEF[el_i][el_t][el_p] - DEF_A[el_i][el_t][el_p]  <= big_m * (1 - DEF_I[el_i][el_t][el_p][0]),
+                              name='DEF_E3'+str(el_i)+str(el_t)+str(el_p))
+                    hcm.addConstr(DEF_A[el_i][el_t][el_p]  - DEF[el_i][el_t][el_p] <= big_m * (1 - DEF_I[el_i][el_t][el_p][0]),
+                              name='DEF_E4'+str(el_i)+str(el_t)+str(el_p))
+                    # Setting DEF to be 0 (when DEF_A[el_i][el_t][el_p][0] = 0)
+                    hcm.addConstr(DEF[el_i][el_t][el_p] <= big_m*DEF_I[el_i][el_t][el_p][0],
+                              name='DEF_E5'+str(el_i)+str(el_t)+str(el_p))
+                    hcm.addConstr(-1*DEF[el_i][el_t][el_p] <= big_m*DEF_I[el_i][el_t][el_p][0],
+                              name='DEF_E6'+str(el_i)+str(el_t)+str(el_p))
                 else:
                     # Force Deficit to be 0 (debugging purposes)
-                    hcm.addConstr(DEF_A[el_i][el_t][el_p] == 0.0, name='DEF_E'+str(el_i)+str(el_t)+str(el_p))
+                    hcm.addConstr(DEF_A[el_i][el_t][el_p] == 0.0, name='DEF_TEMP_A'+str(el_i)+str(el_t)+str(el_p))
+                    hcm.addConstr(DEF[el_i][el_t][el_p] == 0.0, name='DEF_TEMP_A'+str(el_i)+str(el_t)+str(el_p))
+########################################################################################################################
 
-                # Setting DEF to be max of DEF_A and 0
-                generate_max_constrs(hcm, DEF_I[el_i][el_t][el_p], DEF[el_i][el_t][el_p], 0, DEF_A[el_i][el_t][el_p], big_m, big_m1, big_m2, 'DEF_E', str(el_i)+str(el_t)+str(el_p), use_sos)
 
                 # Step 7: If there is a deficit (DEF[i,t,p]>0), use OFR flow with Deficit method
                 # Constraints checking if there is a deficit
