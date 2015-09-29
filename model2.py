@@ -9,7 +9,7 @@ __author__ = 'jltrask'
 use_sos = False
 printFile = False
 def_const_type = 0
-example_problem  = 7
+example_problem  = 3
 
 init_time = time.time()
 

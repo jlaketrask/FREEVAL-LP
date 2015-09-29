@@ -45116,3 +45116,736 @@ Thread count was 8 (of 8 available processors)
 
 Optimal solution found (tolerance 1.00e-04)
 Best objective 1.010176044000e+04, best bound 1.010176044000e+04, gap 0.0%
+
+Gurobi 5.6.3 (win64) logging started 09/29/15 14:07:53
+
+Optimize a model with 23646 rows, 22806 columns and 64463 nonzeros
+Presolve removed 9968 rows and 17063 columns
+Presolve time: 0.27s
+Presolved: 13678 rows, 5743 columns, 36530 nonzeros
+Variable types: 3457 continuous, 2286 integer (2286 binary)
+
+Root relaxation: objective 1.010176e+04, 5252 iterations, 0.17 seconds
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0 10101.7604    0    7          - 10101.7604     -      -    0s
+H    0     0                    10101.760440 10101.7604  0.00%     -    0s
+
+Explored 0 nodes (8146 simplex iterations) in 0.92 seconds
+Thread count was 8 (of 8 available processors)
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 1.010176044000e+04, best bound 1.010176044000e+04, gap 0.0%
+
+Gurobi 5.6.3 (win64) logging started 09/29/15 14:08:28
+
+
+Gurobi 5.6.3 (win64) logging started 09/29/15 14:12:31
+
+Optimize a model with 27366 rows, 21606 columns and 75071 nonzeros
+Presolve removed 10755 rows and 14778 columns
+Presolve time: 0.25s
+Presolved: 16611 rows, 6828 columns, 45386 nonzeros
+Variable types: 3969 continuous, 2859 integer (2859 binary)
+
+Root relaxation: objective 1.197622e+04, 6176 iterations, 0.11 seconds
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0 11976.2244    0   60          - 11976.2244     -      -    0s
+     0     0 11976.2245    0   67          - 11976.2245     -      -    1s
+     0     0 11976.2246    0   21          - 11976.2246     -      -    1s
+     0     0 11976.2246    0   19          - 11976.2246     -      -    1s
+     0     0 11976.2246    0   15          - 11976.2246     -      -    1s
+     0     0 11976.2246    0   14          - 11976.2246     -      -    1s
+     0     0 11976.2246    0   18          - 11976.2246     -      -    1s
+     0     0 11976.2246    0   18          - 11976.2246     -      -    2s
+     0     0 11976.2247    0   18          - 11976.2247     -      -    2s
+     0     0 11976.2247    0   16          - 11976.2247     -      -    2s
+     0     0 11976.2247    0   13          - 11976.2247     -      -    2s
+     0     0 11976.2247    0   14          - 11976.2247     -      -    2s
+     0     0 11976.2247    0   14          - 11976.2247     -      -    2s
+     0     0 11976.2247    0   35          - 11976.2247     -      -    4s
+     0     0 11976.2247    0   39          - 11976.2247     -      -    4s
+     0     0 11976.2247    0   16          - 11976.2247     -      -    4s
+     0     0 11976.2247    0   15          - 11976.2247     -      -    5s
+     0     0 11976.2247    0   15          - 11976.2247     -      -    5s
+     0     0 11976.2247    0   10          - 11976.2247     -      -    5s
+     0     0 11976.2247    0    7          - 11976.2247     -      -    5s
+     0     0 11976.2247    0    6          - 11976.2247     -      -    5s
+     0     0 11976.2247    0    6          - 11976.2247     -      -    6s
+H    0     0                    11976.224400 11976.2244  0.00%     -    8s
+
+Cutting planes:
+  Cover: 4
+  MIR: 16
+
+Explored 0 nodes (23378 simplex iterations) in 8.50 seconds
+Thread count was 8 (of 8 available processors)
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 1.197622440000e+04, best bound 1.197622440000e+04, gap 0.0%
+
+Gurobi 5.6.3 (win64) logging started 09/29/15 14:14:37
+
+Optimize a model with 27846 rows, 24486 columns and 77467 nonzeros
+Presolve removed 11102 rows and 17754 columns
+Presolve time: 0.28s
+Presolved: 16744 rows, 6732 columns, 46245 nonzeros
+Variable types: 3961 continuous, 2771 integer (2771 binary)
+
+Root relaxation: objective 1.197623e+04, 6536 iterations, 0.17 seconds
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0 11976.2254    0   17          - 11976.2254     -      -    0s
+     0     0 11976.2255    0   20          - 11976.2255     -      -    1s
+     0     0 11976.2256    0    5          - 11976.2256     -      -    1s
+H    0     0                    11976.224400 11976.2244  0.00%     -    1s
+
+Cutting planes:
+  Implied bound: 1
+  MIR: 2
+
+Explored 0 nodes (12887 simplex iterations) in 1.48 seconds
+Thread count was 8 (of 8 available processors)
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 1.197622440000e+04, best bound 1.197622440000e+04, gap 0.0000%
+
+Gurobi 5.6.3 (win64) logging started 09/29/15 14:14:52
+
+Optimize a model with 27846 rows, 24486 columns and 77467 nonzeros
+Presolve removed 11102 rows and 17754 columns
+Presolve time: 0.23s
+Presolved: 16744 rows, 6732 columns, 46245 nonzeros
+Variable types: 3961 continuous, 2771 integer (2771 binary)
+
+Root relaxation: objective 1.197623e+04, 6536 iterations, 0.13 seconds
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0 11976.2254    0   17          - 11976.2254     -      -    0s
+     0     0 11976.2255    0   20          - 11976.2255     -      -    0s
+     0     0 11976.2256    0    5          - 11976.2256     -      -    1s
+H    0     0                    11976.224400 11976.2244  0.00%     -    1s
+
+Cutting planes:
+  Implied bound: 1
+  MIR: 2
+
+Explored 0 nodes (12887 simplex iterations) in 1.33 seconds
+Thread count was 8 (of 8 available processors)
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 1.197622440000e+04, best bound 1.197622440000e+04, gap 0.0000%
+
+Gurobi 5.6.3 (win64) logging started 09/29/15 14:16:51
+
+Optimize a model with 24426 rows, 24486 columns and 67283 nonzeros
+Presolve removed 10466 rows and 18604 columns
+Presolve time: 0.21s
+Presolved: 13960 rows, 5882 columns, 37432 nonzeros
+Variable types: 3431 continuous, 2451 integer (2451 binary)
+
+Root relaxation: objective 1.010176e+04, 4945 iterations, 0.10 seconds
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0 10101.7607    0    9          - 10101.7607     -      -    0s
+     0     0 10101.7607    0  182          - 10101.7607     -      -    1s
+     0     0 10101.7609    0  205          - 10101.7609     -      -    1s
+     0     0 10101.7612    0  118          - 10101.7612     -      -    1s
+     0     0 10101.7618    0  101          - 10101.7618     -      -    2s
+     0     0 10101.7622    0  102          - 10101.7622     -      -    2s
+     0     0 10101.7623    0  109          - 10101.7623     -      -    2s
+     0     0 10101.7623    0  108          - 10101.7623     -      -    2s
+     0     0 10101.7623    0    9          - 10101.7623     -      -    5s
+     0     0 10101.7623    0   85          - 10101.7623     -      -    5s
+     0     0 10101.7641    0   98          - 10101.7641     -      -    5s
+     0     0 10101.7648    0   90          - 10101.7648     -      -    6s
+     0     0 10101.7650    0   80          - 10101.7650     -      -    6s
+     0     0 10101.7650    0   82          - 10101.7650     -      -    6s
+     0     0 10101.7650    0   81          - 10101.7650     -      -    6s
+     0     0 10101.7650    0   83          - 10101.7650     -      -    6s
+     0     0 10101.7650    0   83          - 10101.7650     -      -    8s
+     0     2 10101.7650    0   83          - 10101.7650     -      -   10s
+  2049  1625 12958.9142   76  113          - 10101.7650     -   30.2   15s
+  3432  2197 15816.0619   84   69          - 10101.7650     -   30.3   20s
+  3441  2205 10101.7650   16   78          - 10101.7650     -   37.1   25s
+  3623  2306 10101.7650   30   66          - 10101.7650     -   36.9   30s
+  3896  2474 10101.7669   44   60          - 10101.7650     -   36.6   36s
+  4828  2909 infeasible  106               - 10101.7650     -   40.3   40s
+  6655  3729 16338.7739  198   58          - 10101.7650     -   36.9   45s
+  8129  4314 infeasible  268               - 10101.7650     -   35.3   50s
+  9644  5007 10153.1662  159   35          - 10101.7650     -   34.2   55s
+ 10648  5725 13428.9077  218   42          - 10101.7650     -   33.9   60s
+
+Gurobi 5.6.3 (win64) logging started 09/29/15 14:18:35
+
+Optimize a model with 23646 rows, 22086 columns and 64463 nonzeros
+Presolve removed 9968 rows and 16343 columns
+Presolve time: 0.19s
+Presolved: 13678 rows, 5743 columns, 36530 nonzeros
+Variable types: 3457 continuous, 2286 integer (2286 binary)
+
+Root relaxation: objective 1.010176e+04, 5252 iterations, 0.13 seconds
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0 10101.7604    0    7          - 10101.7604     -      -    0s
+H    0     0                    10101.760440 10101.7604  0.00%     -    0s
+
+Explored 0 nodes (8146 simplex iterations) in 0.70 seconds
+Thread count was 8 (of 8 available processors)
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 1.010176044000e+04, best bound 1.010176044000e+04, gap 0.0%
+
+Gurobi 5.6.3 (win64) logging started 09/29/15 15:00:43
+
+Optimize a model with 23646 rows, 18126 columns and 64463 nonzeros
+Presolve removed 10063 rows and 12431 columns
+Presolve time: 0.21s
+Presolved: 13583 rows, 5695 columns, 36329 nonzeros
+Variable types: 3394 continuous, 2301 integer (2301 binary)
+
+Root relaxation: objective 1.010176e+04, 5051 iterations, 0.13 seconds
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0 10101.7607    0    2          - 10101.7607     -      -    0s
+H    0     0                    10101.760440 10101.7604  0.00%     -    1s
+
+Explored 0 nodes (7994 simplex iterations) in 1.09 seconds
+Thread count was 8 (of 8 available processors)
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 1.010176044000e+04, best bound 1.010176044000e+04, gap 0.0%
+
+Gurobi 5.6.3 (win64) logging started 09/29/15 15:00:53
+
+Optimize a model with 27246 rows, 18966 columns and 74831 nonzeros
+Presolve removed 15073 rows and 14082 columns
+Presolve time: 0.29s
+Presolved: 12173 rows, 4884 columns, 34571 nonzeros
+Variable types: 3118 continuous, 1766 integer (1766 binary)
+
+Root relaxation: objective 1.197622e+04, 5021 iterations, 0.09 seconds
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0 11976.2247    0   52          - 11976.2247     -      -    0s
+     0     0 11976.2247    0   60          - 11976.2247     -      -    0s
+*    0     0               0    11976.224387 11976.2244  0.00%     -    1s
+
+Cutting planes:
+  Gomory: 5
+  Cover: 6
+  Implied bound: 24
+  MIR: 41
+
+Explored 0 nodes (9751 simplex iterations) in 1.07 seconds
+Thread count was 8 (of 8 available processors)
+
+Optimal solution found (tolerance 1.00e-04)
+Warning: max constraint violation (7.4656e-06) exceeds tolerance
+Warning: max bound violation (2.3160e-06) exceeds tolerance
+Best objective 1.197622438681e+04, best bound 1.197622438681e+04, gap 0.0%
+
+Gurobi 5.6.3 (win64) logging started 09/29/15 15:04:50
+
+Optimize a model with 24426 rows, 24486 columns and 67283 nonzeros
+Presolve removed 10466 rows and 18604 columns
+Presolve time: 0.21s
+Presolved: 13960 rows, 5882 columns, 37432 nonzeros
+Variable types: 3431 continuous, 2451 integer (2451 binary)
+
+Root relaxation: objective 1.010176e+04, 4945 iterations, 0.12 seconds
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0 10101.7607    0    9          - 10101.7607     -      -    0s
+     0     0 10101.7607    0  182          - 10101.7607     -      -    1s
+     0     0 10101.7609    0  205          - 10101.7609     -      -    1s
+     0     0 10101.7612    0  118          - 10101.7612     -      -    1s
+     0     0 10101.7618    0  101          - 10101.7618     -      -    2s
+     0     0 10101.7622    0  102          - 10101.7622     -      -    2s
+     0     0 10101.7623    0  109          - 10101.7623     -      -    2s
+     0     0 10101.7623    0  108          - 10101.7623     -      -    2s
+     0     0 10101.7623    0    9          - 10101.7623     -      -    5s
+     0     0 10101.7623    0   85          - 10101.7623     -      -    5s
+     0     0 10101.7641    0   98          - 10101.7641     -      -    5s
+     0     0 10101.7648    0   90          - 10101.7648     -      -    6s
+     0     0 10101.7650    0   80          - 10101.7650     -      -    6s
+     0     0 10101.7650    0   82          - 10101.7650     -      -    6s
+     0     0 10101.7650    0   81          - 10101.7650     -      -    6s
+     0     0 10101.7650    0   83          - 10101.7650     -      -    7s
+     0     0 10101.7650    0   83          - 10101.7650     -      -    8s
+     0     2 10101.7650    0   83          - 10101.7650     -      -   10s
+  1726  1414 15816.0570   76  130          - 10101.7650     -   31.0   15s
+  3431  2196 15816.0619   84   14          - 10101.7650     -   30.3   20s
+  3441  2205 10101.7650   16   78          - 10101.7650     -   37.1   25s
+  3591  2308 10101.7650   28   68          - 10101.7650     -   36.8   30s
+  3896  2474 10101.7669   44   60          - 10101.7650     -   36.6   36s
+  4731  2870 10162.3513  101   34          - 10101.7650     -   40.2   40s
+
+Gurobi 5.6.3 (win64) logging started 09/29/15 15:05:38
+
+Optimize a model with 24426 rows, 24486 columns and 67283 nonzeros
+Presolve removed 10466 rows and 18604 columns
+Presolve time: 0.27s
+Presolved: 13960 rows, 5882 columns, 37432 nonzeros
+Variable types: 3431 continuous, 2451 integer (2451 binary)
+
+Root relaxation: objective 1.010176e+04, 4945 iterations, 0.15 seconds
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0 10101.7607    0    9          - 10101.7607     -      -    1s
+     0     0 10101.7607    0  182          - 10101.7607     -      -    1s
+     0     0 10101.7609    0  205          - 10101.7609     -      -    2s
+     0     0 10101.7612    0  118          - 10101.7612     -      -    2s
+     0     0 10101.7618    0  101          - 10101.7618     -      -    2s
+     0     0 10101.7622    0  102          - 10101.7622     -      -    3s
+     0     0 10101.7623    0  109          - 10101.7623     -      -    3s
+     0     0 10101.7623    0  108          - 10101.7623     -      -    3s
+     0     0 10101.7623    0    9          - 10101.7623     -      -    6s
+     0     0 10101.7623    0   85          - 10101.7623     -      -    7s
+     0     0 10101.7641    0   98          - 10101.7641     -      -    7s
+     0     0 10101.7648    0   90          - 10101.7648     -      -    7s
+     0     0 10101.7650    0   80          - 10101.7650     -      -    8s
+     0     0 10101.7650    0   82          - 10101.7650     -      -    8s
+     0     0 10101.7650    0   81          - 10101.7650     -      -    8s
+     0     0 10101.7650    0   83          - 10101.7650     -      -    8s
+     0     0 10101.7650    0   83          - 10101.7650     -      -   10s
+     0     2 10101.7650    0   83          - 10101.7650     -      -   12s
+   761   688 10101.7650   74   93          - 10101.7650     -   32.7   15s
+  3430  2196 15816.0619   84  108          - 10101.7650     -   30.3   20s
+  3440  2202 12958.9248  162   80          - 10101.7650     -   30.2   26s
+  3451  2214 10101.7658   20   74          - 10101.7650     -   37.0   30s
+  3798  2413 10101.7651   40   67          - 10101.7650     -   37.0   36s
+  4401  2750 10147.2071   80   42          - 10101.7650     -   38.1   40s
+  5886  3421 11003.8890  153   55          - 10101.7650     -   38.4   45s
+  7645  4153 27582.1523  257   64          - 10101.7650     -   35.7   50s
+  9170  4755 10143.0685  133   41          - 10101.7650     -   34.6   55s
+ 10271  5400 13184.4193  195   46          - 10101.7650     -   34.1   60s
+ 11943  6754 16659.7646  269   40          - 10101.7650     -   33.3   65s
+ 13439  7978 30616.9273  313   72          - 10101.7650     -   32.6   70s
+ 15010  9107 10208.1306   87   64          - 10101.7650     -   31.5   75s
+ 16256 10019 10561.2190  144   47          - 10101.7650     -   31.5   80s
+ 17147 10719 11044.8266  195   56          - 10101.7650     -   32.2   85s
+ 18028 11456 12019.6630  262   55          - 10101.7650     -   32.4   90s
+ 19514 12639 14815.0409  331   77          - 10101.7650     -   31.6   95s
+
+Gurobi 5.6.3 (win64) logging started 09/29/15 15:07:23
+
+Optimize a model with 27846 rows, 24486 columns and 77467 nonzeros
+Presolve removed 11102 rows and 17754 columns
+Presolve time: 0.39s
+Presolved: 16744 rows, 6732 columns, 46245 nonzeros
+Variable types: 3961 continuous, 2771 integer (2771 binary)
+
+Root relaxation: objective 1.197623e+04, 6536 iterations, 0.17 seconds
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0 11976.2254    0   17          - 11976.2254     -      -    1s
+     0     0 11976.2255    0   20          - 11976.2255     -      -    1s
+     0     0 11976.2256    0    5          - 11976.2256     -      -    1s
+H    0     0                    11976.224400 11976.2244  0.00%     -    1s
+
+Cutting planes:
+  Implied bound: 1
+  MIR: 2
+
+Explored 0 nodes (12887 simplex iterations) in 1.92 seconds
+Thread count was 8 (of 8 available processors)
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 1.197622440000e+04, best bound 1.197622440000e+04, gap 0.0000%
+
+Gurobi 5.6.3 (win64) logging started 09/29/15 15:09:19
+
+Optimize a model with 27246 rows, 18966 columns and 74831 nonzeros
+Presolve removed 15073 rows and 14082 columns
+Presolve time: 0.25s
+Presolved: 12173 rows, 4884 columns, 34571 nonzeros
+Variable types: 3118 continuous, 1766 integer (1766 binary)
+
+Root relaxation: objective 1.197622e+04, 5021 iterations, 0.08 seconds
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0 11976.2247    0   52          - 11976.2247     -      -    0s
+     0     0 11976.2247    0   60          - 11976.2247     -      -    0s
+*    0     0               0    11976.224387 11976.2244  0.00%     -    0s
+
+Cutting planes:
+  Gomory: 5
+  Cover: 6
+  Implied bound: 24
+  MIR: 41
+
+Explored 0 nodes (9751 simplex iterations) in 1.00 seconds
+Thread count was 8 (of 8 available processors)
+
+Optimal solution found (tolerance 1.00e-04)
+Warning: max constraint violation (7.4656e-06) exceeds tolerance
+Warning: max bound violation (2.3160e-06) exceeds tolerance
+Best objective 1.197622438681e+04, best bound 1.197622438681e+04, gap 0.0%
+
+Gurobi 5.6.3 (win64) logging started 09/29/15 15:11:27
+
+Optimize a model with 24426 rows, 24486 columns and 67283 nonzeros
+Presolve removed 10466 rows and 18604 columns
+Presolve time: 0.24s
+Presolved: 13960 rows, 5882 columns, 37432 nonzeros
+Variable types: 3431 continuous, 2451 integer (2451 binary)
+
+Root relaxation: objective 1.010176e+04, 4945 iterations, 0.15 seconds
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0 10101.7607    0    9          - 10101.7607     -      -    1s
+     0     0 10101.7607    0  182          - 10101.7607     -      -    1s
+     0     0 10101.7609    0  205          - 10101.7609     -      -    2s
+     0     0 10101.7612    0  118          - 10101.7612     -      -    3s
+     0     0 10101.7618    0  101          - 10101.7618     -      -    3s
+     0     0 10101.7622    0  102          - 10101.7622     -      -    3s
+     0     0 10101.7623    0  109          - 10101.7623     -      -    3s
+     0     0 10101.7623    0  108          - 10101.7623     -      -    4s
+     0     0 10101.7623    0    9          - 10101.7623     -      -    7s
+     0     0 10101.7623    0   85          - 10101.7623     -      -    7s
+     0     0 10101.7641    0   98          - 10101.7641     -      -    8s
+     0     0 10101.7648    0   90          - 10101.7648     -      -    8s
+     0     0 10101.7650    0   80          - 10101.7650     -      -    8s
+     0     0 10101.7650    0   82          - 10101.7650     -      -    8s
+     0     0 10101.7650    0   81          - 10101.7650     -      -    9s
+     0     0 10101.7650    0   83          - 10101.7650     -      -    9s
+     0     0 10101.7650    0   83          - 10101.7650     -      -   10s
+     0     2 10101.7650    0   83          - 10101.7650     -      -   12s
+   588   537 10101.7650   70  100          - 10101.7650     -   33.4   15s
+  2771  2017 12974.0707  131   83          - 10101.7650     -   32.1   20s
+  3438  2201 15816.0619   84   80          - 10101.7650     -   30.3   25s
+  3445  2208 10101.7650   18   77          - 10101.7650     -   37.0   30s
+  3798  2413 10101.7651   40   67          - 10101.7650     -   37.0   37s
+  4084  2582 10101.7687   62   48          - 10101.7650     -   37.0   40s
+  5324  3155 10223.4043  128   79          - 10101.7650     -   39.7   45s
+  7277  3970 23551.0445  240   70          - 10101.7650     -   36.4   50s
+  8694  4521 10139.6304   74  106          - 10101.7650     -   35.0   55s
+ 10070  5208 12794.8886  180   39          - 10101.7650     -   34.1   60s
+ 11482  6362 14310.1825  249   37          - 10101.7650     -   33.1   65s
+ 13189  7832 infeasible  313               - 10101.7650     -   32.7   70s
+ 14562  8777 10101.7684   56   83          - 10101.7650     -   31.9   75s
+ 15993  9850 10480.2940  138   46          - 10101.7650     -   31.1   80s
+ 16928 10567 10680.7619  165   58          - 10101.7650     -   32.1   85s
+ 17799 11258 49071.6110  255   91          - 10101.7650     -   32.5   90s
+ 19180 12381 13225.3411  323   65          - 10101.7650     -   31.7   95s
+ 20587 13429 15395.5216  388   61          - 10101.7650     -   31.1  100s
+ 22218 14685 10334.0081  167   62          - 10101.7650     -   30.4  105s
+ 23685 15828 11108.4790  228   45          - 10101.7650     -   29.9  110s
+ 25210 17050 11841.0848  307   51          - 10101.7650     -   29.3  115s
+ 26312 17943 14814.7431  348   61          - 10101.7650     -   28.9  120s
+ 27695 19041 10207.6809   93   59          - 10101.7650     -   28.4  125s
+ 28866 20029 10955.0324  156   33          - 10101.7650     -   28.1  130s
+ 30039 21004 12951.8784  244   24          - 10101.7650     -   28.1  135s
+ 31307 21957 10132.0606   71   96          - 10101.7650     -   27.8  140s
+*32791 12558             341    12444.088141 10101.7650  18.8%  27.3  144s
+ 32973 12665 10101.7650   22  108 12444.0881 10101.7650  18.8%  27.3  145s
+ 32990 12676 10101.7650   31   28 12444.0881 10101.7650  18.8%  27.5  150s
+ 33325 12847 10101.7650   54    7 12444.0881 10101.7650  18.8%  27.5  155s
+ 33842 13070 10101.7650   79    8 12444.0881 10101.7650  18.8%  27.4  161s
+ 33967 13139 10116.9097   88    7 12444.0881 10101.7650  18.8%  27.4  165s
+ 34427 13324 10116.9097  106   18 12444.0881 10101.7650  18.8%  27.4  170s
+ 35426 13712 10162.0314  150   11 12444.0881 10101.7650  18.8%  27.0  176s
+*35850 12676             189    10560.999045 10101.7650  4.35%  26.9  177s
+ 37148 13177 10101.7650   43   31 10560.9990 10101.7650  4.35%  26.6  180s
+ 39659 14329 10554.9261  165   49 10560.9990 10101.7650  4.35%  26.0  185s
+ 40219 14562 10116.9161   86   46 10560.9990 10101.7650  4.35%  25.9  190s
+*42334 14782             218    10525.345507 10101.7650  4.02%  25.2  193s
+*42546 14252             225    10511.239874 10101.7650  3.90%  25.1  194s
+ 43344 14606 10101.7650   63   82 10511.2399 10101.7650  3.90%  24.9  195s
+ 46881 16019 10506.9721  112   64 10511.2399 10101.7650  3.90%  24.0  202s
+ 48471 16611 10146.8067   98   63 10511.2399 10101.7650  3.90%  23.6  205s
+ 50464 17330 10418.4187  126   53 10511.2399 10101.7650  3.90%  23.2  210s
+ 53082 18416 10216.8673   96   61 10511.2399 10101.7650  3.90%  22.5  215s
+ 55194 19249 10154.7744   98   68 10511.2399 10101.7650  3.90%  22.1  221s
+H55263 11357                    10144.742686 10101.7650  0.42%  22.1  223s
+ 55512 11461 10101.7650   85    2 10144.7427 10101.7650  0.42%  22.1  225s
+*55513 10888              40    10101.760440 10101.7604  0.00%  22.1  225s
+
+Cutting planes:
+  Gomory: 2
+  Implied bound: 1
+  MIR: 1
+
+Explored 55514 nodes (1249440 simplex iterations) in 225.71 seconds
+Thread count was 8 (of 8 available processors)
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 1.010176044000e+04, best bound 1.010176044000e+04, gap 0.0%
+
+Gurobi 5.6.3 (win64) logging started 09/29/15 15:16:42
+
+Optimize a model with 23646 rows, 18126 columns and 64463 nonzeros
+Presolve removed 10063 rows and 12431 columns
+Presolve time: 0.27s
+Presolved: 13583 rows, 5695 columns, 36329 nonzeros
+Variable types: 3394 continuous, 2301 integer (2301 binary)
+
+Root relaxation: objective 1.010176e+04, 5051 iterations, 0.19 seconds
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0 10101.7607    0    2          - 10101.7607     -      -    1s
+H    0     0                    10101.760440 10101.7604  0.00%     -    1s
+
+Explored 0 nodes (7994 simplex iterations) in 1.56 seconds
+Thread count was 8 (of 8 available processors)
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 1.010176044000e+04, best bound 1.010176044000e+04, gap 0.0%
+
+Gurobi 5.6.3 (win64) logging started 09/29/15 15:18:36
+
+Optimize a model with 27246 rows, 18966 columns and 74831 nonzeros
+Presolve removed 15073 rows and 14082 columns
+Presolve time: 0.31s
+Presolved: 12173 rows, 4884 columns, 34571 nonzeros
+Variable types: 3118 continuous, 1766 integer (1766 binary)
+
+Root relaxation: objective 1.197622e+04, 5021 iterations, 0.11 seconds
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0 11976.2247    0   52          - 11976.2247     -      -    0s
+     0     0 11976.2247    0   60          - 11976.2247     -      -    0s
+*    0     0               0    11976.224387 11976.2244  0.00%     -    1s
+
+Cutting planes:
+  Gomory: 5
+  Cover: 6
+  Implied bound: 24
+  MIR: 41
+
+Explored 0 nodes (9751 simplex iterations) in 1.18 seconds
+Thread count was 8 (of 8 available processors)
+
+Optimal solution found (tolerance 1.00e-04)
+Warning: max constraint violation (7.4656e-06) exceeds tolerance
+Warning: max bound violation (2.3160e-06) exceeds tolerance
+Best objective 1.197622438681e+04, best bound 1.197622438681e+04, gap 0.0%
+
+Gurobi 5.6.3 (win64) logging started 09/29/15 15:19:16
+
+Optimize a model with 24426 rows, 24486 columns and 67283 nonzeros
+Presolve removed 10466 rows and 18604 columns
+Presolve time: 0.21s
+Presolved: 13960 rows, 5882 columns, 37432 nonzeros
+Variable types: 3431 continuous, 2451 integer (2451 binary)
+
+Root relaxation: objective 1.010176e+04, 4945 iterations, 0.09 seconds
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0 10101.7607    0    9          - 10101.7607     -      -    0s
+     0     0 10101.7607    0  182          - 10101.7607     -      -    1s
+     0     0 10101.7609    0  205          - 10101.7609     -      -    1s
+     0     0 10101.7612    0  118          - 10101.7612     -      -    1s
+     0     0 10101.7618    0  101          - 10101.7618     -      -    2s
+     0     0 10101.7622    0  102          - 10101.7622     -      -    2s
+     0     0 10101.7623    0  109          - 10101.7623     -      -    2s
+     0     0 10101.7623    0  108          - 10101.7623     -      -    3s
+     0     0 10101.7623    0    9          - 10101.7623     -      -    5s
+     0     0 10101.7623    0   85          - 10101.7623     -      -    6s
+     0     0 10101.7641    0   98          - 10101.7641     -      -    7s
+
+Gurobi 5.6.3 (win64) logging started 09/29/15 15:19:29
+
+Optimize a model with 27846 rows, 24486 columns and 77467 nonzeros
+
+Gurobi 5.6.3 (win64) logging started 09/29/15 15:19:32
+
+Optimize a model with 27846 rows, 24486 columns and 77467 nonzeros
+Presolve removed 11102 rows and 17754 columns
+Presolve time: 0.30s
+Presolved: 16744 rows, 6732 columns, 46245 nonzeros
+Variable types: 3961 continuous, 2771 integer (2771 binary)
+
+Root relaxation: objective 1.197623e+04, 6536 iterations, 0.17 seconds
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0 11976.2254    0   17          - 11976.2254     -      -    1s
+     0     0 11976.2255    0   20          - 11976.2255     -      -    1s
+     0     0 11976.2256    0    5          - 11976.2256     -      -    1s
+H    0     0                    11976.224400 11976.2244  0.00%     -    1s
+
+Cutting planes:
+  Implied bound: 1
+  MIR: 2
+
+Explored 0 nodes (12887 simplex iterations) in 1.78 seconds
+Thread count was 8 (of 8 available processors)
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 1.197622440000e+04, best bound 1.197622440000e+04, gap 0.0000%
+
+Gurobi 5.6.3 (win64) logging started 09/29/15 15:46:33
+
+
+Gurobi 5.6.3 (win64) logging started 09/29/15 15:47:45
+
+
+Gurobi 5.6.3 (win64) logging started 09/29/15 15:48:33
+
+Optimize a model with 26526 rows, 18246 columns and 73391 nonzeros
+Presolve removed 14451 rows and 13371 columns
+Presolve time: 0.41s
+Presolved: 12075 rows, 4875 columns, 34391 nonzeros
+Variable types: 3111 continuous, 1764 integer (1764 binary)
+
+Root relaxation: objective 1.197622e+04, 5057 iterations, 0.12 seconds
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0 11976.2244    0   52          - 11976.2244     -      -    1s
+     0     0 11976.2244    0   63          - 11976.2244     -      -    1s
+     0     0 11976.2245    0    5          - 11976.2245     -      -    1s
+H    0     0                    11976.224394 11976.2244  0.00%     -    1s
+
+Cutting planes:
+  Gomory: 3
+  MIR: 5
+
+Explored 0 nodes (10006 simplex iterations) in 1.64 seconds
+Thread count was 8 (of 8 available processors)
+
+Optimal solution found (tolerance 1.00e-04)
+Warning: max constraint violation (1.0357e-06) exceeds tolerance
+Warning: max bound violation (1.0502e-06) exceeds tolerance
+Best objective 1.197622439363e+04, best bound 1.197622439363e+04, gap 0.0%
+
+Gurobi 5.6.3 (win64) logging started 09/29/15 15:51:14
+
+Optimize a model with 26526 rows, 18246 columns and 73391 nonzeros
+Presolve removed 14451 rows and 13371 columns
+Presolve time: 0.27s
+Presolved: 12075 rows, 4875 columns, 34391 nonzeros
+Variable types: 3111 continuous, 1764 integer (1764 binary)
+
+Root relaxation: objective 1.197622e+04, 5057 iterations, 0.08 seconds
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0 11976.2244    0   52          - 11976.2244     -      -    0s
+     0     0 11976.2244    0   63          - 11976.2244     -      -    0s
+     0     0 11976.2245    0    5          - 11976.2245     -      -    1s
+H    0     0                    11976.224394 11976.2244  0.00%     -    1s
+
+Cutting planes:
+  Gomory: 3
+  MIR: 5
+
+Explored 0 nodes (10006 simplex iterations) in 1.10 seconds
+Thread count was 8 (of 8 available processors)
+
+Optimal solution found (tolerance 1.00e-04)
+Warning: max constraint violation (1.0357e-06) exceeds tolerance
+Warning: max bound violation (1.0502e-06) exceeds tolerance
+Best objective 1.197622439363e+04, best bound 1.197622439363e+04, gap 0.0%
+
+Gurobi 5.6.3 (win64) logging started 09/29/15 15:51:32
+
+Optimize a model with 26526 rows, 18246 columns and 73391 nonzeros
+Presolve removed 14451 rows and 13371 columns
+Presolve time: 0.35s
+Presolved: 12075 rows, 4875 columns, 34391 nonzeros
+Variable types: 3111 continuous, 1764 integer (1764 binary)
+
+Root relaxation: objective 1.197622e+04, 5057 iterations, 0.10 seconds
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0 11976.2244    0   52          - 11976.2244     -      -    0s
+     0     0 11976.2244    0   63          - 11976.2244     -      -    1s
+     0     0 11976.2245    0    5          - 11976.2245     -      -    1s
+H    0     0                    11976.224394 11976.2244  0.00%     -    1s
+
+Cutting planes:
+  Gomory: 3
+  MIR: 5
+
+Explored 0 nodes (10006 simplex iterations) in 1.48 seconds
+Thread count was 8 (of 8 available processors)
+
+Optimal solution found (tolerance 1.00e-04)
+Warning: max constraint violation (1.0357e-06) exceeds tolerance
+Warning: max bound violation (1.0502e-06) exceeds tolerance
+Best objective 1.197622439363e+04, best bound 1.197622439363e+04, gap 0.0%
+
+Gurobi 5.6.3 (win64) logging started 09/29/15 16:07:49
+
+Optimize a model with 123325 rows, 75025 columns and 350823 nonzeros
+Presolve removed 46317 rows and 44337 columns
+Presolve time: 2.69s
+Presolved: 77008 rows, 30688 columns, 220847 nonzeros
+Variable types: 17439 continuous, 13249 integer (13249 binary)
+
+Root relaxation: objective 7.418248e+04, 36630 iterations, 2.71 seconds
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0 74182.4834    0  193          - 74182.4834     -      -   10s
+     0     0 74182.4846    0  341          - 74182.4846     -      -   11s
+     0     0 74182.4846    0  113          - 74182.4846     -      -   15s
+     0     0 74182.4846    0   87          - 74182.4846     -      -   18s
+     0     0 74182.4846    0   89          - 74182.4846     -      -   21s
+     0     0 74182.4846    0  104          - 74182.4846     -      -   22s
+     0     0 74182.4846    0   83          - 74182.4846     -      -   25s
+     0     0 74182.4846    0   79          - 74182.4846     -      -   27s
+     0     0 74182.4846    0   79          - 74182.4846     -      -   29s
+     0     0 74182.4848    0   86          - 74182.4848     -      -   31s
+     0     0 74182.4848    0   83          - 74182.4848     -      -   43s
+     0     2 74182.4848    0   82          - 74182.4848     -      -   53s
+    14    19 74182.4848    8  129          - 74182.4848     -    245   55s
+   107   113 74182.4852   19  135          - 74182.4848     -   59.6   62s
+   510   491 74182.4855   59   94          - 74182.4848     -   23.6   65s
+   811   781 74330.8168   90   82          - 74182.4848     -   26.0   70s
+  1200  1076 78200.3121  141  114          - 74182.4848     -   26.4   75s
+  1640  1426 77931.4369  183  138          - 74182.4848     -   23.9   87s
+  1778  1561 78038.4428  196  136          - 74182.4848     -   39.0   90s
+  2070  1766 78420.1203  212  135          - 74182.4848     -   37.5  102s
+  2273  1910 79718.8338  223  147          - 74182.4848     -   48.7  105s
+  2615  2183 87892.6033  256  155          - 74182.4848     -   46.2  110s
+  2786  2287 74182.4852   66   83          - 74182.4848     -   45.6  125s
+  2788  2288 74182.4872   62  157          - 74182.4848     -   45.6  136s
+  2789  2289 74182.4868   77   61          - 74182.4848     -   45.6  141s
+  2791  2290 74293.6928   89   78          - 74182.4848     -   45.5  148s
+  2792  2291 74182.4855    7   93          - 74182.4848     -   45.5  151s
+  2793  2292 75575.1808   58   88          - 74182.4848     -   45.5  155s
+  2795  2293 74182.4868   54   80          - 74182.4848     -   45.5  162s
+  2796  2294 74182.4866   82   67          - 74182.4848     -   45.5  165s
