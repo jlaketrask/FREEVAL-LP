@@ -45849,3 +45849,230 @@ Root relaxation: objective 7.418248e+04, 36630 iterations, 2.71 seconds
   2793  2292 75575.1808   58   88          - 74182.4848     -   45.5  155s
   2795  2293 74182.4868   54   80          - 74182.4848     -   45.5  162s
   2796  2294 74182.4866   82   67          - 74182.4848     -   45.5  165s
+
+Gurobi 5.6.3 (win64) logging started 09/29/15 16:15:20
+
+Optimize a model with 26526 rows, 17766 columns and 73391 nonzeros
+Presolve removed 14451 rows and 12891 columns
+Presolve time: 0.27s
+Presolved: 12075 rows, 4875 columns, 34391 nonzeros
+Variable types: 3111 continuous, 1764 integer (1764 binary)
+
+Root relaxation: objective 1.197622e+04, 5057 iterations, 0.08 seconds
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0 11976.2244    0   52          - 11976.2244     -      -    0s
+     0     0 11976.2244    0   63          - 11976.2244     -      -    0s
+     0     0 11976.2245    0    5          - 11976.2245     -      -    1s
+H    0     0                    11976.224394 11976.2244  0.00%     -    1s
+
+Cutting planes:
+  Gomory: 3
+  MIR: 5
+
+Explored 0 nodes (10006 simplex iterations) in 1.16 seconds
+Thread count was 8 (of 8 available processors)
+
+Optimal solution found (tolerance 1.00e-04)
+Warning: max constraint violation (1.0357e-06) exceeds tolerance
+Warning: max bound violation (1.0502e-06) exceeds tolerance
+Best objective 1.197622439363e+04, best bound 1.197622439363e+04, gap 0.0%
+
+Gurobi 5.6.3 (win64) logging started 09/29/15 16:45:22
+
+Optimize a model with 26166 rows, 17766 columns and 72671 nonzeros
+Presolve removed 486 rows and 6122 columns
+Presolve time: 0.01s
+
+Explored 0 nodes (0 simplex iterations) in 0.04 seconds
+Thread count was 1 (of 8 available processors)
+
+Model is infeasible
+Best objective -, best bound -, gap -
+
+Gurobi 5.6.3 (win64) logging started 09/29/15 16:47:51
+
+Optimize a model with 26166 rows, 17766 columns and 72671 nonzeros
+Presolve removed 486 rows and 6122 columns
+Presolve time: 0.01s
+
+Explored 0 nodes (0 simplex iterations) in 0.04 seconds
+Thread count was 1 (of 8 available processors)
+
+Model is infeasible
+Best objective -, best bound -, gap -
+
+Gurobi 5.6.3 (win64) logging started 09/29/15 16:49:11
+
+Optimize a model with 26526 rows, 17766 columns and 73391 nonzeros
+Presolve removed 486 rows and 5762 columns
+Presolve time: 0.01s
+
+Explored 0 nodes (0 simplex iterations) in 0.04 seconds
+Thread count was 1 (of 8 available processors)
+
+Model is infeasible
+Best objective -, best bound -, gap -
+
+Gurobi 5.6.3 (win64) logging started 09/29/15 16:50:27
+
+Optimize a model with 26526 rows, 17766 columns and 73391 nonzeros
+Presolve removed 486 rows and 5762 columns
+Presolve time: 0.01s
+
+Explored 0 nodes (0 simplex iterations) in 0.04 seconds
+Thread count was 1 (of 8 available processors)
+
+Model is infeasible
+Best objective -, best bound -, gap -
+
+Gurobi 5.6.3 (win64) logging started 09/29/15 16:51:08
+
+Optimize a model with 26526 rows, 17766 columns and 73391 nonzeros
+Presolve removed 14451 rows and 12891 columns
+Presolve time: 0.31s
+Presolved: 12075 rows, 4875 columns, 34391 nonzeros
+Variable types: 3111 continuous, 1764 integer (1764 binary)
+
+Root relaxation: objective 1.197622e+04, 5057 iterations, 0.09 seconds
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0 11976.2244    0   52          - 11976.2244     -      -    0s
+     0     0 11976.2244    0   63          - 11976.2244     -      -    0s
+     0     0 11976.2245    0    5          - 11976.2245     -      -    1s
+H    0     0                    11976.224394 11976.2244  0.00%     -    1s
+
+Cutting planes:
+  Gomory: 3
+  MIR: 5
+
+Explored 0 nodes (10006 simplex iterations) in 1.22 seconds
+Thread count was 8 (of 8 available processors)
+
+Optimal solution found (tolerance 1.00e-04)
+Warning: max constraint violation (1.0357e-06) exceeds tolerance
+Warning: max bound violation (1.0502e-06) exceeds tolerance
+Best objective 1.197622439363e+04, best bound 1.197622439363e+04, gap 0.0%
+
+Gurobi 5.6.3 (win64) logging started 09/29/15 16:51:52
+
+Optimize a model with 26166 rows, 17766 columns and 72671 nonzeros
+Presolve removed 12350 rows and 12096 columns
+Presolve time: 0.32s
+Presolved: 13816 rows, 5670 columns, 38277 nonzeros
+Variable types: 3616 continuous, 2054 integer (2054 binary)
+
+Root relaxation: objective 1.197651e+04, 4269 iterations, 0.07 seconds
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0 11976.5121    0  999          - 11976.5121     -      -    0s
+     0     0 11976.5121    0  821          - 11976.5121     -      -    1s
+     0     0 11976.5121    0  637          - 11976.5121     -      -    1s
+     0     0 infeasible    0               - 11976.5121     -      -    2s
+
+Cutting planes:
+  Gomory: 69
+  Implied bound: 44
+  Clique: 1
+  MIR: 188
+
+Explored 1 nodes (17790 simplex iterations) in 2.16 seconds
+Thread count was 8 (of 8 available processors)
+
+Model is infeasible
+Best objective -, best bound -, gap -
+
+Gurobi 5.6.3 (win64) logging started 09/29/15 16:52:45
+
+Optimize a model with 121825 rows, 72625 columns and 347823 nonzeros
+Presolve removed 2110 rows and 19144 columns
+Presolve time: 0.04s
+
+Explored 0 nodes (0 simplex iterations) in 0.36 seconds
+Thread count was 1 (of 8 available processors)
+
+Model is infeasible
+Best objective -, best bound -, gap -
+
+Gurobi 5.6.3 (win64) logging started 09/29/15 16:53:20
+
+Optimize a model with 123325 rows, 72625 columns and 350823 nonzeros
+Presolve removed 2110 rows and 17644 columns
+Presolve time: 0.03s
+
+Explored 0 nodes (0 simplex iterations) in 0.31 seconds
+Thread count was 1 (of 8 available processors)
+
+Model is infeasible
+Best objective -, best bound -, gap -
+
+Gurobi 5.6.3 (win64) logging started 09/29/15 16:53:57
+
+Optimize a model with 123325 rows, 72625 columns and 350823 nonzeros
+Presolve removed 46317 rows and 41937 columns
+Presolve time: 2.53s
+Presolved: 77008 rows, 30688 columns, 220847 nonzeros
+Variable types: 17439 continuous, 13249 integer (13249 binary)
+
+Root relaxation: objective 7.418248e+04, 36561 iterations, 2.13 seconds
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0 74182.4834    0  174          - 74182.4834     -      -    9s
+     0     0 74182.4840    0  337          - 74182.4840     -      -   10s
+     0     0 74182.4845    0  116          - 74182.4845     -      -   15s
+     0     0 74182.4848    0   93          - 74182.4848     -      -   18s
+     0     0 74182.4850    0   88          - 74182.4850     -      -   20s
+
+Gurobi 5.6.3 (win64) logging started 09/29/15 16:54:51
+
+
+Gurobi 5.6.3 (win64) logging started 09/29/15 16:55:01
+
+Optimize a model with 121825 rows, 72625 columns and 347823 nonzeros
+Presolve removed 45253 rows and 41583 columns
+Presolve time: 2.68s
+Presolved: 76572 rows, 31042 columns, 214394 nonzeros
+Variable types: 17859 continuous, 13183 integer (13183 binary)
+
+Root relaxation: objective 7.418358e+04, 29517 iterations, 1.12 seconds
+Total elapsed time = 5.89s
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0 74183.5825    0 3869          - 74183.5825     -      -   10s
+     0     0 74183.5825    0 4197          - 74183.5825     -      -   18s
+     0     0 74183.5825    0 4174          - 74183.5825     -      -   30s
+     0     0 74183.5825    0 4113          - 74183.5825     -      -   34s
+     0     0 74183.5825    0 3744          - 74183.5825     -      -   37s
+     0     0 74183.5825    0 3504          - 74183.5825     -      -   40s
+     0     0 74183.5825    0 3361          - 74183.5825     -      -   43s
+     0     0 74183.5825    0 3241          - 74183.5825     -      -   45s
+     0     0 74183.5825    0 3205          - 74183.5825     -      -   48s
+     0     0 74183.5825    0 3136          - 74183.5825     -      -   50s
+     0     0 74183.5825    0 3101          - 74183.5825     -      -   53s
+     0     0 74183.5825    0 3052          - 74183.5825     -      -   56s
+     0     0 74183.5825    0 3046          - 74183.5825     -      -   59s
+     0     0 74183.5825    0 3044          - 74183.5825     -      -   62s
+     0     0 74183.5825    0 3036          - 74183.5825     -      -   65s
+     0     0 74183.5825    0 3011          - 74183.5825     -      -   67s
+     0     0 74183.5825    0 3019          - 74183.5825     -      -   69s
+     0     0 74183.5825    0 3018          - 74183.5825     -      -   70s
+     0     2 74183.5825    0 3018          - 74183.5825     -      -   80s
+    25    30 74183.5825    9 2960          - 74183.5825     -    624   85s
+   104   105 74183.5825   17 2906          - 74183.5825     -    179   92s
+   238   238 74183.5825   34 2923          - 74183.5825     -   92.9   96s
+   437   437 74183.5825   56 2987          - 74183.5825     -   60.2  102s
+   532   540 74183.5825   68 3005          - 74183.5825     -   52.0  105s
+   738   740 74183.5825   93 3000          - 74183.5825     -   39.8  111s
+   941   938 74183.5825  114 2991          - 74183.5825     -   34.0  117s
+  1049  1045 74183.5825  126 2979          - 74183.5825     -   31.9  120s
+  1226  1219 74183.5825  142 2936          - 74183.5825     -   31.3  125s

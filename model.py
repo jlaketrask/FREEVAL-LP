@@ -121,7 +121,7 @@ def ONRF(i, t, p):
     else:
         return ONRFv[i][t][p]
 ONRI = []  # Input flow rate desiring to enter the merge point at ONR node i during step t in interval p
-for el_i in xrange(NS):
+for el_i in xrange(len(Ntilde)): #nee NS
     ONRI.append([[hcm.addVar(vtype=gbp.GRB.CONTINUOUS, name='ONRI'+str(el_i)+str(el_t)+str(el_p)) for el_p in xrange(P)] for el_t in xrange(S)])
 ONRQv = []  # Unment demand that is stored as a queu on the ONR roadway at node i during step t in interval p
 for el_i in xrange(NS):
@@ -135,7 +135,7 @@ def ONRQ(i, t, p):
     else:
         return ONRQv[i][t][p]
 ONRO = []  # Max output flow rate that can enter the merge point from ONR node i during step t in interval p
-for el_i in xrange(NS):
+for el_i in xrange(len(Ntilde)): #nee NS
     ONRO.append([[hcm.addVar(vtype=gbp.GRB.CONTINUOUS, name='ONRO'+str(el_i)+str(el_t)+str(el_p)) for el_p in xrange(P)] for el_t in xrange(S)])
 DEF = []  # Deficit in flow at segment i at time step t in interval p
 DEF_A = []
@@ -519,7 +519,7 @@ for el_i in xrange(NS):
         onr_i = Ntilde.index(el_i)
         for el_t in xrange(S):
             for el_p in xrange(P):
-                hcm.addConstr(ONRI[el_i][el_t][el_p] ==
+                hcm.addConstr(ONRI[onr_i][el_t][el_p] ==
                               ONRD[el_i][el_p]            # ONR demand
                               + ONRQ(el_i, el_t-1, el_p), # Queued vehicles on ONR at the previous step (t-1=-1 case implemented in function def)
                               name='ONRI_E'+str(el_i)+str(el_t)+str(el_p))
@@ -637,44 +637,44 @@ for el_i in xrange(NS):
                               <= big_m * (1 - ONRO_I[onr_i][el_t][el_p][4]),
                               name='ONRO_MIN4_2'+str(el_i)+str(el_t)+str(el_p)) # ONRO_I4=0 => ONRO_A3 < RM
                 # If ONRO_I4 = 0, setting ONRO = ONRO_A3
-                hcm.addConstr(ONRO[el_i][el_t][el_p] - ONRO_A[onr_i][el_t][el_p][3]
+                hcm.addConstr(ONRO[onr_i][el_t][el_p] - ONRO_A[onr_i][el_t][el_p][3]
                               <= big_m * ONRO_I[onr_i][el_t][el_p][4],
                               name='ONRO_MIN4_3'+str(el_i)+str(el_t)+str(el_p))
-                hcm.addConstr(ONRO[el_i][el_t][el_p] - ONRO_A[onr_i][el_t][el_p][3]
+                hcm.addConstr(ONRO[onr_i][el_t][el_p] - ONRO_A[onr_i][el_t][el_p][3]
                               >= -1*big_m * ONRO_I[onr_i][el_t][el_p][4],
                               name='ONRO_MIN4_4'+str(el_i)+str(el_t)+str(el_p))
                 # If ONRO_I4 = 1, setting ONRO = $M
-                hcm.addConstr(ONRO[el_i][el_t][el_p] - RM[el_i][el_p]
+                hcm.addConstr(ONRO[onr_i][el_t][el_p] - RM[el_i][el_p]
                               <= big_m * (1 - ONRO_I[onr_i][el_t][el_p][4]),
                               name='ONRO_MIN4_5'+str(el_i)+str(el_t)+str(el_p))
-                hcm.addConstr(ONRO[el_i][el_t][el_p] - RM[el_i][el_p]
+                hcm.addConstr(ONRO[onr_i][el_t][el_p] - RM[el_i][el_p]
                               >= -1*big_m * (1 - ONRO_I[onr_i][el_t][el_p][4]),
                               name='ONRO_MIN4_6'+str(el_i)+str(el_t)+str(el_p))
 
 ###################################################### Eq 25-19 ########################################################
                 # Step 13: Is ONRI < ONRO? If so, ONRF = ONRI. Else, ONRF = ONRO.
-                hcm.addConstr(ONRO[el_i][el_t][el_p] - ONRI[el_i][el_t][el_p]
+                hcm.addConstr(ONRO[onr_i][el_t][el_p] - ONRI[onr_i][el_t][el_p]
                               <= big_m*ONRF_I[onr_i][el_t][el_p][0],
                               name="ONRF_IF1"+str(el_i)+str(el_t)+str(el_p)) # ONRF_I0 = 1 => ONRO > ONRI
-                hcm.addConstr(ONRI[el_i][el_t][el_p] - ONRO[el_i][el_t][el_p]
+                hcm.addConstr(ONRI[onr_i][el_t][el_p] - ONRO[onr_i][el_t][el_p]
                               <= big_m*(1 - ONRF_I[onr_i][el_t][el_p][0]),
                               name="ONRF_IF2"+str(el_i)+str(el_t)+str(el_p)) # ONRF_I0 = 0 => ONRO < ONRI
 
                 # Step 15: ONRF_I0 = 1 => ONRI < ONRO => ONRF = ONRI
                 # (Step 15 before step 14 b/c Re-ordered for chapter equation numbering)
-                hcm.addConstr(ONRF(el_i, el_t, el_p) - ONRI[el_i][el_t][el_p]
+                hcm.addConstr(ONRF(el_i, el_t, el_p) - ONRI[onr_i][el_t][el_p]
                               <= big_m * (1 - ONRF_I[onr_i][el_t][el_p][0]),
                               name="ONRF_E3"+str(el_i)+str(el_t)+str(el_p))
-                hcm.addConstr(ONRF(el_i, el_t, el_p) - ONRI[el_i][el_t][el_p]
+                hcm.addConstr(ONRF(el_i, el_t, el_p) - ONRI[onr_i][el_t][el_p]
                               >= -1*big_m * (1 - ONRF_I[onr_i][el_t][el_p][0]),
                               name="ONRF_E4"+str(el_i)+str(el_t)+str(el_p))
 
 ###################################################### Eq 25-20 ########################################################
                 # Step 14: ONRF_I0 = 0 => ONR0 < ONRI => ONRF = ONR0
-                hcm.addConstr(ONRF(el_i, el_t, el_p) - ONRO[el_i][el_t][el_p]
+                hcm.addConstr(ONRF(el_i, el_t, el_p) - ONRO[onr_i][el_t][el_p]
                               <= big_m*ONRF_I[onr_i][el_t][el_p][0],
                               name="ONRF_E1"+str(el_i)+str(el_t)+str(el_p))
-                hcm.addConstr(ONRF(el_i, el_t, el_p) - ONRO[el_i][el_t][el_p]
+                hcm.addConstr(ONRF(el_i, el_t, el_p) - ONRO[onr_i][el_t][el_p]
                               >= -1*big_m*ONRF_I[onr_i][el_t][el_p][0],
                               name="ONRF_E2"+str(el_i)+str(el_t)+str(el_p))
 
@@ -683,14 +683,14 @@ for el_i in xrange(NS):
                 # ONRQ = ONRQt-1 + ONRI - ONRO
                 hcm.addConstr(ONRQ(el_i, el_t, el_p)
                               - ONRQ(el_i, el_t-1, el_p)
-                              - ONRI[el_i][el_t][el_p]
-                              + ONRO[el_i][el_t][el_p]
+                              - ONRI[onr_i][el_t][el_p]
+                              + ONRO[onr_i][el_t][el_p]
                               <= big_m*ONRF_I[onr_i][el_t][el_p][0],
                               name="ONRQ_E1"+str(el_i)+str(el_t)+str(el_p))
                 hcm.addConstr(ONRQ(el_i, el_t, el_p)
                               - ONRQ(el_i, el_t-1, el_p)
-                              - ONRI[el_i][el_t][el_p]
-                              + ONRO[el_i][el_t][el_p]
+                              - ONRI[onr_i][el_t][el_p]
+                              + ONRO[onr_i][el_t][el_p]
                               >= -1*big_m*ONRF_I[onr_i][el_t][el_p][0],
                               name="ONRQ_E2"+str(el_i)+str(el_t)+str(el_p))
                 # If ONRI < ONRO (ONRF_I0 = 1), entire ONRQ is served, and is set to be 0
@@ -764,17 +764,20 @@ for el_i in xrange(NS):
 print("step 16 done")
 ########################################################################################################################
 
-###################################################### Eq 25-9 #########################################################
+###################################################### Eq 25-15 ########################################################
+# Step 17: First Checking to see if a Queue is Present
 M_UV = 10000     # TODO Maximum of UV?
 uv_zero_tol = 0.001
-# Creating constraints
 for el_i in xrange(NS):
     for el_t in xrange(S):
         for (el_p) in xrange(P):
-            hcm.addConstr(UV(el_i,el_t,el_p) - uv_zero_tol <=M_UV* I_UV[el_i][el_t][el_p][0], name="I_UV0"+str(el_i)+str(el_t)+str(el_p))  # Queue Present: I_UV[el_i][el_t][el_p][0] = 1, I_UV[el_i][el_t][el_p][1] = 0
-            hcm.addConstr(uv_zero_tol - UV(el_i,el_t,el_p) <= M_UV* I_UV[el_i][el_t][el_p][1], name="I_UV1"+str(el_i)+str(el_t)+str(el_p)) # Queue Not Present: I_UV[el_i][el_t][el_p][0] = 0, I_UV[el_i][el_t][el_p][1] = 1
-            hcm.addConstr(I_UV[el_i][el_t][el_p][0]+I_UV[el_i][el_t][el_p][1] == 1, name="I_UVE"+str(el_i)+str(el_t)+str(el_p))
-#hcm.update()
+            hcm.addConstr(UV(el_i,el_t,el_p) - uv_zero_tol
+                          <= M_UV* I_UV[el_i][el_t][el_p][0],
+                          name="I_UV0"+str(el_i)+str(el_t)+str(el_p)) # I_UV0=1 => UV>0 (Queue Present)
+            hcm.addConstr(uv_zero_tol - UV(el_i,el_t,el_p)
+                          <= M_UV * (1 - I_UV[el_i][el_t][el_p][0]),
+                          name="I_UV1"+str(el_i)+str(el_t)+str(el_p)) # I_UV0=0 => UV<=0 (No Queue Present)
+            #hcm.addConstr(I_UV[el_i][el_t][el_p][0]+I_UV[el_i][el_t][el_p][1] == 1, name="I_UVE"+str(el_i)+str(el_t)+str(el_p))
 print("step 17 done")
 
 # Step 18 Is there a front clearing queue in this time interval
@@ -785,36 +788,6 @@ for el_i in xrange(NS):
         front_clearing_queue_present[el_i].append(((SC[el_i][el_p] - ONRD[el_i][el_p]) > (SC[el_i][el_p-1]-ONRD[el_i][el_p-1]))  # TODO p-1
             and (SC[el_i][el_p]-ONRD[el_i][el_p] > SD[el_i][el_p]))
 print("step 18 done")
-# hcm.update()
-# hcm.optimize()
-# varCount = 0
-# for p in xrange(P):
-#     for t in xrange(S):
-#         for i in xrange(NS):
-#             varCount+=1
-#             print(str(varCount)
-#                   + ", "+ str(i)
-#                   + ", " + str(p)
-#                   + ", " + str(t)
-#                   + ", " + str(NV(i,t, p).X)
-#                   + ", " + str(MF(i,t, p).X/240.0)
-#                   + ", " + str(MI[i][t][p].X/240.0)
-#                   + ", " + str(MO1(i,t, p).X/240.0)
-#                   + ", " + str(MO2(i,t, p).X/240.0)
-#                   + ", " + str(MO3(i,t, p).X/240.0)
-#                   #+ ", " + str(ONRI[i][t][p].X)
-#                   #+ ", " + str(ONRD[i][p])
-#                   #+ ", " + str(ONRQ(i,t, p).X)
-#                   #+ ", " + str(ONRF_I[i][t][p][0].X)
-#                   #+ ", " + str(ONRF_I[i][t][p][1].X)
-#                   #+ ", " + str(ONRO[i][t][p].X)
-#                   + ", " + str(ONRF(i,t, p).X/240.0)
-#                   + ", " + str(OFRF(i,t, p).X/240.0)
-#                   + ", " + str(DEF_A[i][t][p].X)
-#                   + ", " + str(DEF[i][t][p].X)
-#                   + ", " + str(UV(i,t,p).X)
-#                   + ", " + str(I_UV[i][t][p][0].X)
-#                   + ", " + str(I_UV[i][t][p][1].X))
 
 # Steps 19: Calculate Mainline Output 3
 M_MO3=[]
@@ -824,14 +797,17 @@ for el_i in xrange(NS - 1):  # TODO Check NS minus 1?
         M_MO3[el_i].append([])
         for el_p in xrange(P):
             M_MO3[el_i][el_t].append([10000 for el in xrange(16)])  # TODO Appropriate estimation for M_MO3?
-# hcm.update() # Not needed because just constants, not variables
 
 for el_i in xrange(NS - 1):  # TODO Check NS minus 1?
     for el_t in xrange(S):
         for el_p in xrange(P):
             if not front_clearing_queue_present[el_i][el_p]:
+                # If there is no front clearing queue, this value is set to 1e6 and effectively ignored
                 hcm.addConstr(MO3(el_i,el_t,el_p) == SC[el_i][el_p], name="MO3_NFCQ"+str(el_i)+str(el_t)+str(el_p))
             else :
+                # Binary indicator variable constraint
+                hcm.addConstr(MO3_I[el_i][el_t][el_p][0]+MO3_I[el_i][el_t][el_p][1] == 2 - I_UV[el_i][el_t][el_p][0],
+                               name = "3.65"+str(el_i)+str(el_t)+str(el_p))
                 # Minimum of MO1 and (MO2-OFRF)
                 hcm.addConstr(MO1(el_i+1, el_t - WTT(el_i, el_p), el_p)
                     - (MO2(el_i+1, el_t-WTT(el_i, el_p), el_p) + OFRF(el_i+1, el_t-WTT(el_i, el_p), el_p))
@@ -839,12 +815,6 @@ for el_i in xrange(NS - 1):  # TODO Check NS minus 1?
                 hcm.addConstr((MO2(el_i+1, el_t-WTT(el_i, el_p), el_p) + OFRF(el_i+1, el_t-WTT(el_i, el_p), el_p))
                     - MO1(el_i+1, el_t - WTT(el_i, el_p), el_p)
                     <= M_MO3[el_i][el_t][el_p][0]*MO3_I[el_i][el_t][el_p][1], name = "3.64"+str(el_i)+str(el_t)+str(el_p))
-                # Binary indicator variable constraint
-                if use_sos:
-                    hcm.addSOS(gbp.GRB.SOS_TYPE1, [MO3_I[el_i][el_t][el_p][0],MO3_I[el_i][el_t][el_p][1]])
-                else:
-                    hcm.addConstr(MO3_I[el_i][el_t][el_p][0]+MO3_I[el_i][el_t][el_p][1] == 2 - I_UV[el_i][el_t][el_p][0],
-                               name = "3.65"+str(el_i)+str(el_t)+str(el_p))
                 # Setting minimum to MO3_A[i][t][p][0]
                 hcm.addConstr(MO3_A[el_i][el_t][el_p][0] - MO1(el_i+1, el_t - WTT(el_i, el_p), el_p)
                     >= -M_MO3[el_i][el_t][el_p][1]*MO3_I[el_i][el_t][el_p][0],
@@ -943,43 +913,22 @@ for el_i in xrange(NS - 1):  # TODO Check NS minus 1?
                     <= M_MO3[el_i][el_t][el_p][15]*(I_UV[el_i][el_t][el_p][0]),
                               name = "3.84b"+str(el_i)+str(el_t)+str(el_p))
 print("step 19 done")
-# hcm.update()
-# hcm.optimize()
-# varCount = 0
-# for p in xrange(P):
-#     for t in xrange(S):
-#         for i in xrange(NS):
-#             varCount+=1
-#             print(str(varCount)
-#                   + ", "+ str(i)
-#                   + ", " + str(p)
-#                   + ", " + str(t)
-#                   + ", " + str(NV(i,t, p).X)
-#                   + ", " + str(MF(i,t, p).X/240.0)
-#                   + ", " + str(MI[i][t][p].X/240.0)
-#                   + ", " + str(MO1(i,t, p).X/240.0)
-#                   + ", " + str(MO2(i,t, p).X/240.0)
-#                   + ", " + str(MO3(i,t, p).X/240.0)
-#                   #+ ", " + str(ONRI[i][t][p].X)
-#                   #+ ", " + str(ONRD[i][p])
-#                   #+ ", " + str(ONRQ(i,t, p).X)
-#                   #+ ", " + str(ONRF_I[i][t][p][0].X)
-#                   #+ ", " + str(ONRF_I[i][t][p][1].X)
-#                   #+ ", " + str(ONRO[i][t][p].X)
-#                   + ", " + str(ONRF(i,t, p).X/240.0)
-#                   + ", " + str(OFRF(i,t, p).X/240.0)
-#                   + ", " + str(DEF_A[i][t][p].X)
-#                   + ", " + str(DEF[i][t][p].X)
-#                   + ", " + str(UV(i,t,p).X)
-#                   + ", " + str(I_UV[i][t][p][0].X))
+
+########################################################################################################################
+
+
+###################################################### Eq 25-10 ########################################################
 # Step 20: Calculate density of queue on segment
 for el_i in xrange(NS):  # TODO -1?
     for el_t in xrange(S):  # Todo account for "t-1"
         for el_p in xrange(P):
             hcm.addConstr(KQ[el_i][el_t][el_p] == KJ - ((KJ-KC)/SC[el_i][el_p])*SF(el_i+1, el_t-1, el_p),
                           name="3.85"+str(el_i)+str(el_t)+str(el_p))
-#hcm.update()
 print("step 20 done")
+########################################################################################################################
+
+
+###################################################### Eq 25-11 ########################################################
 # Step 21: Calculate Mainline Output 2
 M_MO2 = 10000
 for el_i in xrange(NS):  # TODO -1?
