@@ -45072,3 +45072,47 @@ Thread count was 4 (of 4 available processors)
 
 Optimal solution found (tolerance 1.00e-04)
 Best objective 1.010176144000e+04, best bound 1.010176138775e+04, gap 0.0000%
+
+Gurobi 5.6.3 (win64) logging started 09/29/15 12:37:46
+
+Optimize a model with 23646 rows, 23766 columns and 64463 nonzeros
+Presolve removed 9968 rows and 18023 columns
+Presolve time: 0.31s
+Presolved: 13678 rows, 5743 columns, 36530 nonzeros
+Variable types: 3457 continuous, 2286 integer (2286 binary)
+
+Root relaxation: objective 1.010176e+04, 5252 iterations, 0.27 seconds
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0 10101.7604    0    7          - 10101.7604     -      -    1s
+H    0     0                    10101.760440 10101.7604  0.00%     -    1s
+
+Explored 0 nodes (8146 simplex iterations) in 1.36 seconds
+Thread count was 8 (of 8 available processors)
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 1.010176044000e+04, best bound 1.010176044000e+04, gap 0.0%
+
+Gurobi 5.6.3 (win64) logging started 09/29/15 12:45:47
+
+Optimize a model with 23646 rows, 22806 columns and 64463 nonzeros
+Presolve removed 9968 rows and 17063 columns
+Presolve time: 0.28s
+Presolved: 13678 rows, 5743 columns, 36530 nonzeros
+Variable types: 3457 continuous, 2286 integer (2286 binary)
+
+Root relaxation: objective 1.010176e+04, 5252 iterations, 0.20 seconds
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0 10101.7604    0    7          - 10101.7604     -      -    0s
+H    0     0                    10101.760440 10101.7604  0.00%     -    0s
+
+Explored 0 nodes (8146 simplex iterations) in 1.01 seconds
+Thread count was 8 (of 8 available processors)
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 1.010176044000e+04, best bound 1.010176044000e+04, gap 0.0%

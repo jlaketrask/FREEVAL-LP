@@ -8,7 +8,7 @@ __author__ = 'jltrask'
 
 use_sos = False
 printFile = False
-def_const_type = 1
+def_const_type = 0
 example_problem  = 2
 
 init_time = time.time()
@@ -212,36 +212,51 @@ NV = lambda i, t, p: NVv[i][t+1][p]
 # Step 6-11 Variables
 DEF_I = []
 OFRF_I = []
-ONRO_I = []
-for el_i in xrange(NS):
+#for el_i in xrange(NS): deprecated, do not need to create for all segments
+for el_i in xrange(len(Ftilde)):
     DEF_I.append([])
     OFRF_I.append([])
-    ONRO_I.append([])
     for el_t in xrange(S):
         DEF_I[el_i].append([])
         OFRF_I[el_i].append([])
-        ONRO_I[el_i].append([])
         for el_p in xrange(P):
-            DEF_I[el_i][el_t].append([hcm.addVar(vtype=gbp.GRB.BINARY, name = "DEF_I"+str(el_i)+str(el_t)+str(el_p)+str(el)) for el in xrange(2)])
-            OFRF_I[el_i][el_t].append([hcm.addVar(vtype=gbp.GRB.BINARY, name='OFRF_I'+str(el)+str(el_i)+str(el_t)+str(el_p)) for el in xrange(4)])
-            ONRO_I[el_i][el_t].append([hcm.addVar(vtype=gbp.GRB.BINARY, name = "ONRO_I"+str(el_i)+str(el_t)+str(el_p)+str(el)) for el in xrange(8)])
+            DEF_I[el_i][el_t].append(
+                [hcm.addVar(vtype=gbp.GRB.BINARY,
+                            name = "DEF_I"+str(el_i)+str(el_t)+str(el_p)+str(el)) for el in xrange(2)])
+            OFRF_I[el_i][el_t].append(
+                [hcm.addVar(vtype=gbp.GRB.BINARY, name='OFRF_I'+str(el)+str(el_i)+str(el_t)+str(el_p)+"0"),
+                 hcm.addVar(vtype=gbp.GRB.INTEGER, ub=2.0,
+                            name='OFRF_I'+str(el)+str(el_i)+str(el_t)+str(el_p)+"1")])
+
 # Step 12 variables
 ONRO_A = []  # List of auxiliary variables for step 12
 ONRF_I = []  # List of auxiliary variables for steps 13-15
 MO1_A = []   # List of auxiliary variables for step 16
+ONRO_I = []
 for el_i in xrange(NS):
     ONRO_A.append([])
     ONRF_I.append([])
     MO1_A.append([])
+    ONRO_I.append([])
     for el_t in xrange(S):
         ONRO_A[el_i].append([])
         ONRF_I[el_i].append([])
         MO1_A[el_i].append([])
+        ONRO_I[el_i].append([])
         for el_p in xrange(P):
             # Creating auxilary variables
-            ONRO_A[el_i][el_t].append([hcm.addVar(vtype=gbp.GRB.CONTINUOUS, name='ONRO_A1'+str(el_i)+str(el_t)+str(el_p)+str(el)) for el in xrange(3)])
-            ONRF_I[el_i][el_t].append([hcm.addVar(vtype=gbp.GRB.BINARY, name='ONRF_A'+str(el)+str(el_i)+str(el_t)+str(el_p)) for el in xrange(2)])
-            MO1_A[el_i][el_t].append([hcm.addVar(vtype=gbp.GRB.CONTINUOUS,name='MO1_A'+str(el_i)+str(el_t)+str(el_p))])
+            ONRO_A[el_i][el_t].append(
+                [hcm.addVar(vtype=gbp.GRB.CONTINUOUS,
+                                                  name='ONRO_A1'+str(el_i)+str(el_t)+str(el_p)+str(el)) for el in xrange(3)])
+            ONRF_I[el_i][el_t].append(
+                [hcm.addVar(vtype=gbp.GRB.BINARY,
+                                                  name='ONRF_A'+str(el)+str(el_i)+str(el_t)+str(el_p)) for el in xrange(2)])
+            MO1_A[el_i][el_t].append(
+                [hcm.addVar(vtype=gbp.GRB.CONTINUOUS,
+                                                 name='MO1_A'+str(el_i)+str(el_t)+str(el_p))])
+            ONRO_I[el_i][el_t].append(
+                [hcm.addVar(vtype=gbp.GRB.BINARY,
+                            name = "ONRO_I"+str(el_i)+str(el_t)+str(el_p)+str(el)) for el in xrange(8)])
 
 # Step 16 variables
 MO1_I = []
@@ -351,12 +366,14 @@ print("step 2 done")
 big_m = 100000  # TODO calculate
 big_m1 = 100000  # TODO calculate
 big_m2 = 100000  # TODO calculate
-big_m1_1 = 10000  # TODO calculate
-big_m1_2 = 10000  # TODO calculate
+big_m1_1 = 100000  # TODO calculate
+big_m1_2 = 100000  # TODO calculate
 def_zero_tol = 0.001
-###################################################### Eq 25-22#########################################################
+###################################################### Eq 25-22 ########################################################
 for el_i in xrange(NS):
     if el_i in Ftilde:  # Check if OFR at segment
+        # Convert segment idx to ofr var idx (for DEF_I, OFRF_I)
+        ofr_i = Ftilde.index(el_i)
         # Calculate possible deficit from upstream queue (Note el_i-1 okay because the first segment cannot be OFR)
         for el_t in xrange(S):
             hcm.addConstr(DEF[el_i][el_t][0] == 0.0, name='DEF_E'+str(el_i)+str(el_t)+str(0)) # ASSUMED NO DEFICIT IN THE FIRST PERIOD
@@ -371,19 +388,19 @@ for el_i in xrange(NS):
                         hcm.addConstr(DEF_A[el_i][el_t][el_p] == DEF_A[el_i][el_t-1][el_p] + MF(el_i-1, el_t-1, el_p)*(1/240.0) + ONRF(el_i-1, el_t-1, el_p)*(1/240.0), name="DEF_TEMP_A"+str(el_i)+str(el_t)+str(el_p))
                     #### Setting DEF to be max of DEF_A and 0
                     # Checking to see if DEF_A is greater than 0
-                    hcm.addConstr(DEF_A[el_i][el_t][el_p] <= big_m * DEF_I[el_i][el_t][el_p][0],
+                    hcm.addConstr(DEF_A[el_i][el_t][el_p] <= big_m * DEF_I[ofr_i][el_t][el_p][0],
                               name='DEF_E1'+str(el_i)+str(el_t)+str(el_p)) # To check if a1>=0
-                    hcm.addConstr(-DEF_A[el_i][el_t][el_p] <= big_m * (1 - DEF_I[el_i][el_t][el_p][0]),
+                    hcm.addConstr(-DEF_A[el_i][el_t][el_p] <= big_m * (1 - DEF_I[ofr_i][el_t][el_p][0]),
                               name='DEF_E2'+str(el_i)+str(el_t)+str(el_p)) # To check if a1>=0
                     # Setting DEF to be a1 (when DEF_A[el_i][el_t][el_p][0] = 1)
-                    hcm.addConstr(DEF[el_i][el_t][el_p] - DEF_A[el_i][el_t][el_p]  <= big_m * (1 - DEF_I[el_i][el_t][el_p][0]),
+                    hcm.addConstr(DEF[el_i][el_t][el_p] - DEF_A[el_i][el_t][el_p]  <= big_m * (1 - DEF_I[ofr_i][el_t][el_p][0]),
                               name='DEF_E3'+str(el_i)+str(el_t)+str(el_p))
-                    hcm.addConstr(DEF_A[el_i][el_t][el_p]  - DEF[el_i][el_t][el_p] <= big_m * (1 - DEF_I[el_i][el_t][el_p][0]),
+                    hcm.addConstr(DEF_A[el_i][el_t][el_p]  - DEF[el_i][el_t][el_p] <= big_m * (1 - DEF_I[ofr_i][el_t][el_p][0]),
                               name='DEF_E4'+str(el_i)+str(el_t)+str(el_p))
                     # Setting DEF to be 0 (when DEF_A[el_i][el_t][el_p][0] = 0)
-                    hcm.addConstr(DEF[el_i][el_t][el_p] <= big_m*DEF_I[el_i][el_t][el_p][0],
+                    hcm.addConstr(DEF[el_i][el_t][el_p] <= big_m*DEF_I[ofr_i][el_t][el_p][0],
                               name='DEF_E5'+str(el_i)+str(el_t)+str(el_p))
-                    hcm.addConstr(-1*DEF[el_i][el_t][el_p] <= big_m*DEF_I[el_i][el_t][el_p][0],
+                    hcm.addConstr(-1*DEF[el_i][el_t][el_p] <= big_m*DEF_I[ofr_i][el_t][el_p][0],
                               name='DEF_E6'+str(el_i)+str(el_t)+str(el_p))
                 else:
                     # Force Deficit to be 0 (debugging purposes)
@@ -392,36 +409,34 @@ for el_i in xrange(NS):
 ########################################################################################################################
 
 
+###################################################### Eq 25-23 ########################################################
                 # Step 7: If there is a deficit (DEF[i,t,p]>0), use OFR flow with Deficit method
                 # Constraints checking if there is a deficit
-                if use_sos:
-                    hcm.addSOS(gbp.GRB.SOS_TYPE1, [OFRF_I[el_i][el_t][el_p][0],OFRF_I[el_i][el_t][el_p][1]])
-                else:
-                    hcm.addConstr(OFRF_I[el_i][el_t][el_p][0] + OFRF_I[el_i][el_t][el_p][1] == 1.0,
-                              name='OFRF_IF_DEF0'+str(el_i)+str(el_t)+str(el_p))
-
-                hcm.addConstr(DEF[el_i][el_t][el_p] - def_zero_tol <= big_m*OFRF_I[el_i][el_t][el_p][0],
-                              name='OFRF_IF_DEF1'+str(el_i)+str(el_t)+str(el_p))  # OFRF_I0i,t,p = 1 iplies there is a deficit
-                hcm.addConstr(def_zero_tol - DEF[el_i][el_t][el_p] <= big_m*OFRF_I[el_i][el_t][el_p][1],
-                              name='OFRF_IF_DEF2'+str(el_i)+str(el_t)+str(el_p))  # OFRF_I1i,t,p = 1 iplies there is a deficit
+                hcm.addConstr(DEF[el_i][el_t][el_p] - def_zero_tol <= big_m * OFRF_I[ofr_i][el_t][el_p][0],
+                              name='OFRF_IF_DEF1'+str(el_i)+str(el_t)+str(el_p))  # OFRF_Ii,t,p,0 = 1 implies DEF > 0
+                hcm.addConstr(def_zero_tol - DEF[el_i][el_t][el_p] <= big_m * (1 - OFRF_I[ofr_i][el_t][el_p][0]),
+                              name='OFRF_IF_DEF2'+str(el_i)+str(el_t)+str(el_p))  # OFRF_Ii,t,p,0 = 0 implies DEF < 0
 
                 # Constraint that activates (or deactivates) situation 1/2 based on deficit check
-                # If there is a deficit, i_2 = 0, so one of the following must hold.  If no deficit, i_2 = 1, which
-                # means both of the following sets of "definition" inequalities will be inactive
-                hcm.addConstr(OFRF_I[el_i][el_t][el_p][2]+OFRF_I[el_i][el_t][el_p][3] == OFRF_I[el_i][el_t][el_p][1]+1,
+                # If there is a deficit, i_0=0.
+                # i_1 >= 2-2*i_0
+                # i_1 <= M*(1-i_0)+1
+                hcm.addConstr(OFRF_I[ofr_i][el_t][el_p][1] >= 2 - 2 * OFRF_I[ofr_i][el_t][el_p][0],
                               name='OFRF_IF_DEF3'+str(el_i)+str(el_t)+str(el_p))
+                hcm.addConstr(OFRF_I[ofr_i][el_t][el_p][1] <= 1 * (1-OFRF_I[ofr_i][el_t][el_p][0]) + 1,
+                              name='OFRF_IF_DEF4'+str(el_i)+str(el_t)+str(el_p)) # big_m=1 b/c i_1<=2 (ub)
 
-                # Constraints to check to see if situation 1 or situation 2 is true. OFRF_I2i,t,p (i_3) = 1 implies that
-                # situation 1 is used, while if OFRF_I3i,t,p (i_4) = 1 imples that situation 2 is used.
+                # Constraints to check to see if situation 1 or situation 2 is true. OFRF_Ii,t,p,1 (i_1) = 1 implies that
+                # situation 1 is used, while if OFRF_Ii,t,p,1 (i_1) = 0 imples that situation 2 is used.
                 hcm.addConstr(DEF[el_i][el_t][el_p]
                               - MF(el_i-1, el_t, el_p)
                               - ONRF(el_i-1, el_t, el_p)
-                              <= big_m1*OFRF_I[el_i][el_t][el_p][2],
+                              <= big_m * OFRF_I[ofr_i][el_t][el_p][1],
                               name="OFRF_IF_S1"+str(el_i)+str(el_t)+str(el_p))
                 hcm.addConstr(MF(el_i-1, el_t, el_p)
                               + ONRF(el_i-1, el_t, el_p)
                               - DEF[el_i][el_t][el_p]
-                              <= big_m1*OFRF_I[el_i][el_t][el_p][3],
+                              <= big_m * (OFRF_I[ofr_i][el_t][el_p][1] - 1),           # Reversed because i_1 can = 2
                               name="OFRF_IF_S2"+str(el_i)+str(el_t)+str(el_p))
 
                     # Situation 1: If upstream mainline flow plus the flow from an ONR at the upstream node is less than
@@ -435,13 +450,14 @@ for el_i in xrange(NS):
                 hcm.addConstr(OFRF(el_i, el_t, el_p)
                               - ofr_tp1*MFv[el_i-1][el_t][el_p]
                               - ofr_tp1*ONRF(el_i-1, el_t, el_p)
-                              <= big_m1_1*OFRF_I[el_i][el_t][el_p][3],
+                              <= big_m*(OFRF_I[ofr_i][el_t][el_p][1] - 1),
                               name='OFRF_E1_1'+str(el_i)+str(el_t)+str(el_p))
                 hcm.addConstr(OFRF(el_i, el_t, el_p)
                               - ofr_tp1*MFv[el_i-1][el_t][el_p]
                               - ofr_tp1*ONRF(el_i-1, el_t, el_p)
-                              >= -1*big_m1_1*OFRF_I[el_i][el_t][el_p][3],
+                              >= -1*big_m * (OFRF_I[ofr_i][el_t][el_p][1] - 1),
                               name='OFRF_E1_2'+str(el_i)+str(el_t)+str(el_p))
+###################################################### Eq 25-24 ########################################################
                     # Situation 2: If the deficit is less than the upstream mainline flow plus the ONR flow from an ONR
                     # at the upstream node (if present)
                 ofr_tp2_1 = 0
@@ -455,36 +471,38 @@ for el_i in xrange(NS):
                               - ofr_tp2_2*MFv[el_i-1][el_t][el_p]
                               - ofr_tp2_2*ONRF(el_i-1, el_t, el_p)
                               + ofr_tp2_2*DEF[el_i][el_t][el_p]
-                              <= big_m1_2*OFRF_I[el_i][el_t][el_p][2],
+                              <= big_m*OFRF_I[ofr_i][el_t][el_p][1],
                               name='OFRF_E2_1'+str(el_i)+str(el_t)+str(el_p))
                 hcm.addConstr(OFRF(el_i, el_t, el_p)
                               - ofr_tp2_1*DEF[el_i][el_t][el_p]
                               - ofr_tp2_2*MFv[el_i-1][el_t][el_p]
                               - ofr_tp2_2*ONRF(el_i-1, el_t, el_p)
                               + ofr_tp2_2*DEF[el_i][el_t][el_p]
-                              >= -1*big_m1_2*OFRF_I[el_i][el_t][el_p][2],
+                              >= -1*big_m*OFRF_I[ofr_i][el_t][el_p][1],
                               name='OFRF_E2_2'+str(el_i)+str(el_t)+str(el_p))
 
+###################################################### Eq 25-25 ########################################################
                 # Step 8: If there is no deficit (DEF[i,t,p]=0), use OFR flow without deficit method
                 ofr_tp3 = OFRD[el_i][el_p]/SD[el_i-1][el_p]
                 hcm.addConstr(OFRF(el_i, el_t, el_p)
                               - ofr_tp3*MFv[el_i-1][el_t][el_p]
                               - ofr_tp3*ONRF(el_i-1, el_t, el_p)
-                              <= big_m2*OFRF_I[el_i][el_t][el_p][0],
+                              <= big_m * OFRF_I[ofr_i][el_t][el_p][0],
                               name='OFRF_E3_1'+str(el_i)+str(el_t)+str(el_p))
                 hcm.addConstr(OFRF(el_i, el_t, el_p)
                               - ofr_tp3*MFv[el_i-1][el_t][el_p]
                               - ofr_tp3*ONRF(el_i-1, el_t, el_p)
-                              >= -1*big_m2*OFRF_I[el_i][el_t][el_p][0],
+                              >= -1*big_m * OFRF_I[ofr_i][el_t][el_p][0],
                               name='OFRF_E3_2'+str(el_i)+str(el_t)+str(el_p))
-    else:
+    else:  # The segment is not an offramp
        for el_t in xrange(S):
             for el_p in xrange(P):
                 hcm.addConstr(OFRF(el_i, el_t, el_p) == 0.0, name='OFRF_E3'+str(el_i)+str(el_t)+str(el_p))
-
-
 print("step 8 done")
+########################################################################################################################
 
+
+###################################################### Eq 25-23 ########################################################
 # Step 9: Calculate Mainline Input
 for el_i in xrange(NS):                               # TODO start loop at 0?
     for el_t in xrange(S):
