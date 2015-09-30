@@ -9,7 +9,7 @@ __author__ = 'jltrask'
 use_sos = False
 printFile = False
 def_const_type = 0
-example_problem  = 14
+example_problem  = 3
 
 init_time = time.time()
 
@@ -221,12 +221,12 @@ for el_i in xrange(len(Ftilde)):
         OFRF_I[el_i].append([])
         for el_p in xrange(P):
             DEF_I[el_i][el_t].append(
-                [hcm.addVar(vtype=gbp.GRB.BINARY,
-                            name = "DEF_I"+str(el_i)+str(el_t)+str(el_p)+str(el)) for el in xrange(2)])
+                hcm.addVar(vtype=gbp.GRB.BINARY,
+                            name = "DEF_I"+str(el_i)+str(el_t)+str(el_p)))
             OFRF_I[el_i][el_t].append(
-                [hcm.addVar(vtype=gbp.GRB.BINARY, name='OFRF_I'+str(el)+str(el_i)+str(el_t)+str(el_p)+"0"),
+                [hcm.addVar(vtype=gbp.GRB.BINARY, name='OFRF_I'+str(0)+str(el_i)+str(el_t)+str(el_p)+"0"),
                  hcm.addVar(vtype=gbp.GRB.INTEGER, ub=2.0,
-                            name='OFRF_I'+str(el)+str(el_i)+str(el_t)+str(el_p)+"1")])
+                            name='OFRF_I'+str(1)+str(el_i)+str(el_t)+str(el_p)+"1")])
 
 # Step 12 variables
 ONRO_A = []  # List of auxiliary variables for step 12
@@ -381,19 +381,25 @@ for el_i in xrange(NS):
                         hcm.addConstr(DEF_A[el_i][el_t][el_p] == DEF_A[el_i][el_t-1][el_p] + MF(el_i-1, el_t-1, el_p)*(1/240.0) + ONRF(el_i-1, el_t-1, el_p)*(1/240.0), name="DEF_TEMP_A"+str(el_i)+str(el_t)+str(el_p))
                     #### Setting DEF to be max of DEF_A and 0
                     # Checking to see if DEF_A is greater than 0
-                    hcm.addConstr(DEF_A[el_i][el_t][el_p] <= big_m * DEF_I[ofr_i][el_t][el_p][0],
-                              name='DEF_E1'+str(el_i)+str(el_t)+str(el_p)) # To check if a1>=0
-                    hcm.addConstr(-DEF_A[el_i][el_t][el_p] <= big_m * (1 - DEF_I[ofr_i][el_t][el_p][0]),
-                              name='DEF_E2'+str(el_i)+str(el_t)+str(el_p)) # To check if a1>=0
-                    # Setting DEF to be a1 (when DEF_A[el_i][el_t][el_p][0] = 1)
-                    hcm.addConstr(DEF[el_i][el_t][el_p] - DEF_A[el_i][el_t][el_p]  <= big_m * (1 - DEF_I[ofr_i][el_t][el_p][0]),
+                    hcm.addConstr(DEF_A[el_i][el_t][el_p] - def_zero_tol
+                                  <= big_m * DEF_I[ofr_i][el_t][el_p],
+                              name='DEF_E1'+str(el_i)+str(el_t)+str(el_p)) # DEF_I=1 => DEF_A>0
+                    hcm.addConstr(def_zero_tol-DEF_A[el_i][el_t][el_p]
+                                  <= big_m * (1 - DEF_I[ofr_i][el_t][el_p]),
+                              name='DEF_E2'+str(el_i)+str(el_t)+str(el_p)) # DEF_I=0 => DEF_A<=0
+                    # Setting DEF to be a1 (when DEF_I=1)
+                    hcm.addConstr(DEF[el_i][el_t][el_p] - DEF_A[el_i][el_t][el_p]
+                                  <= big_m * (1 - DEF_I[ofr_i][el_t][el_p]),
                               name='DEF_E3'+str(el_i)+str(el_t)+str(el_p))
-                    hcm.addConstr(DEF_A[el_i][el_t][el_p]  - DEF[el_i][el_t][el_p] <= big_m * (1 - DEF_I[ofr_i][el_t][el_p][0]),
+                    hcm.addConstr(DEF_A[el_i][el_t][el_p]  - DEF[el_i][el_t][el_p]
+                                  <= big_m * (1 - DEF_I[ofr_i][el_t][el_p]),
                               name='DEF_E4'+str(el_i)+str(el_t)+str(el_p))
-                    # Setting DEF to be 0 (when DEF_A[el_i][el_t][el_p][0] = 0)
-                    hcm.addConstr(DEF[el_i][el_t][el_p] <= big_m*DEF_I[ofr_i][el_t][el_p][0],
+                    # Setting DEF to be 0 (when DEF_A<=0)
+                    hcm.addConstr(DEF[el_i][el_t][el_p]
+                                  <= big_m*DEF_I[ofr_i][el_t][el_p],
                               name='DEF_E5'+str(el_i)+str(el_t)+str(el_p))
-                    hcm.addConstr(-1*DEF[el_i][el_t][el_p] <= big_m*DEF_I[ofr_i][el_t][el_p][0],
+                    hcm.addConstr(-1*DEF[el_i][el_t][el_p]
+                                  <= big_m*DEF_I[ofr_i][el_t][el_p],
                               name='DEF_E6'+str(el_i)+str(el_t)+str(el_p))
                 else:
                     # Force Deficit to be 0 (debugging purposes)
@@ -405,6 +411,7 @@ for el_i in xrange(NS):
 ###################################################### Eq 25-23 ########################################################
                 # Step 7: If there is a deficit (DEF[i,t,p]>0), use OFR flow with Deficit method
                 # Constraints checking if there is a deficit
+                # (Now redundant, can simply use DEF_I)
                 hcm.addConstr(DEF[el_i][el_t][el_p] - def_zero_tol <= big_m * OFRF_I[ofr_i][el_t][el_p][0],
                               name='OFRF_IF_DEF1'+str(el_i)+str(el_t)+str(el_p))  # OFRF_Ii,t,p,0 = 1 implies DEF > 0
                 hcm.addConstr(def_zero_tol - DEF[el_i][el_t][el_p] <= big_m * (1 - OFRF_I[ofr_i][el_t][el_p][0]),
@@ -414,9 +421,9 @@ for el_i in xrange(NS):
                 # If there is a deficit, i_0=0.
                 # i_1 >= 2-2*i_0
                 # i_1 <= M*(1-i_0)+1
-                hcm.addConstr(OFRF_I[ofr_i][el_t][el_p][1] >= 2 - 2 * OFRF_I[ofr_i][el_t][el_p][0],
+                hcm.addConstr(OFRF_I[ofr_i][el_t][el_p][1] >= 2 - 2 * OFRF_I[ofr_i][el_t][el_p][0], #OFRF_I[ofr_i][el_t][el_p][0]
                               name='OFRF_IF_DEF3'+str(el_i)+str(el_t)+str(el_p))
-                hcm.addConstr(OFRF_I[ofr_i][el_t][el_p][1] <= 1 * (1-OFRF_I[ofr_i][el_t][el_p][0]) + 1,
+                hcm.addConstr(OFRF_I[ofr_i][el_t][el_p][1] <= 1 * (1-OFRF_I[ofr_i][el_t][el_p][0]) + 1, #OFRF_I[ofr_i][el_t][el_p][0]
                               name='OFRF_IF_DEF4'+str(el_i)+str(el_t)+str(el_p)) # big_m=1 b/c i_1<=2 (ub)
 
                 # Constraints to check to see if situation 1 or situation 2 is true. OFRF_Ii,t,p,1 (i_1) = 1 implies that
@@ -805,114 +812,114 @@ for el_i in xrange(NS - 1):  # TODO Check NS minus 1?
                 # If there is no front clearing queue, this value is set to 1e6 and effectively ignored
                 hcm.addConstr(MO3(el_i,el_t,el_p) == SC[el_i][el_p], name="MO3_NFCQ"+str(el_i)+str(el_t)+str(el_p))
             else :
-                hcm.addConstr(MO3(el_i,el_t,el_p) == M_MO3[el_i][el_t][el_p][15],name = "3.84b"+str(el_i)+str(el_t)+str(el_p))
-                # # Binary indicator variable constraint
-                # hcm.addConstr(MO3_I[el_i][el_t][el_p][0]+MO3_I[el_i][el_t][el_p][1] == 2 - I_UV[el_i][el_t][el_p][0],
-                #                name = "3.65"+str(el_i)+str(el_t)+str(el_p))
-                # # Minimum of MO1 and (MO2-OFRF)
-                # hcm.addConstr(MO1(el_i+1, el_t - WTT(el_i, el_p), el_p)
-                #     - (MO2(el_i+1, el_t-WTT(el_i, el_p), el_p) + OFRF(el_i+1, el_t-WTT(el_i, el_p), el_p))
-                #     <= M_MO3[el_i][el_t][el_p][0]*MO3_I[el_i][el_t][el_p][0], name = "3.63"+str(el_i)+str(el_t)+str(el_p))
-                # hcm.addConstr((MO2(el_i+1, el_t-WTT(el_i, el_p), el_p) + OFRF(el_i+1, el_t-WTT(el_i, el_p), el_p))
-                #     - MO1(el_i+1, el_t - WTT(el_i, el_p), el_p)
-                #     <= M_MO3[el_i][el_t][el_p][0]*MO3_I[el_i][el_t][el_p][1], name = "3.64"+str(el_i)+str(el_t)+str(el_p))
-                # # Setting minimum to MO3_A[i][t][p][0]
-                # hcm.addConstr(MO3_A[el_i][el_t][el_p][0] - MO1(el_i+1, el_t - WTT(el_i, el_p), el_p)
-                #     >= -M_MO3[el_i][el_t][el_p][1]*MO3_I[el_i][el_t][el_p][0],
-                #               name = "3.66a"+str(el_i)+str(el_t)+str(el_p))
-                # hcm.addConstr(MO3_A[el_i][el_t][el_p][0] - MO1(el_i+1, el_t - WTT(el_i, el_p), el_p)
-                #     <= M_MO3[el_i][el_t][el_p][1]*MO3_I[el_i][el_t][el_p][0],
-                #               name = "3.66b"+str(el_i)+str(el_t)+str(el_p))
-                # hcm.addConstr(MO3_A[el_i][el_t][el_p][0] - (MO2(el_i+1, el_t-WTT(el_i, el_p), el_p) + OFRF(el_i+1, el_t-WTT(el_i, el_p), el_p))
-                #     >= -M_MO3[el_i][el_t][el_p][2]*MO3_I[el_i][el_t][el_p][1],
-                #               name = "3.67a"+str(el_i)+str(el_t)+str(el_p))
-                # hcm.addConstr(MO3_A[el_i][el_t][el_p][0] - (MO2(el_i+1, el_t-WTT(el_i, el_p), el_p) + OFRF(el_i+1, el_t-WTT(el_i, el_p), el_p))
-                #     <= M_MO3[el_i][el_t][el_p][2]*MO3_I[el_i][el_t][el_p][1],
-                #               name = "3.67b"+str(el_i)+str(el_t)+str(el_p))
-                # # Minimum of MO3[i+1][t-WTT][p] and MO3_A
-                # hcm.addConstr(MO3_A[el_i][el_t][el_p][0]
-                #     - (MO3(el_i+1, el_t-WTT(el_i, el_p), el_p) + OFRF(el_i+1, el_t-WTT(el_i, el_p), el_p))
-                #     <= M_MO3[el_i][el_t][el_p][3]*MO3_I[el_i][el_t][el_p][2], name = "3.68"+str(el_i)+str(el_t)+str(el_p))
-                # hcm.addConstr((MO3(el_i+1, el_t-WTT(el_i, el_p), el_p) + OFRF(el_i+1, el_t-WTT(el_i, el_p), el_p))
-                #     - MO3_A[el_i][el_t][el_p][0]
-                #     <= M_MO3[el_i][el_t][el_p][4]*MO3_I[el_i][el_t][el_p][3], name = "3.69"+str(el_i)+str(el_t)+str(el_p))
-                # # Binary indicator variable constraint
-                # hcm.addConstr(MO3_I[el_i][el_t][el_p][2]+MO3_I[el_i][el_t][el_p][3] == 2 - I_UV[el_i][el_t][el_p][0],
-                #         name = "3.70"+str(el_i)+str(el_t)+str(el_p))
-                # # Setting minimum to MO3_A[i][t][p][1]
-                # hcm.addConstr(MO3_A[el_i][el_t][el_p][1] - MO3_A[el_i][el_t][el_p][0]
-                #     >= - M_MO3[el_i][el_t][el_p][5]*MO3_I[el_i][el_t][el_p][2],
-                #               name = "3.71a"+str(el_i)+str(el_t)+str(el_p))
-                # hcm.addConstr(MO3_A[el_i][el_t][el_p][1] - MO3_A[el_i][el_t][el_p][0]
-                #     <= M_MO3[el_i][el_t][el_p][5]*MO3_I[el_i][el_t][el_p][2],
-                #               name = "3.71b"+str(el_i)+str(el_t)+str(el_p))
-                # hcm.addConstr(MO3_A[el_i][el_t][el_p][1] - (MO3(el_i+1, el_t-WTT(el_i, el_p), el_p) + OFRF(el_i+1, el_t-WTT(el_i, el_p), el_p))
-                #     >= - M_MO3[el_i][el_t][el_p][6]*MO3_I[el_i][el_t][el_p][3],
-                #               name = "3.72a"+str(el_i)+str(el_t)+str(el_p))
-                # hcm.addConstr(MO3_A[el_i][el_t][el_p][1] - (MO3(el_i+1, el_t-WTT(el_i, el_p), el_p) + OFRF(el_i+1, el_t-WTT(el_i, el_p), el_p))
-                #     <= M_MO3[el_i][el_t][el_p][6]*MO3_I[el_i][el_t][el_p][3],
-                #               name = "3.72b"+str(el_i)+str(el_t)+str(el_p))
-                # # Minimum of MO3_A[i][t][p][1] and SC[i][p]
-                # temp_sc = generate_sc(el_i, el_t-WTT(el_i, el_p), el_p)
-                # hcm.addConstr(MO3_A[el_i][el_t][el_p][1] - temp_sc
-                #     <=M_MO3[el_i][el_t][el_p][7]*MO3_I[el_i][el_t][el_p][4],
-                #               name = "3.73"+str(el_i)+str(el_t)+str(el_p))
-                # hcm.addConstr(temp_sc - MO3_A[el_i][el_t][el_p][1]
-                #     <=M_MO3[el_i][el_t][el_p][8]*MO3_I[el_i][el_t][el_p][5],
-                #               name = "3.74"+str(el_i)+str(el_t)+str(el_p))
-                # # Binary Indicator variable constraint
-                # hcm.addConstr(MO3_I[el_i][el_t][el_p][4]+MO3_I[el_i][el_t][el_p][5] == 2-I_UV[el_i][el_t][el_p][0],
-                #               name = "3.75"+str(el_i)+str(el_t)+str(el_p))
-                # # Setting minimum to MO3_A[i][t][p][2]
-                # hcm.addConstr(MO3_A[el_i][el_t][el_p][2] - MO3_A[el_i][el_t][el_p][1]
-                #     >= - M_MO3[el_i][el_t][el_p][9]*MO3_I[el_i][el_t][el_p][4],
-                #               name = "3.76a"+str(el_i)+str(el_t)+str(el_p))
-                # hcm.addConstr(MO3_A[el_i][el_t][el_p][2] - MO3_A[el_i][el_t][el_p][1]
-                #     <= M_MO3[el_i][el_t][el_p][9]*MO3_I[el_i][el_t][el_p][4],
-                #               name = "3.76b"+str(el_i)+str(el_t)+str(el_p))
-                # hcm.addConstr(MO3_A[el_i][el_t][el_p][2] - temp_sc
-                #     >= - M_MO3[el_i][el_t][el_p][10]*MO3_I[el_i][el_t][el_p][5],
-                #               name = "3.77a"+str(el_i)+str(el_t)+str(el_p))
-                # hcm.addConstr(MO3_A[el_i][el_t][el_p][2] - temp_sc
-                #     <= M_MO3[el_i][el_t][el_p][10]*MO3_I[el_i][el_t][el_p][5],
-                #               name = "3.77b"+str(el_i)+str(el_t)+str(el_p))
-                # # Minimum of MO3_A[i][t][p][2] and SC+OFRF
-                # temp_sc = generate_sc(el_i+1, el_t-WTT(el_i, el_p), el_p)
-                # hcm.addConstr(MO3_A[el_i][el_t][el_p][2] - (temp_sc+OFRF(el_i+1, el_t-WTT(el_i, el_p), el_p))
-                #     <=M_MO3[el_i][el_t][el_p][11]*MO3_I[el_i][el_t][el_p][6],
-                #               name = "3.78"+str(el_i)+str(el_t)+str(el_p))
-                # hcm.addConstr((temp_sc+OFRF(el_i+1, el_t-WTT(el_i, el_p), el_p)) - MO3_A[el_i][el_t][el_p][1]
-                #     <=M_MO3[el_i][el_t][el_p][11]*MO3_I[el_i][el_t][el_p][7],
-                #               name = "3.79"+str(el_i)+str(el_t)+str(el_p))
-                # # Binary Indicator variable constraints
-                # hcm.addConstr(MO3_I[el_i][el_t][el_p][6]+MO3_I[el_i][el_t][el_p][7] == 2-I_UV[el_i][el_t][el_p][0],
-                #               name = "3.80"+str(el_i)+str(el_t)+str(el_p))
-                # # Setting minimum to MO3_A[i][t][p][3]
-                # hcm.addConstr(MO3_A[el_i][el_t][el_p][3] - MO3_A[el_i][el_t][el_p][2]
-                #     >= - M_MO3[el_i][el_t][el_p][12]*MO3_I[el_i][el_t][el_p][6],
-                #               name = "3.81a"+str(el_i)+str(el_t)+str(el_p))
-                # hcm.addConstr(MO3_A[el_i][el_t][el_p][3] - MO3_A[el_i][el_t][el_p][2]
-                #     <= M_MO3[el_i][el_t][el_p][12]*MO3_I[el_i][el_t][el_p][6],
-                #               name = "3.81b"+str(el_i)+str(el_t)+str(el_p))
-                # hcm.addConstr(MO3_A[el_i][el_t][el_p][3] - (temp_sc+OFRF(el_i+1, el_t-WTT(el_i, el_p), el_p))
-                #     >= - M_MO3[el_i][el_t][el_p][13]*MO3_I[el_i][el_t][el_p][7],
-                #               name = "3.82a"+str(el_i)+str(el_t)+str(el_p))
-                # hcm.addConstr(MO3_A[el_i][el_t][el_p][3] - (temp_sc+OFRF(el_i+1, el_t-WTT(el_i, el_p), el_p))
-                #     <= M_MO3[el_i][el_t][el_p][13]*MO3_I[el_i][el_t][el_p][7],
-                #               name = "3.82b"+str(el_i)+str(el_t)+str(el_p))
-                # # Setting to MO3[i][t][p], or setting MO3[i][t][p] to a large value if no front clearing queue
-                # hcm.addConstr(MO3(el_i,el_t,el_p) - (MO3_A[el_i][el_t][el_p][3] - ONRF(el_i, el_t, el_p))
-                #     >= - M_MO3[el_i][el_t][el_p][14]*(1-I_UV[el_i][el_t][el_p][0]),
-                #               name = "3.83a"+str(el_i)+str(el_t)+str(el_p))
-                # hcm.addConstr(MO3(el_i,el_t,el_p) - (MO3_A[el_i][el_t][el_p][3] - ONRF(el_i, el_t, el_p))
-                #     <= M_MO3[el_i][el_t][el_p][14]*(1-I_UV[el_i][el_t][el_p][0]),
-                #               name = "3.83b"+str(el_i)+str(el_t)+str(el_p))
-                # hcm.addConstr(MO3(el_i,el_t,el_p) - M_MO3[el_i][el_t][el_p][15]
-                #     >= - M_MO3[el_i][el_t][el_p][15]*(I_UV[el_i][el_t][el_p][0]),
-                #               name = "3.84a"+str(el_i)+str(el_t)+str(el_p))
-                # hcm.addConstr(MO3(el_i,el_t,el_p) - M_MO3[el_i][el_t][el_p][15]
-                #     <= M_MO3[el_i][el_t][el_p][15]*(I_UV[el_i][el_t][el_p][0]),
-                #               name = "3.84b"+str(el_i)+str(el_t)+str(el_p))
+                #hcm.addConstr(MO3(el_i,el_t,el_p) == M_MO3[el_i][el_t][el_p][15],name = "3.84b"+str(el_i)+str(el_t)+str(el_p))
+                # Binary indicator variable constraint
+                hcm.addConstr(MO3_I[el_i][el_t][el_p][0]+MO3_I[el_i][el_t][el_p][1] == 2 - I_UV[el_i][el_t][el_p][0],
+                               name = "3.65"+str(el_i)+str(el_t)+str(el_p))
+                # Minimum of MO1 and (MO2-OFRF)
+                hcm.addConstr(MO1(el_i+1, el_t - WTT(el_i, el_p), el_p)
+                    - (MO2(el_i+1, el_t-WTT(el_i, el_p), el_p) + OFRF(el_i+1, el_t-WTT(el_i, el_p), el_p))
+                    <= M_MO3[el_i][el_t][el_p][0]*MO3_I[el_i][el_t][el_p][0], name = "3.63"+str(el_i)+str(el_t)+str(el_p))
+                hcm.addConstr((MO2(el_i+1, el_t-WTT(el_i, el_p), el_p) + OFRF(el_i+1, el_t-WTT(el_i, el_p), el_p))
+                    - MO1(el_i+1, el_t - WTT(el_i, el_p), el_p)
+                    <= M_MO3[el_i][el_t][el_p][0]*MO3_I[el_i][el_t][el_p][1], name = "3.64"+str(el_i)+str(el_t)+str(el_p))
+                # Setting minimum to MO3_A[i][t][p][0]
+                hcm.addConstr(MO3_A[el_i][el_t][el_p][0] - MO1(el_i+1, el_t - WTT(el_i, el_p), el_p)
+                    >= -M_MO3[el_i][el_t][el_p][1]*MO3_I[el_i][el_t][el_p][0],
+                              name = "3.66a"+str(el_i)+str(el_t)+str(el_p))
+                hcm.addConstr(MO3_A[el_i][el_t][el_p][0] - MO1(el_i+1, el_t - WTT(el_i, el_p), el_p)
+                    <= M_MO3[el_i][el_t][el_p][1]*MO3_I[el_i][el_t][el_p][0],
+                              name = "3.66b"+str(el_i)+str(el_t)+str(el_p))
+                hcm.addConstr(MO3_A[el_i][el_t][el_p][0] - (MO2(el_i+1, el_t-WTT(el_i, el_p), el_p) + OFRF(el_i+1, el_t-WTT(el_i, el_p), el_p))
+                    >= -M_MO3[el_i][el_t][el_p][2]*MO3_I[el_i][el_t][el_p][1],
+                              name = "3.67a"+str(el_i)+str(el_t)+str(el_p))
+                hcm.addConstr(MO3_A[el_i][el_t][el_p][0] - (MO2(el_i+1, el_t-WTT(el_i, el_p), el_p) + OFRF(el_i+1, el_t-WTT(el_i, el_p), el_p))
+                    <= M_MO3[el_i][el_t][el_p][2]*MO3_I[el_i][el_t][el_p][1],
+                              name = "3.67b"+str(el_i)+str(el_t)+str(el_p))
+                # Minimum of MO3[i+1][t-WTT][p] and MO3_A
+                hcm.addConstr(MO3_A[el_i][el_t][el_p][0]
+                    - (MO3(el_i+1, el_t-WTT(el_i, el_p), el_p) + OFRF(el_i+1, el_t-WTT(el_i, el_p), el_p))
+                    <= M_MO3[el_i][el_t][el_p][3]*MO3_I[el_i][el_t][el_p][2], name = "3.68"+str(el_i)+str(el_t)+str(el_p))
+                hcm.addConstr((MO3(el_i+1, el_t-WTT(el_i, el_p), el_p) + OFRF(el_i+1, el_t-WTT(el_i, el_p), el_p))
+                    - MO3_A[el_i][el_t][el_p][0]
+                    <= M_MO3[el_i][el_t][el_p][4]*MO3_I[el_i][el_t][el_p][3], name = "3.69"+str(el_i)+str(el_t)+str(el_p))
+                # Binary indicator variable constraint
+                hcm.addConstr(MO3_I[el_i][el_t][el_p][2]+MO3_I[el_i][el_t][el_p][3] == 2 - I_UV[el_i][el_t][el_p][0],
+                        name = "3.70"+str(el_i)+str(el_t)+str(el_p))
+                # Setting minimum to MO3_A[i][t][p][1]
+                hcm.addConstr(MO3_A[el_i][el_t][el_p][1] - MO3_A[el_i][el_t][el_p][0]
+                    >= - M_MO3[el_i][el_t][el_p][5]*MO3_I[el_i][el_t][el_p][2],
+                              name = "3.71a"+str(el_i)+str(el_t)+str(el_p))
+                hcm.addConstr(MO3_A[el_i][el_t][el_p][1] - MO3_A[el_i][el_t][el_p][0]
+                    <= M_MO3[el_i][el_t][el_p][5]*MO3_I[el_i][el_t][el_p][2],
+                              name = "3.71b"+str(el_i)+str(el_t)+str(el_p))
+                hcm.addConstr(MO3_A[el_i][el_t][el_p][1] - (MO3(el_i+1, el_t-WTT(el_i, el_p), el_p) + OFRF(el_i+1, el_t-WTT(el_i, el_p), el_p))
+                    >= - M_MO3[el_i][el_t][el_p][6]*MO3_I[el_i][el_t][el_p][3],
+                              name = "3.72a"+str(el_i)+str(el_t)+str(el_p))
+                hcm.addConstr(MO3_A[el_i][el_t][el_p][1] - (MO3(el_i+1, el_t-WTT(el_i, el_p), el_p) + OFRF(el_i+1, el_t-WTT(el_i, el_p), el_p))
+                    <= M_MO3[el_i][el_t][el_p][6]*MO3_I[el_i][el_t][el_p][3],
+                              name = "3.72b"+str(el_i)+str(el_t)+str(el_p))
+                # Minimum of MO3_A[i][t][p][1] and SC[i][p]
+                temp_sc = generate_sc(el_i, el_t-WTT(el_i, el_p), el_p)
+                hcm.addConstr(MO3_A[el_i][el_t][el_p][1] - temp_sc
+                    <=M_MO3[el_i][el_t][el_p][7]*MO3_I[el_i][el_t][el_p][4],
+                              name = "3.73"+str(el_i)+str(el_t)+str(el_p))
+                hcm.addConstr(temp_sc - MO3_A[el_i][el_t][el_p][1]
+                    <=M_MO3[el_i][el_t][el_p][8]*MO3_I[el_i][el_t][el_p][5],
+                              name = "3.74"+str(el_i)+str(el_t)+str(el_p))
+                # Binary Indicator variable constraint
+                hcm.addConstr(MO3_I[el_i][el_t][el_p][4]+MO3_I[el_i][el_t][el_p][5] == 2-I_UV[el_i][el_t][el_p][0],
+                              name = "3.75"+str(el_i)+str(el_t)+str(el_p))
+                # Setting minimum to MO3_A[i][t][p][2]
+                hcm.addConstr(MO3_A[el_i][el_t][el_p][2] - MO3_A[el_i][el_t][el_p][1]
+                    >= - M_MO3[el_i][el_t][el_p][9]*MO3_I[el_i][el_t][el_p][4],
+                              name = "3.76a"+str(el_i)+str(el_t)+str(el_p))
+                hcm.addConstr(MO3_A[el_i][el_t][el_p][2] - MO3_A[el_i][el_t][el_p][1]
+                    <= M_MO3[el_i][el_t][el_p][9]*MO3_I[el_i][el_t][el_p][4],
+                              name = "3.76b"+str(el_i)+str(el_t)+str(el_p))
+                hcm.addConstr(MO3_A[el_i][el_t][el_p][2] - temp_sc
+                    >= - M_MO3[el_i][el_t][el_p][10]*MO3_I[el_i][el_t][el_p][5],
+                              name = "3.77a"+str(el_i)+str(el_t)+str(el_p))
+                hcm.addConstr(MO3_A[el_i][el_t][el_p][2] - temp_sc
+                    <= M_MO3[el_i][el_t][el_p][10]*MO3_I[el_i][el_t][el_p][5],
+                              name = "3.77b"+str(el_i)+str(el_t)+str(el_p))
+                # Minimum of MO3_A[i][t][p][2] and SC+OFRF
+                temp_sc = generate_sc(el_i+1, el_t-WTT(el_i, el_p), el_p)
+                hcm.addConstr(MO3_A[el_i][el_t][el_p][2] - (temp_sc+OFRF(el_i+1, el_t-WTT(el_i, el_p), el_p))
+                    <=M_MO3[el_i][el_t][el_p][11]*MO3_I[el_i][el_t][el_p][6],
+                              name = "3.78"+str(el_i)+str(el_t)+str(el_p))
+                hcm.addConstr((temp_sc+OFRF(el_i+1, el_t-WTT(el_i, el_p), el_p)) - MO3_A[el_i][el_t][el_p][1]
+                    <=M_MO3[el_i][el_t][el_p][11]*MO3_I[el_i][el_t][el_p][7],
+                              name = "3.79"+str(el_i)+str(el_t)+str(el_p))
+                # Binary Indicator variable constraints
+                hcm.addConstr(MO3_I[el_i][el_t][el_p][6]+MO3_I[el_i][el_t][el_p][7] == 2-I_UV[el_i][el_t][el_p][0],
+                              name = "3.80"+str(el_i)+str(el_t)+str(el_p))
+                # Setting minimum to MO3_A[i][t][p][3]
+                hcm.addConstr(MO3_A[el_i][el_t][el_p][3] - MO3_A[el_i][el_t][el_p][2]
+                    >= - M_MO3[el_i][el_t][el_p][12]*MO3_I[el_i][el_t][el_p][6],
+                              name = "3.81a"+str(el_i)+str(el_t)+str(el_p))
+                hcm.addConstr(MO3_A[el_i][el_t][el_p][3] - MO3_A[el_i][el_t][el_p][2]
+                    <= M_MO3[el_i][el_t][el_p][12]*MO3_I[el_i][el_t][el_p][6],
+                              name = "3.81b"+str(el_i)+str(el_t)+str(el_p))
+                hcm.addConstr(MO3_A[el_i][el_t][el_p][3] - (temp_sc+OFRF(el_i+1, el_t-WTT(el_i, el_p), el_p))
+                    >= - M_MO3[el_i][el_t][el_p][13]*MO3_I[el_i][el_t][el_p][7],
+                              name = "3.82a"+str(el_i)+str(el_t)+str(el_p))
+                hcm.addConstr(MO3_A[el_i][el_t][el_p][3] - (temp_sc+OFRF(el_i+1, el_t-WTT(el_i, el_p), el_p))
+                    <= M_MO3[el_i][el_t][el_p][13]*MO3_I[el_i][el_t][el_p][7],
+                              name = "3.82b"+str(el_i)+str(el_t)+str(el_p))
+                # Setting to MO3[i][t][p], or setting MO3[i][t][p] to a large value if no front clearing queue
+                hcm.addConstr(MO3(el_i,el_t,el_p) - (MO3_A[el_i][el_t][el_p][3] - ONRF(el_i, el_t, el_p))
+                    >= - M_MO3[el_i][el_t][el_p][14]*(1-I_UV[el_i][el_t][el_p][0]),
+                              name = "3.83a"+str(el_i)+str(el_t)+str(el_p))
+                hcm.addConstr(MO3(el_i,el_t,el_p) - (MO3_A[el_i][el_t][el_p][3] - ONRF(el_i, el_t, el_p))
+                    <= M_MO3[el_i][el_t][el_p][14]*(1-I_UV[el_i][el_t][el_p][0]),
+                              name = "3.83b"+str(el_i)+str(el_t)+str(el_p))
+                hcm.addConstr(MO3(el_i,el_t,el_p) - M_MO3[el_i][el_t][el_p][15]
+                    >= - M_MO3[el_i][el_t][el_p][15]*(I_UV[el_i][el_t][el_p][0]),
+                              name = "3.84a"+str(el_i)+str(el_t)+str(el_p))
+                hcm.addConstr(MO3(el_i,el_t,el_p) - M_MO3[el_i][el_t][el_p][15]
+                    <= M_MO3[el_i][el_t][el_p][15]*(I_UV[el_i][el_t][el_p][0]),
+                              name = "3.84b"+str(el_i)+str(el_t)+str(el_p))
 print("step 19 done")
 
 ########################################################################################################################
@@ -935,29 +942,29 @@ M_MO2 = 10000
 for el_i in xrange(NS):  # TODO -1?
     for el_t in xrange(S):  # Todo account for "t-1" (MF/OFRF/ONRF/NV) (NV fixed)
         for el_p in xrange(P):
-            hcm.addConstr(MO2(el_i, el_t, el_p) == SC[el_i][el_p],name="3.86"+str(el_i)+str(el_t)+str(el_p))
-            # hcm.addConstr(MO2(el_i, el_t, el_p)
-            #               - MF(el_i+1, el_t-1, el_p)
-            #               - OFRF(el_i+1, el_t-1, el_p)
-            #               + ONRF(el_i, el_t-1, el_p)
-            #               - (L[el_i]*KQ[el_i][el_t][el_p])
-            #               + NV(el_i, el_t-1, el_p)
-            #               <= M_MO2*I_UV[el_i][el_t][el_p][1],
-            #               name="3.86"+str(el_i)+str(el_t)+str(el_p))
-            # hcm.addConstr(MO2(el_i, el_t, el_p)
-            #               - MF(el_i+1, el_t-1, el_p)
-            #               - OFRF(el_i+1, el_t-1, el_p)
-            #               + ONRF(el_i, el_t-1, el_p)
-            #               - (L[el_i]*KQ[el_i][el_t][el_p])
-            #               + NV(el_i, el_t-1, el_p)
-            #               >= -M_MO2*I_UV[el_i][el_t][el_p][1],
-            #               name="3.86"+str(el_i)+str(el_t)+str(el_p))
-            # hcm.addConstr(MO2(el_i, el_t, el_p) - SC[el_i][el_p]
-            #               <= M_MO2*I_UV[el_i][el_t][el_p][0],
-            #               name="3.86"+str(el_i)+str(el_t)+str(el_p))
-            # hcm.addConstr(MO2(el_i, el_t, el_p) - SC[el_i][el_p]
-            #               >= -M_MO2*I_UV[el_i][el_t][el_p][0],
-            #               name="3.86"+str(el_i)+str(el_t)+str(el_p))
+            #hcm.addConstr(MO2(el_i, el_t, el_p) == SC[el_i][el_p],name="3.86"+str(el_i)+str(el_t)+str(el_p))
+            hcm.addConstr(MO2(el_i, el_t, el_p)
+                          - MF(el_i+1, el_t-1, el_p)
+                          - OFRF(el_i+1, el_t-1, el_p)
+                          + ONRF(el_i, el_t-1, el_p)
+                          - (L[el_i]*KQ[el_i][el_t][el_p])
+                          + NV(el_i, el_t-1, el_p)
+                          <= M_MO2*I_UV[el_i][el_t][el_p][1],
+                          name="3.86"+str(el_i)+str(el_t)+str(el_p))
+            hcm.addConstr(MO2(el_i, el_t, el_p)
+                          - MF(el_i+1, el_t-1, el_p)
+                          - OFRF(el_i+1, el_t-1, el_p)
+                          + ONRF(el_i, el_t-1, el_p)
+                          - (L[el_i]*KQ[el_i][el_t][el_p])
+                          + NV(el_i, el_t-1, el_p)
+                          >= -M_MO2*I_UV[el_i][el_t][el_p][1],
+                          name="3.86"+str(el_i)+str(el_t)+str(el_p))
+            hcm.addConstr(MO2(el_i, el_t, el_p) - SC[el_i][el_p]
+                          <= M_MO2*I_UV[el_i][el_t][el_p][0],
+                          name="3.86"+str(el_i)+str(el_t)+str(el_p))
+            hcm.addConstr(MO2(el_i, el_t, el_p) - SC[el_i][el_p]
+                          >= -M_MO2*I_UV[el_i][el_t][el_p][0],
+                          name="3.86"+str(el_i)+str(el_t)+str(el_p))
 print("step 21 done")
 ########################################################################################################################
 
