@@ -221,12 +221,12 @@ for el_i in xrange(len(Ftilde)):
         OFRF_I[el_i].append([])
         for el_p in xrange(P):
             DEF_I[el_i][el_t].append(
-                [hcm.addVar(vtype=gbp.GRB.BINARY,
-                            name = "DEF_I"+str(el_i)+str(el_t)+str(el_p)+str(el)) for el in xrange(2)])
+                hcm.addVar(vtype=gbp.GRB.BINARY,
+                            name = "DEF_I"+str(el_i)+str(el_t)+str(el_p)))
             OFRF_I[el_i][el_t].append(
-                [hcm.addVar(vtype=gbp.GRB.BINARY, name='OFRF_I'+str(el)+str(el_i)+str(el_t)+str(el_p)+"0"),
+                [hcm.addVar(vtype=gbp.GRB.BINARY, name='OFRF_I'+str(0)+str(el_i)+str(el_t)+str(el_p)+"0"),
                  hcm.addVar(vtype=gbp.GRB.INTEGER, ub=2.0,
-                            name='OFRF_I'+str(el)+str(el_i)+str(el_t)+str(el_p)+"1")])
+                            name='OFRF_I'+str(1)+str(el_i)+str(el_t)+str(el_p)+"1")])
 
 # Step 12 variables
 ONRO_A = []  # List of auxiliary variables for step 12
@@ -381,19 +381,25 @@ for el_i in xrange(NS):
                         hcm.addConstr(DEF_A[el_i][el_t][el_p] == DEF_A[el_i][el_t-1][el_p] + MF(el_i-1, el_t-1, el_p)*(1/240.0) + ONRF(el_i-1, el_t-1, el_p)*(1/240.0), name="DEF_TEMP_A"+str(el_i)+str(el_t)+str(el_p))
                     #### Setting DEF to be max of DEF_A and 0
                     # Checking to see if DEF_A is greater than 0
-                    hcm.addConstr(DEF_A[el_i][el_t][el_p] <= big_m * DEF_I[ofr_i][el_t][el_p][0],
-                              name='DEF_E1'+str(el_i)+str(el_t)+str(el_p)) # To check if a1>=0
-                    hcm.addConstr(-DEF_A[el_i][el_t][el_p] <= big_m * (1 - DEF_I[ofr_i][el_t][el_p][0]),
-                              name='DEF_E2'+str(el_i)+str(el_t)+str(el_p)) # To check if a1>=0
-                    # Setting DEF to be a1 (when DEF_A[el_i][el_t][el_p][0] = 1)
-                    hcm.addConstr(DEF[el_i][el_t][el_p] - DEF_A[el_i][el_t][el_p]  <= big_m * (1 - DEF_I[ofr_i][el_t][el_p][0]),
+                    hcm.addConstr(DEF_A[el_i][el_t][el_p] - def_zero_tol
+                                  <= big_m * DEF_I[ofr_i][el_t][el_p],
+                              name='DEF_E1'+str(el_i)+str(el_t)+str(el_p)) # DEF_I=1 => DEF_A>0
+                    hcm.addConstr(def_zero_tol-DEF_A[el_i][el_t][el_p]
+                                  <= big_m * (1 - DEF_I[ofr_i][el_t][el_p]),
+                              name='DEF_E2'+str(el_i)+str(el_t)+str(el_p)) # DEF_I=0 => DEF_A<=0
+                    # Setting DEF to be a1 (when DEF_I=1)
+                    hcm.addConstr(DEF[el_i][el_t][el_p] - DEF_A[el_i][el_t][el_p]
+                                  <= big_m * (1 - DEF_I[ofr_i][el_t][el_p]),
                               name='DEF_E3'+str(el_i)+str(el_t)+str(el_p))
-                    hcm.addConstr(DEF_A[el_i][el_t][el_p]  - DEF[el_i][el_t][el_p] <= big_m * (1 - DEF_I[ofr_i][el_t][el_p][0]),
+                    hcm.addConstr(DEF_A[el_i][el_t][el_p]  - DEF[el_i][el_t][el_p]
+                                  <= big_m * (1 - DEF_I[ofr_i][el_t][el_p]),
                               name='DEF_E4'+str(el_i)+str(el_t)+str(el_p))
-                    # Setting DEF to be 0 (when DEF_A[el_i][el_t][el_p][0] = 0)
-                    hcm.addConstr(DEF[el_i][el_t][el_p] <= big_m*DEF_I[ofr_i][el_t][el_p][0],
+                    # Setting DEF to be 0 (when DEF_A<=0)
+                    hcm.addConstr(DEF[el_i][el_t][el_p]
+                                  <= big_m*DEF_I[ofr_i][el_t][el_p],
                               name='DEF_E5'+str(el_i)+str(el_t)+str(el_p))
-                    hcm.addConstr(-1*DEF[el_i][el_t][el_p] <= big_m*DEF_I[ofr_i][el_t][el_p][0],
+                    hcm.addConstr(-1*DEF[el_i][el_t][el_p]
+                                  <= big_m*DEF_I[ofr_i][el_t][el_p],
                               name='DEF_E6'+str(el_i)+str(el_t)+str(el_p))
                 else:
                     # Force Deficit to be 0 (debugging purposes)
@@ -405,6 +411,7 @@ for el_i in xrange(NS):
 ###################################################### Eq 25-23 ########################################################
                 # Step 7: If there is a deficit (DEF[i,t,p]>0), use OFR flow with Deficit method
                 # Constraints checking if there is a deficit
+                # (Now redundant, can simply use DEF_I)
                 hcm.addConstr(DEF[el_i][el_t][el_p] - def_zero_tol <= big_m * OFRF_I[ofr_i][el_t][el_p][0],
                               name='OFRF_IF_DEF1'+str(el_i)+str(el_t)+str(el_p))  # OFRF_Ii,t,p,0 = 1 implies DEF > 0
                 hcm.addConstr(def_zero_tol - DEF[el_i][el_t][el_p] <= big_m * (1 - OFRF_I[ofr_i][el_t][el_p][0]),
@@ -414,9 +421,9 @@ for el_i in xrange(NS):
                 # If there is a deficit, i_0=0.
                 # i_1 >= 2-2*i_0
                 # i_1 <= M*(1-i_0)+1
-                hcm.addConstr(OFRF_I[ofr_i][el_t][el_p][1] >= 2 - 2 * OFRF_I[ofr_i][el_t][el_p][0],
+                hcm.addConstr(OFRF_I[ofr_i][el_t][el_p][1] >= 2 - 2 * OFRF_I[ofr_i][el_t][el_p][0], #OFRF_I[ofr_i][el_t][el_p][0]
                               name='OFRF_IF_DEF3'+str(el_i)+str(el_t)+str(el_p))
-                hcm.addConstr(OFRF_I[ofr_i][el_t][el_p][1] <= 1 * (1-OFRF_I[ofr_i][el_t][el_p][0]) + 1,
+                hcm.addConstr(OFRF_I[ofr_i][el_t][el_p][1] <= 1 * (1-OFRF_I[ofr_i][el_t][el_p][0]) + 1, #OFRF_I[ofr_i][el_t][el_p][0]
                               name='OFRF_IF_DEF4'+str(el_i)+str(el_t)+str(el_p)) # big_m=1 b/c i_1<=2 (ub)
 
                 # Constraints to check to see if situation 1 or situation 2 is true. OFRF_Ii,t,p,1 (i_1) = 1 implies that

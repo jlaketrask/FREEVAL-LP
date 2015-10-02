@@ -1,0 +1,5 @@
+*.log
+facilities.pyc
+*.pyc
+.idea/workspace.xml
+*.xml
