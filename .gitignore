@@ -3,3 +3,7 @@ facilities.pyc
 *.pyc
 .idea/workspace.xml
 *.xml
+.idea/workspace.xml
+*.xml
+gurobi.log
+*.log
