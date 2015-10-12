@@ -1,0 +1,13 @@
+*.log
+facilities.pyc
+*.pyc
+.idea/workspace.xml
+*.xml
+.idea/workspace.xml
+*.xml
+gurobi.log
+*.log
+gurobi.log
+*.log
+.idea/workspace.xml
+*.xml

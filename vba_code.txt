@@ -1,0 +1,743 @@
+Sub OverSaturated()
+
+
+    S = 60
+
+            'Oversaturated Variables are not defined
+                ReDim KB(intTimePeriods, intNumSegments) As Double          'Background Density of each Segment during each Time Period
+                ReDim ED(intTimePeriods, intNumSegments) As Double          'Expected Demand of each Segment during each Time Period
+                ReDim MF(intTimePeriods, intNumSegments + 1, S) As Double   'Mainline Flow
+                ReDim ONRF(intTimePeriods, intNumSegments + 1, S) As Double 'On-Ramp Flow
+                ReDim ONRO(intTimePeriods, intNumSegments + 1, S) As Double 'On-Ramp Output
+                ReDim ONRQ(intTimePeriods, intNumSegments + 1, S) As Double 'Queued Vehicles on the On-Ramp
+                ReDim ONRI(intTimePeriods, intNumSegments + 1, S) As Double 'On-Ramp Input
+                ReDim OFRF(intTimePeriods, intNumSegments + 1, S) As Double 'Off-Ramp Flow
+                ReDim MI(intTimePeriods, intNumSegments + 1, S) As Double   'Mainline Input
+                ReDim MO1(intTimePeriods, intNumSegments + 1, S) As Double  'Mainline Output(1)
+                ReDim MO2(intTimePeriods, intNumSegments + 1, S) As Double  'Mainline Output(2)
+                ReDim MO3(intTimePeriods, intNumSegments + 1, S) As Double  'Mainline Output(3)
+
+                ReDim KQ(intTimePeriods, intNumSegments + 1, S) As Double   'Queue Density
+                ReDim WS(intTimePeriods, intNumSegments) As Double          'Wave Speed
+                ReDim WTT(intTimePeriods, intNumSegments) As Double         'Wave Travel Time
+                ReDim SF(intTimePeriods, intNumSegments + 1, S) As Double   'Segment Flow in vehicles per time step
+                ReDim NV(intTimePeriods, intNumSegments + 1, S) As Double   'Number of Vehicles on a Segment
+                ReDim DEF(intTimePeriods, intNumSegments + 1, S) As Double  'Off-Ramp Flow Defficit
+                'ReDim Segmentflow(intTimePeriods, intNumSegments) As Double 'Segment Flow in vph
+                ReDim Density(intTimePeriods, intNumSegments) As Double     'Segment Density in vpmmpl
+                ReDim speed(intTimePeriods, intNumSegments) As Double       'Segment Speed in mph
+                ReDim LQ(intTimePeriods, intNumSegments) As Double          'Length of Queue
+                ReDim bottleneck(intTimePeriods, intNumSegments) As Integer 'array that contains the location of the bottleneck
+                Dim Report As String                                        'Report about queue information
+                ReDim QueueBegin(intTimePeriods, intNumSegments) As Integer 'Time Step Queue begins in a segment
+                ReDim QueueEnd(intTimePeriods, intNumSegments) As Integer   'Time Step Queue Ends in a segment
+                Dim booFront As Boolean                                     'True/False variable if there is a front clearing queue
+                Dim queue As Double                                         'Number of vehicles in queue
+                Dim ONRQL As Double                                         'On-Ramp Queue Length
+                Dim SDtot As Double                                         'Total Segment Demand
+                Dim FirstOversatTP As Integer                               'First Oversaturated Time Period
+                ReDim UV(intTimePeriods, intNumSegments + 1, S) As Double            'Unserved Vehicles
+
+
+                For i1 = 1 To intTimePeriods
+                    For j1 = 1 To intNumSegments
+
+                    KB(i1, j1) = 0
+                    ED(i1, j1) = 0
+                    WS(i1, j1) = 0
+                    WTT(i1, j1) = 0
+
+                    If i1 >= aatp Then Segmentflow(i1, j1) = 0
+
+                    Density(i1, j1) = 0
+                    LQ(i1, j1) = 0
+                    bottleneck(i1, j1) = 0
+                    QueueBegin(i1, j1) = 0
+                    QueueEnd(i1, j1) = 0
+
+
+                    Row59(i1, j1) = 0
+                    Row64(i1, j1) = 0
+                    Row65(i1, j1) = 0
+                    Row66(i1, j1) = 0
+                    Row71(i1, j1) = 0
+                    Row74(i1, j1) = 0
+                    Row87(i1, j1) = 0
+
+
+
+
+                    For s1 = 1 To S
+                    UV(ATP, ASeg, S) = 0
+                    MF(i1, j1, s1) = 0
+                    ONRF(i1, j1, s1) = 0
+                    ONRO(i1, j1, s1) = 0
+                    ONRQ(i1, j1, s1) = 0
+                    ONRI(i1, j1, s1) = 0
+                    OFRF(i1, j1, s1) = 0
+                    MO1(i1, j1, s1) = 0
+                    MO2(i1, j1, s1) = 0
+                    MO3(i1, j1, s1) = 0
+                    KQ(i1, j1, s1) = 0
+                    SF(i1, j1, s1) = 0
+                    NV(i1, j1, s1) = 0
+                    DEF(i1, j1, s1) = 0
+
+
+                    Next
+
+
+                    Next
+                Next
+
+
+
+
+                FirstOversatTP = aatp
+
+
+                Kj = Sheets("Form Results").Range("D17").Value
+                KC = 45
+
+                ' Step 1 - This calculates the Expected Demand and Background Density for each segment for each time period
+                ' This section is used to have KB different for different segment types
+
+One:
+
+                For p = ATP To ATP
+                    i = 1
+                    For i = 1 To intNumSegments
+                        If i = 1 Then
+                            ED(p, i) = sngSegmentDemand(p, i)
+                        Else
+                            If SC(p, i) < ED(p, i - 1) + sngONRDemand(p, i) - sngOFRDemand(p, i - 1) Then
+                                ED(p, i) = SC(p, i)
+                                If Report = "" Then
+                                    bottleneck(p, i) = 1
+                                    Report = "Bottleneck at Segment " & i & " in Time Period " & p & ".  "
+                                End If
+                            Else
+                                ED(p, i) = ED(p, i - 1) + sngONRDemand(p, i) - sngOFRDemand(p, i - 1)
+                            End If
+                        End If
+                        Call Set_Ramp_Variables(i)
+                        Select Case strSegmentType(i)
+                            Case Is = "B"
+                                KB(p, i) = ED(p, i) / BasicSpeed(sngFFS(p, i), (ED(p, i) / fhv(p, i)) / intNumberLanes(p, i))
+                            Case Is = "ONR-B"
+                                KB(p, i) = ED(p, i) / BasicSpeed(sngFFS(p, i), (ED(p, i) / fhv(p, i)) / intNumberLanes(p, i))
+                            Case Is = "OFR-B"
+                                KB(p, i) = ED(p, i) / BasicSpeed(sngFFS(p, i), (ED(p, i) / fhv(p, i)) / intNumberLanes(p, i))
+                            Case Is = "ONR"
+                                KB(p, i) = intNumberLanes(p, i) * OnRampDensity(intNumberLanes(p, i), strSegmentType(i - ups2), strSegmentType(i - ups1), L(i - ups1), L(i - ups2), strSegmentType(i - ups3), L(i - ups3), strSegmentType(i + dns1), L(i + dns1), strSegmentType(i + dns2), L(i + dns2), ED(p, i - 1) / fhv(p, i - 1), sngONRDemand(p, i) / FhvONR(p, i), sngAccDecLength(p, i), sngRampFFS(p, i), sngOFRDemand(p, i + dns1) / FhvOFR(p, i + dns1), sngOFRDemand(p, i + dns2) / FhvOFR(p, i + dns2), sngOFRDemand(p, i + dns3) / FhvOFR(p, i + dns3), strSegmentType(i + dns3), L(i + dns3), intNumLanesRamp(p, i), strRampLR(p, i), L(i), sngFFS(p, i), sngSAF(p, i)) * fhv(p, i)
+                            Case Is = "R"
+                                KB(p, i) = KB(p, i - 1)
+                            Case Is = "OFR"
+                                KB(p, i) = intNumberLanes(p, i) * OffRampDensity(intNumberLanes(p, i), strSegmentType(i - ups2), strSegmentType(i - ups1), L(i - ups1), L(i - ups2), strSegmentType(i - ups3), L(i - ups3), strSegmentType(i + dns1), L(i + dns1), strSegmentType(i + dns2), L(i + dns2), ED(p, i) / fhv(p, i), sngOFRDemand(p, i) / FhvOFR(p, i), sngAccDecLength(p, i), sngRampFFS(p, i), sngOFRDemand(p, i + dns1) / FhvOFR(p, i + dns1), sngOFRDemand(p, i - ups2) / FhvOFR(p, i - ups2), sngOFRDemand(p, i + dns3) / FhvOFR(p, i + dns3), strSegmentType(i + dns3), L(i + dns3), intNumLanesRamp(p, i), strRampLR(p, i), L(i), sngONRDemand(p, i - 1) / FhvONR(p, i - 1), sngONRDemand(p, i - ups2) / FhvONR(p, i - ups2), sngONRDemand(p, i - ups3) / FhvONR(p, i - ups3), sngFFS(p, i), sngSAF(p, i)) * fhv(p, i) 'S7speedUpdate 051312
+                                If strSegmentType(i - 1) = "R" Then If KB(p, i) > KB(p, i - 1) Then KB(p, i - 1) = KB(p, i)
+                            Case Else
+                                KB(p, i) = intNumberLanes(p, i) * WeavingDensity(sngOneSided(i), sngLS(i), sngLCRF(i), sngLCFR(i), sngLCRR(i), sngNW(i), intNumberLanes(p, i), sngMainMain(p, i) / fhv(p, i), sngMainOFR(p, i) / FhvOFR(p, i), sngONRMain(p, i) / FhvONR(p, i), sngRR(p, i) / FhvRR(p, i), sngFFS(p, i), sngID(i), sngSAF(p, i)) * (1 / (1 + sngPercentTrucks(p, i) / 100 * (sngET(p, i) - 1) + sngPercentRV(p, i) / 100 * (sngER(p, i) - 1))) 'S7SpeedUpdate
+                            End Select
+                        If sngCAF(p, i) = 1 Then
+                        Else
+                            KB(p, i) = ED(p, i) / (((sngFFS(p, i) + 1) - Exp(LN(sngFFS(p, i) + 1 - SC(p, i) / (45 * intNumberLanes(p, i))) / (SC(p, i) / intNumberLanes(p, i)) * (ED(p, i) / intNumberLanes(p, i)))) / fhv(p, i))
+
+                        End If
+
+                    Next
+                Next
+                ' This step 8 calculates KB assuming all basic segments
+
+                  '  Sheets(ATP).Select
+                  '  ActiveSheet.Unprotect
+    'Rows("7:49").Select
+    'Selection.EntireRow.Hidden = True   'Hides input worksheet
+    'Rows("50:92").Select
+    'Selection.EntireRow.Hidden = False  'Unhides output worksheet
+    'Rows("64:65").Select
+    'Selection.EntireRow.Hidden = True
+
+                Range("C51").Select
+                If FirstOversatTP < ATP Then
+                    UV(ATP, 0, 0) = UV(ATP - 1, 0, S)
+                    For i = 1 To intNumSegments
+                        UV(ATP, i, 0) = UV(ATP - 1, i, S)
+                        MF(ATP, i, 0) = MF(ATP - 1, i, S)
+                        MO1(ATP, i, 0) = MO1(ATP - 1, i, S)
+                        MO2(ATP, i, 0) = MO2(ATP - 1, i, S)
+                        MO3(ATP, i, 0) = MO3(ATP - 1, i, S)
+                        ONRQ(ATP, i, 0) = ONRQ(ATP - 1, i, S)
+                        OFRF(ATP, i, 0) = OFRF(ATP - 1, i, S)
+                        If i = 1 Then
+                                MI(ATP, i, 0) = sngSegmentDemand(ATP, i) / (S * 60 / Interval) + UV(ATP - 1, i - 1, S)
+                            Else
+                                MI(ATP, i, 0) = MF(ATP, i - 1, 0) + ONRF(ATP, i - 1, 0) - OFRF(ATP, i, 0) + UV(ATP - 1, i - 1, S)
+                            End If
+                        If strSegmentType(i) = "ONR" Or strSegmentType(i) = "W" Then
+                            ONRF(ATP, i, 0) = (ONRF(ATP - 1, i, S) / sngONRDemand(ATP - 1, i)) * sngONRDemand(ATP, i)
+                            MO1(ATP, i, 0) = MO1(ATP - 1, i, S) - (ONRF(ATP, i, 0) - ONRF(ATP - 1, i, S))
+                        End If
+                        MF(ATP, i, 0) = MainlineFlow(MO1(ATP, i, 0), MO2(ATP, i, 0), MO3(ATP, i, 0), i, SC(ATP, i), SC(ATP, i - 1), UV(ATP, i - 1, 0), MI(ATP, i - 1, 0), NV(ATP, i - 1, 0), sngFFS(ATP, i - 1), L(i - 1), OFRF(ATP, i, 0), MI(ATP, i, 0), MF(ATP, i - 1, 0) + ONRF(ATP, i - 1, 0))
+                        NV(ATP, i, 0) = (KB(ATP, i) - KB(ATP - 1, i)) * L(i) / 5280 + NV(ATP - 1, i, S)
+                    Next
+                Else
+                    For i = 1 To intNumSegments
+                        NV(ATP, i, 0) = NumberVehicles(KB(ATP, i), L(i), UV(ATP - 1, i, S))
+                    Next
+                End If
+                AStep = 1
+                'Step 3
+Three:
+                ASeg = 1
+
+Five:           ' Step 5 Off-Ramp at node?
+                 If sngOFRDemand(ATP, ASeg - 1) > 0 Then
+                    Else
+                        GoTo Nine:
+                End If
+
+                ' Step 6 Deficit from previous time period?
+
+                If FirstOversatTP = ATP Then GoTo Eight:
+                SDtot = 0
+                For x = FirstOversatTP To ATP - 1
+                    SDtot = sngSegmentDemand(x, ASeg - 1) + SDtot
+                    Next
+                DEF2 = 0
+                For x = FirstOversatTP To ATP - 1
+                    For t = 1 To S
+                        DEF2 = DEF2 + MF(x, ASeg - 1, t) + ONRF(x, ASeg - 1, t)
+                    Next
+                Next
+                DEF3 = 0
+                For t = 1 To AStep - 1
+                    DEF3 = DEF3 + MF(ATP, ASeg - 1, t) + ONRF(ATP, ASeg - 1, t)
+                    Next
+
+                DEF(ATP, ASeg, AStep) = (SDtot / (60 / Interval)) - (DEF2 + DEF3)
+                If DEF(ATP, ASeg, AStep) < 0.01 Then GoTo Eight: '???? WHAT DOES THIS DO, BJS ????
+
+                'Step 7 Calculate off-ramp flow using deficit method
+                If MF(ATP, ASeg - 1, AStep) + ONRF(ATP, ASeg + 1, AStep) < DEF(ATP, ASeg, AStep) Then
+                    OFRF(ATP, ASeg, AStep) = (MF(ATP, ASeg - 1, AStep) + ONRF(ATP, ASeg - 1, AStep)) * (sngOFRDemand(ATP - 1, ASeg - 1) / sngSegmentDemand(ATP - 1, ASeg - 1))
+                Else
+                    OFRF(ATP, ASeg, AStep) = DEF(ATP, ASeg, AStep) * (sngOFRDemand(ATP - 1, ASeg - 1) / sngSegmentDemand(ATP - 1, ASeg - 1)) + (MF(ATP, ASeg - 1, AStep) + ONRF(ATP, ASeg - 1, AStep) - DEF(ATP, ASeg, AStep)) * (sngOFRDemand(ATP, ASeg - 1) / sngSegmentDemand(ATP, ASeg - 1))
+                End If
+                GoTo Nine:
+
+                'Step 8 Calculate off-ramp flow without using deficit method
+Eight:
+                OFRF(ATP, ASeg, AStep) = (MF(ATP, ASeg - 1, AStep) + ONRF(ATP, ASeg - 1, AStep)) * (sngOFRDemand(ATP, ASeg - 1) / sngSegmentDemand(ATP, ASeg - 1))
+
+                 'Step 9 Calculate Mainline Input
+Nine:
+                If ASeg = 1 Then
+                    MI(ATP, ASeg, AStep) = sngSegmentDemand(ATP, ASeg) / (S * 60 / Interval) + UV(ATP, ASeg - 1, AStep - 1)
+                Else
+                    MI(ATP, ASeg, AStep) = MF(ATP, ASeg - 1, AStep) + ONRF(ATP, ASeg - 1, AStep) - OFRF(ATP, ASeg, AStep) + UV(ATP, ASeg - 1, AStep - 1)
+                End If
+
+                'Step10 On-ramp at node?
+                If ASeg <= intNumSegments Then
+                    If sngONRDemand(ATP, ASeg) > 0 Then
+                    Else
+                        GoTo Seventeen:
+                    End If
+                    Else
+                    GoTo Seventeen:
+                End If
+
+                'Step 11 Calculate on-ramp input
+                ONRO(ATP, ASeg, AStep) = RM(ATP, ASeg) / (S * 60 / Interval)
+                If RM(ATP, ASeg) / (S * 60 / Interval) > ONRC(ATP, ASeg) / (S * 60 / Interval) Then ONRO(ATP, ASeg, AStep) = ONRC(ATP, ASeg) / (S * 60 / Interval)
+                onr2 = SC(ATP, ASeg) / (S * 60 / Interval)
+                If MO2(ATP, ASeg, AStep - 1) > 0 Then
+                    If MF(ATP, ASeg + 1, AStep - 1) + ONRF(ATP, ASeg, AStep - 1) < onr2 Then onr2 = MF(ATP, ASeg + 1, AStep - 1) + ONRF(ATP, ASeg, AStep - 1)
+                    End If
+                If MO3(ATP, ASeg, AStep - 1) > 0 Then If MO3(ATP, ASeg, AStep - 1) + ONRF(ATP, ASeg, AStep - 1) < onr2 Then onr2 = MO3(ATP, ASeg, AStep - 1) + ONRF(ATP, ASeg, AStep - 1)
+                onr3 = onr2 - MI(ATP, ASeg, AStep)
+                If onr2 / (2 * intNumberLanes(ATP, ASeg)) > onr3 Then onr3 = onr2 / (2 * intNumberLanes(ATP, ASeg))
+                If ONRO(ATP, ASeg, AStep) > onr3 Then ONRO(ATP, ASeg, AStep) = onr3
+
+                ' Step 12 Calculate on-ramp max output
+                ONRI(ATP, ASeg, AStep) = sngONRDemand(ATP, ASeg) / (60 / (Interval / S)) + ONRQ(ATP, ASeg, AStep - 1)
+
+                ' Step 13 ONR output < ONR input?
+                If ONRO(ATP, ASeg, AStep) > ONRI(ATP, ASeg, AStep) Then GoTo Fifteen:
+
+                'Step 14 On-ramp flow = on-ramp output, transfer unmet demand
+                ONRF(ATP, ASeg, AStep) = ONRO(ATP, ASeg, AStep)
+                ONRQ(ATP, ASeg, AStep) = ONRI(ATP, ASeg, AStep) - ONRO(ATP, ASeg, AStep)
+                GoTo Sixteen:
+
+                ' Step 15 On-ramp flow = on-ramp input
+Fifteen:
+                ONRF(ATP, ASeg, AStep) = ONRI(ATP, ASeg, AStep)
+
+                ' Step 16 Calculate Mainline Output(1), MO1
+Sixteen:
+
+                MO1(ATP, ASeg, AStep) = SC(ATP, ASeg) / (S * 60 / Interval)
+                If MO2(ATP, ASeg, AStep - 1) > 0 Then If MO1(ATP, ASeg, AStep) > MO2(ATP, ASeg, AStep - 1) + ONRF(ATP, ASeg, AStep) Then MO1(ATP, ASeg, AStep) = MO2(ATP, ASeg, AStep - 1) + ONRF(ATP, ASeg, AStep)
+                If MO3(ATP, ASeg, AStep - 1) > 0 Then If MO1(ATP, ASeg, AStep) > MO3(ATP, ASeg, AStep - 1) + ONRF(ATP, ASeg, AStep) Then MO1(ATP, ASeg, AStep) = MO3(ATP, ASeg, AStep - 1) + ONRF(ATP, ASeg, AStep)
+                If MO2(ATP, ASeg, AStep - 1) > 0 Or MO3(ATP, ASeg, AStep - 1) > 0 Then
+                    If strSegmentType(ASeg) = "W" Then
+                        OFRF0 = OFRF(ATP, ASeg + 1, AStep - 1) * MO1(ATP, ASeg, AStep) / (MO1(ATP, ASeg, AStep - 1))
+                        MO21 = MO2(ATP, ASeg, AStep - 1) - (OFRF(ATP, ASeg + 1, AStep - 1) - OFRF0)
+                        If MO2(ATP, ASeg, AStep - 1) > MO21 Then
+                            MO1(ATP, ASeg, AStep) = MO21 + ONRF(ATP, ASeg, AStep)
+                        End If
+                    End If
+                End If
+            MO1(ATP, ASeg, AStep) = MO1(ATP, ASeg, AStep) - ONRF(ATP, ASeg, AStep) '- OFRF(ATP, ASeg, AStep)
+
+                ' Step 17 Queue present on segment?
+Seventeen:
+                If AStep = 1 Then
+                Else
+                    If ASeg = intNumSegments + 1 Then
+                        UV(ATP, ASeg, AStep - 1) = 0
+                        Else
+                        UV(ATP, ASeg, AStep - 1) = NV(ATP, ASeg, AStep - 1) - (KB(ATP, ASeg) * L(ASeg) / 5280)
+                        End If
+                End If
+
+                If UV(ATP, ASeg, AStep - 1) < 0.01 Then
+                     If SC(ATP, ASeg + 1) < OSC(ATP, ASeg + 1) Then SC(ATP, ASeg + 1) = OSC(ATP, ASeg + 1)
+                        GoTo Twentytwo: ' SSS: C no queue calculate mainline flow
+                    Else
+                     SC(ATP, ASeg + 1) = OSC(ATP, ASeg + 1) * (1 - (Alpha / 100)) 'alpha
+                  End If
+
+
+                ' Step 20 Calculate Storage and Queue Density on Segment
+                KQ(ATP, ASeg, AStep) = Kj * intNumberLanes(ATP, ASeg) - ((Kj * intNumberLanes(ATP, ASeg) - KC * intNumberLanes(ATP, ASeg)) * (MF(ATP, ASeg + 1, AStep - 1) + OFRF(ATP, ASeg + 1, AStep - 1))) / (SC(ATP, ASeg) / (S * 60 / Interval))
+                If strSegmentType(ASeg) = "W" Then
+                        If MO2(ATP, ASeg, AStep - 1) > 0 Then
+                            OFRF0 = OFRF(ATP, ASeg + 1, AStep - 1) * MO2(ATP, ASeg, AStep) / (MO2(ATP, ASeg, AStep - 1))
+                            KQ(ATP, ASeg, AStep) = Kj * intNumberLanes(ATP, ASeg) - ((Kj * intNumberLanes(ATP, ASeg) - KC * intNumberLanes(ATP, ASeg)) * (MF(ATP, ASeg + 1, AStep - 1) + OFRF0)) / (SC(ATP, ASeg) / (S * 60 / Interval))
+
+                        End If
+                    End If
+
+                ' Step 21 Calculate Mainline Output (2) MO2
+                 If (KQ(ATP, ASeg, AStep) * L(ASeg) / 5280 - NV(ATP, ASeg, AStep - 1) < 0) Then
+                    MO2Storage = 0
+                    Else 'Nov Bug
+                    MO2Storage = KQ(ATP, ASeg, AStep) * L(ASeg) / 5280 - NV(ATP, ASeg, AStep - 1)
+                 End If 'Nov Bug
+
+                    MO2(ATP, ASeg, AStep) = MF(ATP, ASeg + 1, AStep - 1) + OFRF(ATP, ASeg + 1, AStep - 1) - ONRF(ATP, ASeg, AStep - 1) + MO2Storage
+                If strSegmentType(ASeg) = "W" Then
+                    If MO2(ATP, ASeg, AStep - 1) > 0 Then
+                        OFRF0 = OFRF(ATP, ASeg + 1, AStep - 1) * MO2(ATP, ASeg, AStep) / (MO2(ATP, ASeg, AStep - 1))
+                        MO21 = MF(ATP, ASeg + 1, AStep - 1) + OFRF0 - ONRF(ATP, ASeg, AStep - 1) + KQ(ATP, ASeg, AStep) * L(ASeg) / 5280 - NV(ATP, ASeg, AStep - 1)
+                        If MO2(ATP, ASeg, AStep) > MO21 Then
+                        MO2(ATP, ASeg, AStep) = MO21
+                End If
+                End If
+                End If
+
+                ' Step 18 Is there a front-clearing queue in this time interval?
+                If booFront = True Then
+                Else
+                GoTo Twentytwo:
+                End If
+
+                'Step 19 Calculate Mainline Output (3), MO3
+                If WS(ATP, ASeg) > 0 Then
+                    WTT(ATP, ASeg) = (L(ASeg) / 5280) / WS(ATP, ASeg) * (S * 60 / Interval)
+                    WTT(ATP, ASeg) = Int(WTT(ATP, ASeg))
+
+
+                   If WTT(ATP, ASeg) > AStep Then
+                       TP = ATP - 1
+                       Step = S - (WTT(ATP, ASeg) - AStep)
+                       If Step < 0 Then Step = 0 ' changed due to ed @ Caltrans
+                       Else
+                       TP = ATP
+                        Step = AStep
+                   End If
+                   MO3(ATP, ASeg, AStep) = 1000000  '
+                   If MO1(TP, ASeg + 1, Step) > 0.01 Then MO3(ATP, ASeg, AStep) = MO1(TP, ASeg + 1, Step)
+                   If MO2(TP, ASeg + 1, Step) > 0.01 Then If MO3(ATP, ASeg, AStep) > MO2(TP, ASeg + 1, Step) - OFRF(TP, ASeg + 1, Step) Then MO3(ATP, ASeg, AStep) = MO2(TP, ASeg + 1, Step) - OFRF(TP, ASeg + 1, Step)
+                   If MO3(TP, ASeg + 1, Step) > 0.01 Then If MO3(ATP, ASeg, AStep) > MO3(TP, ASeg + 1, Step) - OFRF(TP, ASeg + 1, Step) Then MO3(ATP, ASeg, AStep) = MO3(TP, ASeg + 1, Step) - OFRF(TP, ASeg + 1, Step)
+                   If MO3(ATP, ASeg, AStep) > SC(TP, ASeg) / (S * 60 / Interval) Then MO3(ATP, ASeg, AStep) = SC(TP, ASeg)
+                   If MO3(ATP, ASeg, AStep) > SC(TP, ASeg + 1) / (S * 60 / Interval) - OFRF(TP, ASeg + 1, Step) Then MO3(ATP, ASeg, AStep) = SC(TP, ASeg + 1) - OFRF(TP, ASeg + 1, Step)
+                   MO3(ATP, ASeg, AStep) = MO3(ATP, ASeg, AStep) - ONRF(ATP, ASeg, AStep)
+                End If
+                ' Step 22 Calculate Mainline Flow
+Twentytwo:
+                MF(ATP, ASeg, AStep) = MainlineFlow(MO1(ATP, ASeg, AStep), MO2(ATP, ASeg, AStep), MO3(ATP, ASeg, AStep), ASeg, SC(ATP, ASeg), SC(ATP, ASeg - 1), UV(ATP, ASeg - 1, AStep - 1), MI(ATP, ASeg - 1, AStep), NV(ATP, ASeg - 1, AStep - 1), sngFFS(ATP, ASeg - 1), L(ASeg - 1), OFRF(ATP, ASeg, ATP), MI(ATP, ASeg, AStep), MF(ATP, ASeg - 1, AStep) + ONRF(ATP, ASeg - 1, Step))
+
+                ' Step 23 First node?
+                If ASeg = 1 Then
+                    UV(ATP, ASeg - 1, AStep) = sngSegmentDemand(ATP, ASeg) / ((60 / Interval) * S) - MF(ATP, ASeg, AStep) + UV(ATP, ASeg - 1, AStep - 1)
+                    GoTo Twentyseven:
+                     End If
+
+                ' Step 24 Calculate Segment flow
+                SF(ATP, ASeg - 1, AStep) = MF(ATP, ASeg, AStep) + OFRF(ATP, ASeg, AStep)
+
+                ' Step 25 Update number of vehicle on segment
+                NV(ATP, ASeg - 1, AStep) = NV(ATP, ASeg - 1, AStep - 1) + MF(ATP, ASeg - 1, AStep) + ONRF(ATP, ASeg - 1, AStep) - MF(ATP, ASeg, AStep) - OFRF(ATP, ASeg, AStep)
+                UV(ATP, ASeg - 1, AStep) = NV(ATP, ASeg - 1, AStep) - (KB(ATP, ASeg - 1) * L(ASeg - 1) / 5280)
+                If UV(ATP, ASeg - 1, AStep) > 0.01 Then
+                        If AStep = 1 Then QueueBegin(ATP, ASeg - 1) = 99
+                        If UV(ATP, ASeg - 1, AStep - 1) < 0.01 Then
+                            If QueueBegin(ATP, ASeg - 1) = 99 Then QueueBegin(ATP, ASeg - 1) = AStep
+                            If QueueBegin(ATP, ASeg - 1) = 0 Then QueueBegin(ATP, ASeg - 1) = AStep
+                            If bottleneck(ATP, ASeg - 1) = 1 Then Report = Report & "Overlapping Bottlenecks meet at Segment " & ASeg - 1 & " during Time Period " & ATP & ".  "
+                            End If
+                    Else
+                        If AStep > 1 Then If UV(ATP, ASeg - 1, AStep - 1) > 0.01 Then QueueEnd(ATP, ASeg - 1) = AStep
+                    End If
+
+                ' Step 26 Last node?
+                If ASeg = intNumSegments + 1 Then GoTo Twentyeight:
+
+                ' Step 27 Move to the next downstream node
+Twentyseven:
+                ASeg = ASeg + 1
+                GoTo Five:
+
+                ' Step 28 Last time step in current time interval?
+Twentyeight:
+                If AStep = S Then GoTo Thirty:
+
+                ' Step 29 Move to the next time step
+                AStep = AStep + 1
+                GoTo Three:
+
+                ' Step 30
+Thirty:
+                For ASeg = 1 To intNumSegments
+                    For i = 1 To S
+                        ONR(ATP, ASeg) = ONR(ATP, ASeg) + ONRF(ATP, ASeg, i)
+                        OFR(ATP, ASeg) = OFR(ATP, ASeg) + OFRF(ATP, ASeg, i)
+                    Next
+                    ONR(ATP, ASeg) = ONR(ATP, ASeg) * (60 / Interval)
+                    OFR(ATP, ASeg) = OFR(ATP, ASeg) * (60 / Interval)
+                Density(ATP, ASeg) = 0
+                Next
+
+                For ASeg = 1 To intNumSegments
+                    For x = 1 To S
+
+                        Segmentflow(ATP, ASeg) = Segmentflow(ATP, ASeg) + SF(ATP, ASeg, x) * 60 / Interval
+
+                        Density(ATP, ASeg) = Density(ATP, ASeg) + NV(ATP, ASeg, x)
+                    Next
+                    Density(ATP, ASeg) = (Density(ATP, ASeg) / S) / (L(ASeg) / 5280)
+                    'Code added to prevent the effect of double bottlenecks on segment density SSS 042612
+                    If Density(ATP, ASeg) > (Kj * intNumberLanes(ATP, ASeg)) / fhv(ATP, ASeg) Then Density(ATP, ASeg) = (Kj * (intNumberLanes(ATP, ASeg))) / fhv(ATP, ASeg)
+
+                    sngSpeed(ATP, ASeg) = Segmentflow(ATP, ASeg) / Density(ATP, ASeg)
+
+                    If ASeg > 1 Then
+                        If (sngSpeed(ATP, ASeg) > sngFFS(ATP, ASeg) - (sngFFS(ATP, ASeg) - sngSpeed(ATP, ASeg - 1)) * Exp(-0.00162 * ((L(ASeg - 1) + L(ASeg)) / 2))) Then sngSpeed(ATP, ASeg) = sngFFS(ATP, ASeg) - (sngFFS(ATP, ASeg) - sngSpeed(ATP, ASeg - 1)) * Exp(-0.00162 * ((L(ASeg - 1) + L(ASeg)) / 2))
+                        End If
+                    ActiveSheet.Unprotect
+                    'ActiveCell.Offset(5, ASeg - 1).Value = sngSpeed(ATP, ASeg)
+                    'sngdensity(atp,aseg) = Density(ATP, ASeg) / (intNumberLanes(ATP, ASeg))
+                    sngDensity(ATP, ASeg) = Density(ATP, ASeg) / (intNumberLanes(ATP, ASeg))
+                    'row59(atp,aseg) = Density(ATP, ASeg) / (intNumberLanes(ATP, ASeg))
+                    'ActiveCell.Offset(7, ASeg - 1).Value = OSC(ATP, ASeg)
+                    'ActiveCell.Offset(10, ASeg - 1).Value = Segmentflow(ATP, ASeg)
+                    'ActiveCell.Offset(11, ASeg - 1).Value = sngSegmentDemand(ATP, ASeg) / OSC(ATP, ASeg)
+                    'ActiveCell.Offset(12, ASeg - 1).Value = Segmentflow(ATP, ASeg) / OSC(ATP, ASeg)
+                    'ActiveCell.Offset(0, ASeg - 1).Value = strSegmentType(ASeg)
+                    'If strSegmentType(ASeg) = "W" Then If Ls(ASeg) > LMax(sngOneSided(ASeg), sngNW(ASeg), sngMainMain(ATP, ASeg) / fhv(ATP, ASeg), sngMainOFR(ATP, ASeg) / FhvOFR(ATP, ASeg), sngONRMain(ATP, ASeg) / FhvONR(ATP, ASeg), sngRR(ATP, ASeg) / FhvRR(ATP, ASeg)) Then ActiveCell.Offset(0, ASeg - 1).Value = "W-B"
+                    'ActiveCell.Offset(1, ASeg - 1).Value = L(ASeg)
+                    'ActiveCell.Offset(2, ASeg - 1).Value = intNumberLanes(ATP, ASeg)
+                    'ActiveCell.Offset(4, ASeg - 1).Value = sngFFS(ATP, ASeg)
+                    'ActiveCell.Offset(9, ASeg - 1).Value = sngSegmentDemand(ATP, ASeg)
+
+                    If UV(ATP, ASeg, S) > 0.1 Then
+                        QueueEnd(ATP, ASeg) = 99
+                        Row65(ATP, ASeg) = "**"
+                    Else
+                        If QueueEnd(ATP, ASeg) > 0 Then
+                            Row65(ATP, ASeg) = (QueueEnd(ATP, ASeg) / S) * Interval
+                        Else
+                            Row65(ATP, ASeg) = ""
+                        End If
+                    End If
+                    If QueueBegin(ATP, ASeg) > 0 Then
+                        If QueueBegin(ATP, ASeg) = 99 Then
+                            Row64(ATP, ASeg) = "**"
+                        Else
+                            If QueueEnd(ATP - 1, ASeg) = 99 Then
+                                Row64(ATP, ASeg) = "**"
+                            Else
+                                Row64(ATP, ASeg) = (QueueBegin(ATP, ASeg) / S) * Interval
+                            End If
+                        End If
+                        If QueueEnd(ATP, ASeg) = 0 Then
+                            QueueEnd(ATP, ASeg) = 99
+                            Row65(ATP, ASeg) = "**"
+                        End If
+                    Else
+                        Row64(ATP, ASeg) = ""
+                    End If
+
+                    If UV(ATP, ASeg, S) > 0.01 Then
+                        If KQ(ATP, ASeg, S) > KB(ATP, ASeg) Then
+                        Row66(ATP, ASeg) = ((UV(ATP, ASeg, S) / (KQ(ATP, ASeg, S) - KB(ATP, ASeg))) * 5280)
+                    Else
+                        Row66(ATP, ASeg) = UV(ATP, ASeg, S) * 20 / intNumberLanes(ATP, ASeg)
+                    End If
+
+                    ' new code to set queue length equal to segment length in case of rounding error
+                    If ((UV(ATP, ASeg, S) / (KQ(ATP, ASeg, S) - KB(ATP, ASeg))) * 5280) > 0.95 * L(ASeg) Then
+                        Row66(ATP, ASeg) = L(ASeg)
+                    End If
+                    Else
+                        'row66(atp,aseg) = ""
+                    End If
+
+
+
+                    'ActiveCell.Offset(17, ASeg - 1).Value = sngONRDemand(ATP, ASeg)
+
+                    queue = 0
+                    For i = 1 To S
+                        queue = UV(ATP, ASeg, i) + queue
+                        Next
+                    If OFR(ATP, ASeg) > 2100 * intNumLanesRamp(ATP, ASeg) Then
+                        'Mbox_Prompt = "Off-Ramp Flow exceeds capacity at Segment " & ASeg - 1 & " during Time Period " & ATP & "."
+                        'Mbox_response = MsgBox(Mbox_Prompt)
+                    End If
+                    'ActiveCell.Offset(18, ASeg - 1).Value = ONR(ATP, ASeg)
+                    'ActiveCell.Offset(22, ASeg - 1).Value = sngOFRDemand(ATP, ASeg)
+                    'If ASeg > 1 Then ActiveCell.Offset(23, ASeg - 2).Value = OFR(ATP, ASeg)
+                    If sngONRDemand(ATP, ASeg) > 0 Then
+                        ONRQL = RM(ATP, ASeg)
+                        If ONRO(ATP, ASeg, S) * (60 / Interval) * S < ONRQL Then ONRQL = ONRO(ATP, ASeg, S) * (60 / Interval) * S
+                        If ONRC(ATP, ASeg) < ONRQL Then ONRQL = ONRC(ATP, ASeg)
+                        ONRQL = ONRQ(ATP, ASeg, S) / ((Kj - (ONRQL / ONRC(ATP, ASeg)) * (Kj - KC)) * fhv(ATP, ASeg)) * 5280
+                        If ONRQL > 0.01 Then
+                            Row71(ATP, ASeg) = ONRQL
+                        Else
+                            Row71(ATP, ASeg) = ""
+                        End If
+                        ONRQL = 0
+                        'If ONRC(ATP, ASeg) > 0 Then ActiveCell.Offset(21, ASeg - 1).Value = ONRC(ATP, ASeg)
+                        'If OFRC(ATP, ASeg) > 0 Then ActiveCell.Offset(24, ASeg - 1).Value = OFRC(ATP, ASeg)
+                        If ONRQ(ATP, ASeg, S) > 0 Then
+                            ONRDelay(ATP, ASeg) = (ONRQ(ATP, ASeg, S) + ONRQ(ATP - 1, ASeg, S)) / 8
+                        Else
+                            If intNumberLanes(ATP, ASeg) > intNumberLanes(ATP, ASeg - 1) Then
+                                ONRQL = SC(ATP, ASeg) - ONR(ATP, ASeg)
+                                If SC(ATP, ASeg) / (2 * intNumberLanes(ATP, ASeg)) > ONRQL Then ONRQL = SC(ATP, ASeg) / (2 * N)
+                                Else
+                                ONRQL = 10000000
+                            End If
+                            If RM(ATP, ASeg) < ONRQL Then ONRQL = RM(ATP, ASeg)
+                            If ONRC(ATP, ASeg) < ONRQL Then ONRQL = ONRC(ATP, ASeg)
+                            ONRQL = ONRQL - sngONRDemand(ATP, ASeg)
+                            If ONRQL > 0 Then ONRDelay(ATP, ASeg) = ((ONRQ(ATP - 1, ASeg, S) / 8) * ((ONRQ(ATP - 1, ASeg, S) * 4) / ONRQL))
+                        End If
+                        'ActiveCell.Offset(19, ASeg - 1).Value = ONRDelay(ATP, ASeg)
+                    End If
+
+                    If queue < 0.1 Then
+                            Call Set_Ramp_Variables(ASeg)
+                            'If sngCAF(ATP, ASeg) = 1 Then   'The If statement was removed because of ramp and weaving new speed adjustment (bypassing Equation 25-1 for these segments 051412 SSS
+                                Select Case strSegmentType(ASeg)
+                                    Case Is = "W"
+                                        sngSpeed(ATP, ASeg) = WeavingSpeed(sngOneSided(ASeg), sngLS(ASeg), sngLCRF(ASeg), sngLCFR(ASeg), sngLCRR(ASeg), sngNW(ASeg), intNumberLanes(ATP, ASeg), sngMainMain(ATP, ASeg) / fhv(ATP, ASeg), sngMainOFR(ATP, ASeg) / FhvOFR(ATP, ASeg), sngONRMain(ATP, ASeg) / FhvONR(ATP, ASeg), sngRR(ATP, ASeg) / FhvRR(ATP, ASeg), sngFFS(ATP, ASeg), sngID(ASeg), sngSAF(ATP, ASeg))    'S7speedUpdate
+                                        sngDensity(ATP, ASeg) = WeavingDensity(sngOneSided(ASeg), sngLS(ASeg), sngLCRF(ASeg), sngLCFR(ASeg), sngLCRR(ASeg), sngNW(ASeg), intNumberLanes(ATP, ASeg), sngMainMain(ATP, ASeg) / fhv(ATP, ASeg), sngMainOFR(ATP, ASeg) / FhvOFR(ATP, ASeg), sngONRMain(ATP, ASeg) / FhvONR(ATP, ASeg), sngRR(ATP, ASeg) / FhvRR(ATP, ASeg), sngFFS(ATP, ASeg), sngID(ASeg), sngSAF(ATP, ASeg)) 'S7speedUpdate
+                                        'sngSpeed(ATP, ASeg) = BasicSpeed(sngFFS(ATP, ASeg), ((SegmentFlow(ATP, ASeg) / Fhv(ATP, ASeg)) / intNumberLanes(ATP, ASeg)))
+                                        'sngDensity(ATP, ASeg) = BasicDensity(sngSpeed(ATP, ASeg), SegmentFlow(ATP, ASeg))
+                                    'Case Is = "ONR-B"
+                                    '    sngSpeed(ATP, ASeg) = BasicSpeed(sngFFS(ATP, ASeg), ((SegmentFlow(ATP, ASeg) / Fhv(ATP, ASeg)) / intNumberLanes(ATP, ASeg)))
+                                    '    sngDensity(ATP, ASeg) = BasicDensity(sngSpeed(ATP, ASeg), SegmentFlow(ATP, ASeg))
+                                    'Case Is = "OFR-B"
+                                    '    sngSpeed(ATP, ASeg) = BasicSpeed(sngFFS(ATP, ASeg), ((SegmentFlow(ATP, ASeg) / Fhv(ATP, ASeg)) / intNumberLanes(ATP, ASeg)))
+                                    '    sngDensity(ATP, ASeg) = BasicDensity(sngSpeed(ATP, ASeg), SegmentFlow(ATP, ASeg))
+                                    Case Is = "ONR"
+                                        sngSpeed(ATP, ASeg) = OnRampSpeed(intNumberLanes(ATP, ASeg), strSegmentType(ASeg - ups2), strSegmentType(ASeg - ups1), L(ASeg - ups1), L(ASeg - ups2), strSegmentType(ASeg - ups3), L(ASeg - ups3), strSegmentType(ASeg + dns1), L(ASeg + dns1), strSegmentType(ASeg + dns2), L(ASeg + dns2), Segmentflow(ATP, ASeg - 1) / fhv(ATP, ASeg - 1), ONR(ATP, ASeg) / FhvONR(ATP, ASeg), sngAccDecLength(ATP, ASeg), sngRampFFS(ATP, ASeg), sngOFRDemand(ATP, ASeg + dns1) / FhvOFR(ATP, ASeg + dns1), sngOFRDemand(ATP, ASeg + dns2) / FhvOFR(ATP, ASeg + dns2), sngOFRDemand(ATP, ASeg + dns3) / FhvOFR(ATP, ASeg + dns3), strSegmentType(ASeg + dns3), L(ASeg + dns3), intNumLanesRamp(ATP, ASeg), strRampLR(ATP, ASeg), L(ASeg), sngFFS(ATP, ASeg), sngSAF(ATP, ASeg))   'S7SpeedUpdate 051312
+                                        sngDensity(ATP, ASeg) = OnRampDensity(intNumberLanes(ATP, ASeg), strSegmentType(ASeg - ups2), strSegmentType(ASeg - ups1), L(ASeg - ups1), L(ASeg - ups2), strSegmentType(ASeg - ups3), L(ASeg - ups3), strSegmentType(ASeg + dns1), L(ASeg + dns1), strSegmentType(ASeg + dns2), L(ASeg + dns2), Segmentflow(ATP, ASeg - 1) / fhv(ATP, ASeg - 1), ONR(ATP, ASeg) / FhvONR(ATP, ASeg), sngAccDecLength(ATP, ASeg), sngRampFFS(ATP, ASeg), sngOFRDemand(ATP, ASeg + dns1) / FhvOFR(ATP, ASeg + dns1), sngOFRDemand(ATP, ASeg + dns2) / FhvOFR(ATP, ASeg + dns2), sngOFRDemand(ATP, ASeg + dns3) / FhvOFR(ATP, ASeg + dns3), strSegmentType(ASeg + dns3), L(ASeg + dns3), intNumLanesRamp(ATP, ASeg), strRampLR(ATP, ASeg), L(ASeg), sngFFS(ATP, ASeg), sngSAF(ATP, ASeg)) 'S7speedUpdate 051312
+                                    Case Is = "R"
+                                        sngSpeed(ATP, ASeg) = sngSpeed(ATP, ASeg - 1)
+                                        sngDensity(ATP, ASeg) = sngDensity(ATP, ASeg - 1)
+                                    Case Is = "OFR"
+                                        sngSpeed(ATP, ASeg) = OffRampSpeed(intNumberLanes(ATP, ASeg), strSegmentType(ASeg - ups2), strSegmentType(ASeg - ups1), L(ASeg - ups1), L(ASeg - ups2), strSegmentType(ASeg - ups3), L(ASeg - ups3), strSegmentType(ASeg + dns1), L(ASeg + dns1), strSegmentType(ASeg + dns2), L(ASeg + dns2), Segmentflow(ATP, ASeg) / fhv(ATP, ASeg), OFR(ATP, ASeg + 1) / FhvOFR(ATP, ASeg), sngAccDecLength(ATP, ASeg), sngRampFFS(ATP, ASeg), OFR(ATP, ASeg) / FhvOFR(ATP, ASeg), OFR(ATP, ASeg + dns1) / FhvOFR(ATP, ASeg + dns1), OFR(ATP, ASeg + dns2) / FhvOFR(ATP, ASeg + dns2), strSegmentType(ASeg + dns3), L(ASeg + dns3), intNumLanesRamp(ATP, ASeg), strRampLR(ATP, ASeg), L(ASeg), ONR(ATP, ASeg - 1) / FhvONR(ATP, ASeg - 1), ONR(ATP, ASeg - ups2) / FhvONR(ATP, ASeg - ups2), ONR(ATP, ASeg - ups3) / FhvONR(ATP, ASeg - ups3), sngFFS(ATP, ASeg), sngSAF(ATP, ASeg))   'S7speedUpdate 051312
+                                        sngDensity(ATP, ASeg) = OffRampDensity(intNumberLanes(ATP, ASeg), strSegmentType(ASeg - ups2), strSegmentType(ASeg - ups1), L(ASeg - ups1), L(ASeg - ups2), strSegmentType(ASeg - ups3), L(ASeg - ups3), strSegmentType(ASeg + dns1), L(ASeg + dns1), strSegmentType(ASeg + dns2), L(ASeg + dns2), Segmentflow(ATP, ASeg) / fhv(ATP, ASeg), OFR(ATP, ASeg + 1) / FhvOFR(ATP, ASeg), sngAccDecLength(ATP, ASeg), sngRampFFS(ATP, ASeg), OFR(ATP, ASeg) / FhvOFR(ATP, ASeg), OFR(ATP, ASeg + dns1) / FhvOFR(ATP, ASeg + dns1), OFR(ATP, ASeg + dns2) / FhvOFR(ATP, ASeg + dns2), strSegmentType(ASeg + dns3), L(ASeg + dns3), intNumLanesRamp(ATP, ASeg), strRampLR(ATP, ASeg), L(ASeg), ONR(ATP, ASeg - 1) / FhvONR(ATP, ASeg - 1), ONR(ATP, ASeg - ups2) / FhvONR(ATP, ASeg - ups2), ONR(ATP, ASeg - ups3) / FhvONR(ATP, ASeg - ups3), sngFFS(ATP, ASeg), sngSAF(ATP, ASeg)) 'S7speedUpdate 051312
+                                        If strSegmentType(ASeg - 1) = "R" Then
+                                            If sngSpeed(ATP, ASeg) < sngSpeed(ATP, ASeg - 1) Then
+                                                sngSpeed(ATP, ASeg - 1) = sngSpeed(ATP, ASeg)
+                                                If (sngSpeed(ATP, ASeg - 1) > sngFFS(ATP, ASeg - 1) - (sngFFS(ATP, ASeg - 1) - sngSpeed(ATP, ASeg - 2)) * Exp(-0.00162 * ((L(ASeg - 2) + L(ASeg - 1)) / 2))) Then sngSpeed(ATP, ASeg - 1) = sngFFS(ATP, ASeg - 1) - (sngFFS(ATP, ASeg - 1) - sngSpeed(ATP, ASeg - 2)) * Exp(-0.00162 * ((L(ASeg - 2) + L(ASeg - 1)) / 2))
+                                                'ActiveCell.Offset(5, ASeg - 2).Value = sngSpeed(ATP, ASeg - 1)
+                                            End If
+                                            If sngDensity(ATP, ASeg) > sngDensity(ATP, ASeg - 1) Then sngDensity(ATP, ASeg - 1) = sngDensity(ATP, ASeg)
+                                        End If
+                                    Case Else
+                                        sngSpeed(ATP, ASeg) = BasicSpeed(sngFFS(ATP, ASeg), ((Segmentflow(ATP, ASeg) / fhv(ATP, ASeg)) / intNumberLanes(ATP, ASeg)))
+                                        sngDensity(ATP, ASeg) = BasicDensity(sngSpeed(ATP, ASeg), Segmentflow(ATP, ASeg))
+                                    End Select
+                            'Else
+
+                                If sngCAF(ATP, ASeg) <> 1 Then
+                                    If strSegmentType(ASeg) = "B" Then 'Or strSegmentType(ASeg) = "R" Then
+                                        'Equation 25-1
+                                        sngSpeed(ATP, ASeg) = ((sngFFS(ATP, ASeg) * sngSAF(ATP, ASeg) + 1) - Exp(LN(sngFFS(ATP, ASeg) * sngSAF(ATP, ASeg) + 1 - SC(ATP, ASeg) / (45 * intNumberLanes(ATP, ASeg))) / (SC(ATP, ASeg) / intNumberLanes(ATP, ASeg)) * (Segmentflow(ATP, ASeg) / intNumberLanes(ATP, ASeg)) / fhv(ATP, ASeg))) 'S7Speed4
+                                        sngDensity(ATP, ASeg) = Segmentflow(ATP, ASeg) / (sngSpeed(ATP, ASeg) * intNumberLanes(ATP, ASeg))
+                                    End If
+                                End If
+                            'End If
+
+                        If ASeg > 1 Then
+                            If (sngSpeed(ATP, ASeg) > sngFFS(ATP, ASeg) - (sngFFS(ATP, ASeg) - sngSpeed(ATP, ASeg - 1)) * Exp(-0.00162 * ((L(ASeg - 1) + L(ASeg)) / 2))) Then sngSpeed(ATP, ASeg) = sngFFS(ATP, ASeg) - (sngFFS(ATP, ASeg) - sngSpeed(ATP, ASeg - 1)) * Exp(-0.00162 * ((L(ASeg - 1) + L(ASeg)) / 2))
+                            End If
+                        Row59(ATP, ASeg) = sngDensity(ATP, ASeg)
+                        'If sngCAF(ATP, ASeg) = 1 Then
+                            Select Case strSegmentType(ASeg)
+                                Case Is = "B"
+                                    sngDensity(ATP, ASeg) = BasicDensity(sngSpeed(ATP, ASeg), ((Segmentflow(ATP, ASeg) / fhv(ATP, ASeg)) / intNumberLanes(ATP, ASeg))) * (1 / (1 + sngPercentTrucks(ATP, ASeg) / 100 * (sngET(ATP, ASeg) - 1) + sngPercentRV(ATP, ASeg) / 100 * (sngER(ATP, ASeg) - 1)))
+                                Case Is = "ONR-B"
+                                    sngDensity(ATP, ASeg) = BasicDensity(sngSpeed(ATP, ASeg), ((Segmentflow(ATP, ASeg) / fhv(ATP, ASeg)) / intNumberLanes(ATP, ASeg))) * (1 / (1 + sngPercentTrucks(ATP, ASeg) / 100 * (sngET(ATP, ASeg) - 1) + sngPercentRV(ATP, ASeg) / 100 * (sngER(ATP, ASeg) - 1)))
+                                Case Is = "OFR-B"
+                                    sngDensity(ATP, ASeg) = BasicDensity(sngSpeed(ATP, ASeg), ((Segmentflow(ATP, ASeg) / fhv(ATP, ASeg)) / intNumberLanes(ATP, ASeg))) * (1 / (1 + sngPercentTrucks(ATP, ASeg) / 100 * (sngET(ATP, ASeg) - 1) + sngPercentRV(ATP, ASeg) / 100 * (sngER(ATP, ASeg) - 1)))
+                                Case Is = "ONR"
+                                    sngDensity(ATP, ASeg) = OnRampDensity(intNumberLanes(ATP, ASeg), strSegmentType(ASeg - ups2), strSegmentType(ASeg - ups1), L(ASeg - ups1), L(ASeg - ups2), strSegmentType(ASeg - ups3), L(ASeg - ups3), strSegmentType(ASeg + dns1), L(ASeg + dns1), strSegmentType(ASeg + dns2), L(ASeg + dns2), Segmentflow(ATP, ASeg - 1) / fhv(ATP, ASeg - 1), ONR(ATP, ASeg) / FhvONR(ATP, ASeg), sngAccDecLength(ATP, ASeg), sngRampFFS(ATP, ASeg), sngOFRDemand(ATP, ASeg + dns1) / FhvOFR(ATP, ASeg + dns1), sngOFRDemand(ATP, ASeg + dns2) / FhvOFR(ATP, ASeg + dns2), sngOFRDemand(ATP, ASeg + dns3) / FhvOFR(ATP, ASeg + dns3), strSegmentType(ASeg + dns3), L(ASeg + dns3), intNumLanesRamp(ATP, ASeg), strRampLR(ATP, ASeg), L(ASeg), sngFFS(ATP, ASeg), sngSAF(ATP, ASeg)) * (1 / (1 + sngPercentTrucks(ATP, ASeg) / 100 * (sngET(ATP, ASeg) - 1) + sngPercentRV(ATP, ASeg) / 100 * (sngER(ATP, ASeg) - 1)))    'S7speedUpdate 051312
+                                    Row59(ATP, ASeg) = OnRampDensityLOS(intNumberLanes(ATP, ASeg), strSegmentType(ASeg - ups2), strSegmentType(ASeg - ups1), L(ASeg - ups1), L(ASeg - ups2), strSegmentType(ASeg - ups3), L(ASeg - ups3), strSegmentType(ASeg + dns1), L(ASeg + dns1), strSegmentType(ASeg + dns2), L(ASeg + dns2), Segmentflow(ATP, ASeg - 1) / fhv(ATP, ASeg - 1), ONR(ATP, ASeg) / FhvONR(ATP, ASeg), sngAccDecLength(ATP, ASeg), sngRampFFS(ATP, ASeg), sngOFRDemand(ATP, ASeg + dns1) / FhvOFR(ATP, ASeg + dns1), sngOFRDemand(ATP, ASeg + dns2) / FhvOFR(ATP, ASeg + dns2), sngOFRDemand(ATP, ASeg + dns3) / FhvOFR(ATP, ASeg + dns3), strSegmentType(ASeg + dns3), L(ASeg + dns3), intNumLanesRamp(ATP, ASeg), strRampLR(ATP, ASeg), L(ASeg), sngFFS(ATP, ASeg), sngSAF(ATP, ASeg)) * (1 / (1 + sngPercentTrucks(ATP, ASeg) / 100 * (sngET(ATP, ASeg) - 1) + sngPercentRV(ATP, ASeg) / 100 * (sngER(ATP, ASeg) - 1))) 'S7speedUpdate 051312
+                                Case Is = "R"
+                                    sngDensity(ATP, ASeg) = sngDensity(ATP, ASeg - 1)
+                                    'row59(atp,aseg) = row59(atp,aseg-1)
+                                    Row59(ATP, ASeg) = Row59(ATP, ASeg - 1)
+                                Case Is = "OFR"
+                                    sngDensity(ATP, ASeg) = OffRampDensity(intNumberLanes(ATP, ASeg), strSegmentType(ASeg - ups2), strSegmentType(ASeg - ups1), L(ASeg - ups1), L(ASeg - ups2), strSegmentType(ASeg - ups3), L(ASeg - ups3), strSegmentType(ASeg + dns1), L(ASeg + dns1), strSegmentType(ASeg + dns2), L(ASeg + dns2), Segmentflow(ATP, ASeg) / fhv(ATP, ASeg), OFR(ATP, ASeg + 1) / FhvOFR(ATP, ASeg), sngAccDecLength(ATP, ASeg), sngRampFFS(ATP, ASeg), OFR(ATP, ASeg) / FhvOFR(ATP, ASeg), OFR(ATP, ASeg + dns1) / FhvOFR(ATP, ASeg + dns1), OFR(ATP, ASeg + dns2) / FhvOFR(ATP, ASeg + dns2), strSegmentType(ASeg + dns3), L(ASeg + dns3), intNumLanesRamp(ATP, ASeg), strRampLR(ATP, ASeg), L(ASeg), ONR(ATP, ASeg - 1) / FhvONR(ATP, ASeg - 1), ONR(ATP, ASeg - ups2) / FhvONR(ATP, ASeg - ups2), ONR(ATP, ASeg - ups3) / FhvONR(ATP, ASeg - ups3), sngFFS(ATP, ASeg), sngSAF(ATP, ASeg)) * fhv(ATP, ASeg)
+                                    Row59(ATP, ASeg) = OffRampDensityLOS(intNumberLanes(ATP, ASeg), strSegmentType(ASeg - ups2), strSegmentType(ASeg - ups1), L(ASeg - ups1), L(ASeg - ups2), strSegmentType(ASeg - ups3), L(ASeg - ups3), strSegmentType(ASeg + dns1), L(ASeg + dns1), strSegmentType(ASeg + dns2), L(ASeg + dns2), Segmentflow(ATP, ASeg) / fhv(ATP, ASeg), OFR(ATP, ASeg + 1) / FhvOFR(ATP, ASeg), sngAccDecLength(ATP, ASeg), sngRampFFS(ATP, ASeg), OFR(ATP, ASeg) / FhvOFR(ATP, ASeg), OFR(ATP, ASeg + dns1) / FhvOFR(ATP, ASeg + dns1), OFR(ATP, ASeg + dns2) / FhvOFR(ATP, ASeg + dns2), strSegmentType(ASeg + dns3), L(ASeg + dns3), intNumLanesRamp(ATP, ASeg), strRampLR(ATP, ASeg), L(ASeg), ONR(ATP, ASeg - 1) / FhvONR(ATP, ASeg - 1), ONR(ATP, ASeg - ups2) / FhvONR(ATP, ASeg - ups2), ONR(ATP, ASeg - ups3) / FhvONR(ATP, ASeg - ups3), sngFFS(ATP, ASeg)) * fhv(ATP, ASeg)
+                                    If strSegmentType(ASeg - 1) = "R" Then
+                                        If sngDensity(ATP, ASeg) > sngDensity(ATP, ASeg - 1) Then sngDensity(ATP, ASeg - 1) = sngDensity(ATP, ASeg)
+                                        If Row59(ATP, ASeg) > Row59(ATP, ASeg - 1) Then Row59(ATP, ASeg - 1) = Row59(ATP, ASeg)
+                                    End If
+                                Case Else
+                                sngDensity(ATP, ASeg) = WeavingDensity(sngOneSided(ASeg), sngLS(ASeg), sngLCRF(ASeg), sngLCFR(ASeg), sngLCRR(ASeg), sngNW(ASeg), intNumberLanes(ATP, ASeg), sngMainMain(ATP, ASeg) / fhv(ATP, ASeg), sngMainOFR(ATP, ASeg) / FhvOFR(ATP, ASeg), sngONRMain(ATP, ASeg) / FhvONR(ATP, ASeg), sngRR(ATP, ASeg) / FhvRR(ATP, ASeg), sngFFS(ATP, ASeg), sngID(ASeg), sngSAF(ATP, ASeg)) * (1 / (1 + sngPercentTrucks(ATP, ASeg) / 100 * (sngET(ATP, ASeg) - 1) + sngPercentRV(ATP, ASeg) / 100 * (sngER(ATP, ASeg) - 1)))   'S7speedUpdate
+                                Row59(ATP, ASeg) = WeavingDensity(sngOneSided(ASeg), sngLS(ASeg), sngLCRF(ASeg), sngLCFR(ASeg), sngLCRR(ASeg), sngNW(ASeg), intNumberLanes(ATP, ASeg), sngMainMain(ATP, ASeg) / fhv(ATP, ASeg), sngMainOFR(ATP, ASeg) / FhvOFR(ATP, ASeg), sngONRMain(ATP, ASeg) / FhvONR(ATP, ASeg), sngRR(ATP, ASeg) / FhvRR(ATP, ASeg), sngFFS(ATP, ASeg), sngID(ASeg), sngSAF(ATP, ASeg)) * (1 / (1 + sngPercentTrucks(ATP, ASeg) / 100 * (sngET(ATP, ASeg) - 1) + sngPercentRV(ATP, ASeg) / 100 * (sngER(ATP, ASeg) - 1)))  'S7speedUpdate
+                            End Select
+                        'Else
+                            If sngCAF(ATP, ASeg) <> 1 Then
+                                If strSegmentType(ASeg) = "B" Then 'Or strSegmentType(ASeg) = "R" Then
+                                    'Equation 25-1
+                                    sngSpeed(ATP, ASeg) = ((sngFFS(ATP, ASeg) * sngSAF(ATP, ASeg) + 1) - Exp(LN(sngFFS(ATP, ASeg) * sngSAF(ATP, ASeg) + 1 - SC(ATP, ASeg) / (45 * intNumberLanes(ATP, ASeg))) / (SC(ATP, ASeg) / intNumberLanes(ATP, ASeg)) * (Segmentflow(ATP, ASeg) / intNumberLanes(ATP, ASeg)) / fhv(ATP, ASeg))) 'S7Speed1
+                                End If
+                            End If
+                        'End If
+                        'ActiveCell.Offset(5, ASeg - 1).Value = sngSpeed(ATP, ASeg)
+                        sngDensity(ATP, ASeg) = sngDensity(ATP, ASeg)
+                    End If
+                    Call RIADensity(strSegmentType(ASeg), fhv(ATP, ASeg), strSegmentType(ASeg - 1))
+
+'beh                    Veh = Veh + sngDensity(ATP, ASeg) * L(ASeg) * intNumberLanes(ATP, ASeg)
+'                    PC = PC + (sngDensity(ATP, ASeg) / fhv(ATP, ASeg)) * L(ASeg) * intNumberLanes(ATP, ASeg)
+'                    LaneFeet = LaneFeet + L(ASeg) * intNumberLanes(ATP, ASeg)
+
+                    Next
+
+'beh                    For ASeg = 1 To intNumSegments
+'                        ActiveCell.Offset(27, ASeg - 1).Value = L(ASeg) / (5280 * sngSpeed(ATP, ASeg)) * 60
+'                        TPTT = TPTT + L(ASeg) / (5280 * sngSpeed(ATP, ASeg)) * 60
+'                        ActiveCell.Offset(28, ASeg - 1).Value = L(ASeg) / (5280 * sngFFS(ATP, ASeg)) * 60
+'                        TPFFTT = TPFFTT + L(ASeg) / (5280 * sngFFS(ATP, ASeg)) * 60
+'                        ActiveCell.Offset(29, ASeg - 1).Value = L(ASeg) / (5280 * sngSpeed(ATP, ASeg)) * 60 - L(ASeg) / (5280 * sngFFS(ATP, ASeg)) * 60
+'                        TPTD = TPTD + L(ASeg) / (5280 * sngSpeed(ATP, ASeg)) * 60 - L(ASeg) / (5280 * sngFFS(ATP, ASeg)) * 60
+'                        If ONR(ATP, ASeg) > 0 Then
+'                            ActiveCell.Offset(30, ASeg - 1).Value = L(ASeg) / (5280 * sngSpeed(ATP, ASeg)) * 60 - L(ASeg) / (5280 * sngFFS(ATP, ASeg)) * 60 + (ONRDelay(ATP, ASeg) * 60 / (ONR(ATP, ASeg) / (60 / Interval)))
+'                            TPSTD = TPSTD + L(ASeg) / (5280 * sngSpeed(ATP, ASeg)) * 60 - L(ASeg) / (5280 * sngFFS(ATP, ASeg)) * 60 + (ONRDelay(ATP, ASeg) * 60 / (ONR(ATP, ASeg) / (60 / Interval)))
+'                        Else
+'                            ActiveCell.Offset(30, ASeg - 1).Value = L(ASeg) / (5280 * sngSpeed(ATP, ASeg)) * 60 - L(ASeg) / (5280 * sngFFS(ATP, ASeg)) * 60
+'                            TPSTD = TPSTD + L(ASeg) / (5280 * sngSpeed(ATP, ASeg)) * 60 - L(ASeg) / (5280 * sngFFS(ATP, ASeg)) * 60
+'                        End If
+'                        ActiveCell.Offset(31, ASeg - 1).Value = sngSegmentDemand(ATP, ASeg) * (Interval / 60) * L(ASeg) / 5280
+'                        VMTD(ASeg) = VMTD(ASeg) + sngSegmentDemand(ATP, ASeg) * (Interval / 60) * L(ASeg) / 5280
+'                        TPVMTD = TPVMTD + sngSegmentDemand(ATP, ASeg) * (Interval / 60) * L(ASeg) / 5280
+'                        ActiveCell.Offset(32, ASeg - 1).Value = Segmentflow(ATP, ASeg) * (Interval / 60) * L(ASeg) / 5280
+'                        VMTV(ASeg) = VMTV(ASeg) + Segmentflow(ATP, ASeg) * (Interval / 60) * L(ASeg) / 5280
+'                        TPVMTV = TPVMTV + Segmentflow(ATP, ASeg) * (Interval / 60) * L(ASeg) / 5280
+'                        ActiveCell.Offset(33, ASeg - 1).Value = (L(ASeg) / (5280 * sngSpeed(ATP, ASeg)) * 60) * Segmentflow(ATP, ASeg) * (Interval / 60) / 60
+'                        VHT(ASeg) = VHT(ASeg) + (L(ASeg) / (5280 * sngSpeed(ATP, ASeg)) * 60) * Segmentflow(ATP, ASeg) * (Interval / 60) / 60
+'                        TPVHT = TPVHT + (L(ASeg) / (5280 * sngSpeed(ATP, ASeg)) * 60) * Segmentflow(ATP, ASeg) * (Interval / 60) / 60
+'                        If ONR(ATP, ASeg) > 0 Then
+'                            ActiveCell.Offset(34, ASeg - 1).Value = (L(ASeg) / (5280 * sngSpeed(ATP, ASeg)) * 60 - L(ASeg) / (5280 * sngFFS(ATP, ASeg)) * 60) * Segmentflow(ATP, ASeg) * (Interval / 60) / 60 + ONRDelay(ATP, ASeg)
+'                            VHD(ASeg) = VHD(ASeg) + (L(ASeg) / (5280 * sngSpeed(ATP, ASeg)) * 60 - L(ASeg) / (5280 * sngFFS(ATP, ASeg)) * 60) * Segmentflow(ATP, ASeg) * (Interval / 60) / 60 + ONRDelay(ATP, ASeg)
+'                            TPVHD = TPVHD + (L(ASeg) / (5280 * sngSpeed(ATP, ASeg)) * 60 - L(ASeg) / (5280 * sngFFS(ATP, ASeg)) * 60) * Segmentflow(ATP, ASeg) * (Interval / 60) / 60 + ONRDelay(ATP, ASeg)
+'                        Else
+'                            ActiveCell.Offset(34, ASeg - 1).Value = (L(ASeg) / (5280 * sngSpeed(ATP, ASeg)) * 60 - L(ASeg) / (5280 * sngFFS(ATP, ASeg)) * 60) * Segmentflow(ATP, ASeg) * (Interval / 60) / 60
+'                            VHD(ASeg) = VHD(ASeg) + (L(ASeg) / (5280 * sngSpeed(ATP, ASeg)) * 60 - L(ASeg) / (5280 * sngFFS(ATP, ASeg)) * 60) * Segmentflow(ATP, ASeg) * (Interval / 60) / 60
+'                            TPVHD = TPVHD + (L(ASeg) / (5280 * sngSpeed(ATP, ASeg)) * 60 - L(ASeg) / (5280 * sngFFS(ATP, ASeg)) * 60) * Segmentflow(ATP, ASeg) * (Interval / 60) / 60
+'                        End If
+'                        ActiveCell.Offset(35, ASeg - 1).Value = ActiveCell.Offset(32, ASeg - 1).Value / ActiveCell.Offset(33, ASeg - 1).Value
+'                        ' Took this out to have LOS always calculated from density and not default to F for queues!
+'                        'If UV(ATP, ASeg, S) > 0.01 Then
+'                        '    ActiveCell.Offset(37, ASeg - 1).Value = "F"
+'                        'Else
+'                            Call ReportLOS(strSegmentType(ASeg), ASeg, fhv(ATP, ASeg), sngSegmentDemand(ATP, ASeg) / SC(ATP, ASeg))
+'                Next
+'                TotalDensity(ATP) = Veh / LaneFeet
+'                TotalPCDensity(ATP) = PC / LaneFeet
+'                'addPCE: Calculation for overall density in PCE for oversaturated. Also need to define variable above!
+'                TotLaneFeet(ATP) = LaneFeet
+'                Call Facility_Total
+
+
+                If UV(ATP, 0, S) > 0.01 Then
+                    'Mbox_Prompt = "Queue Extends Beyond Analysis Area In Time Period " & ATP & "."
+                    'Mbox_response = MsgBox(Mbox_Prompt)
+
+                    '****************************************************************************************
+
+                      'verticalQueue(ATP) = ((UV(ATP, 0, S) / intNumberLanes(ATP, 1)) / KQ(ATP, 1, S)) * 5280
+
+                      'UV(ATP, 0, S) * 20 / intNumberLanes(ATP, 1)
+
+                      If KQ(ATP, 1, S) > KB(ATP, 1) Then
+                        verticalQueue(ATP) = UV(ATP, 0, S) / (KQ(ATP, 1, S) - KB(ATP, 1)) * 5280
+                    Else
+                        verticalQueue(ATP) = (UV(ATP, 0, S) / sngDensity(ATP, 1) / intNumberLanes(ATP, 1)) * 5280
+                    End If
+
+
+                '******************************************************************************************
+
+
+                '022912
+
+
+                    End If
+
+                ' Add on-ramp queue length
+
+                ' Step 31 Last time interval in analysis?
+                If ATP = intTimePeriods Then GoTo Thirtysix:
+
+                ' Step 32 Move to the first time step in the next time period
+                ATP = ATP + 1
+                AStep = 1
+                ActiveSheet.protect 'BJS added 052509
+                ' Step 33 Calculate background density of this time period
+                ' Now done in step 8
+
+                ' Step 34 Is there a front clearing queue in this time period?
+                booFront = False
+                For i = 1 To intNumSegments
+                    If UV(ATP - 1, i, S) > 0.1 And UV(ATP - 1, i + 1, S) < 0.1 And SC(ATP, i + 1) - sngONRDemand(ATP, i + 1) > SC(ATP - 1, i + 1) - sngONRDemand(ATP - 1, i + 1) Then
+                                If SC(ATP, i + 1) - sngONRDemand(ATP, i + 1) > sngSegmentDemand(ATP, i + 1) Then
+                                    booFront = True
+                                    bseg = i
+                                End If
+                    End If
+                Next
+                If booFront = False Then GoTo One:
+
+                ' Step 35 Calculate Wave Speed
+                For i = 1 To bseg
+                    WS(ATP, i) = (SC(ATP, i) / intNumberLanes(ATP, i)) / (Kj - KC)
+                    Next
+                GoTo One:
+                ' Step 36 Calculate facility-wide performance measures
+Thirtysix:
+
+                'GoTo Facilitywide:
