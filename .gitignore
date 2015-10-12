@@ -11,3 +11,5 @@ gurobi.log
 *.log
 .idea/workspace.xml
 *.xml
+.idea/FREEVAL-LP.iml
+*.iml
