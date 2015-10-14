@@ -9,7 +9,7 @@ __author__ = 'jltrask'
 use_sos = False
 printFile = False
 def_const_type = 0
-example_problem  = 14
+example_problem = 14
 
 init_time = time.time()
 
@@ -46,6 +46,11 @@ SD = fd["SD"] # Segment demand for segment i in time interval p
 EDv = facilities.compute_estimated_demand(SC, SD)
 #KB = compute_background_density(ED, Ftilde, Ntilde)
 KB = fd["KB"]
+def func_KB(i,p):
+    if (i < 0):
+        return KB[0][p]
+    else:
+        return KB[i][p]
 
 # (2) Wave Trave Time and Wave Speed
 
@@ -106,7 +111,7 @@ for el_i in xrange(NS+1):
     MO3v.append([[hcm.addVar(vtype=gbp.GRB.CONTINUOUS, name='MO3'+str(el_i)+str(el_t)+str(el_p)) for el_p in xrange(P)] for el_t in xrange(S)])
     KQ.append([[hcm.addVar(vtype=gbp.GRB.CONTINUOUS, name='KQ'+str(el_i)+str(el_t)+str(el_p)) for el_p in xrange(P)] for el_t in xrange(S)])
     SFv.append([[hcm.addVar(vtype=gbp.GRB.CONTINUOUS, name='SF'+str(el_i)+str(el_t)+str(el_p)) for el_p in xrange(P)] for el_t in xrange(S)])
-    NVv.append([[hcm.addVar(vtype=gbp.GRB.CONTINUOUS, name='NV'+str(el_i)+str(el_t)+str(el_p)) for el_p in xrange(P)] for el_t in xrange(S+1)])
+    NVv.append([[hcm.addVar(vtype=gbp.GRB.CONTINUOUS, name='NV'+str(el_i)+str(el_t-1)+str(el_p)) for el_p in xrange(P)] for el_t in xrange(S+1)])
     DEF.append([[hcm.addVar(vtype=gbp.GRB.CONTINUOUS, name='DEF'+str(el_i)+str(el_t)+str(el_p)) for el_p in xrange(P)] for el_t in xrange(S)])
     DEF_A.append([[hcm.addVar(lb=-1*gbp.GRB.INFINITY, ub=gbp.GRB.INFINITY, vtype=gbp.GRB.CONTINUOUS, name='DEF'+str(el_i)+str(el_t)+str(el_p)) for el_p in xrange(P)] for el_t in xrange(S)])
     UVv.append([[hcm.addVar(vtype=gbp.GRB.CONTINUOUS, name='UV'+str(el_i)+str(el_t)+str(el_p)) for el_p in xrange(P)] for el_t in xrange(S)])
@@ -350,9 +355,9 @@ hcm.update()
 # Step 2: initialize the Freeway Facility
 # Updateing # of vehicles - note t goes from 0 to S (i.e. S+1 steps) for NV, with 0 being  "before" interval p starts.
 ##### Need to calculate KB from Undersat
-for el_i in xrange(-1,NS):  # Does not set minimum number of vehicles for the final node (vba_code.txt line 184-185)
+for el_i in xrange(NS):  # Does not set minimum number of vehicles for the final node (vba_code.txt line 184-185)
     for el_p in xrange(P):  # Note that the lambda function on UV accounts for the case p = -1 (UV = 0 in that case)
-        hcm.addConstr(NV(el_i, -1, el_p) == KB[el_i][el_p]*L[el_i] + UV(el_i, S-1, el_p-1),
+        hcm.addConstr(NV(el_i, -1, el_p) == func_KB(el_i, el_p)*L[el_i] + UV(el_i, S-1, el_p-1),
                       name='NV_E'+str(el_i)+str(0)+str(el_p))
 #hcm.update()
 print("step 2 done")
@@ -802,7 +807,7 @@ print("step 18 done")
 
 # Steps 19: Calculate Mainline Output 3
 M_MO3=[]
-for el_i in xrange(NS - 1):  # TODO Check NS minus 1?
+for el_i in xrange(NS):  # TODO Check NS minus 1?
     M_MO3.append([])
     for el_t in xrange(S):
         M_MO3[el_i].append([])
@@ -813,11 +818,11 @@ for el_i in xrange(NS):  # TODO Check NS minus 1?
     for el_t in xrange(S):
         for el_p in xrange(P):
             if True or not front_clearing_queue_present[el_i][el_p]:
-                print(str(el_i)+", "+str(el_p)+", "+str(el_t)+", "+"false")
+                #print(str(el_i)+", "+str(el_p)+", "+str(el_t)+", "+"false")
                 # If there is no front clearing queue, this value is set to 1e6 and effectively ignored
                 hcm.addConstr(MO3(el_i,el_t,el_p) == SC[el_i][el_p]*(1/Th), name="MO3_NFCQ"+str(el_i)+str(el_t)+str(el_p))
             else :
-                print(str(el_i)+", "+str(el_p)+", "+str(el_t)+", "+"true")
+                #print(str(el_i)+", "+str(el_p)+", "+str(el_t)+", "+"true")
                 #hcm.addConstr(MO3(el_i,el_t,el_p) == M_MO3[el_i][el_t][el_p][15],name = "3.84b"+str(el_i)+str(el_t)+str(el_p))
                 # Binary indicator variable constraint
                 hcm.addConstr(MO3_I[el_i][el_t][el_p][0]+MO3_I[el_i][el_t][el_p][1] == 2 - I_UV[el_i][el_t][el_p][0],
@@ -949,31 +954,29 @@ for el_i in xrange(NS):  # TODO -1?
     for el_t in xrange(S):  # Todo account for "t-1" (MF/OFRF/ONRF/NV) (NV fixed)
         for el_p in xrange(P):
             #hcm.addConstr(MO2(el_i, el_t, el_p) == SC[el_i][el_p],name="3.86"+str(el_i)+str(el_t)+str(el_p))
-            hcm.addConstr(MO2(el_i, el_t, el_p) ==
-                          SF(el_i, el_t, el_p) - ONRF(el_i, el_t, el_p) + (L[el_i]*KQ[el_i][el_t][el_p]) - NV(el_i, el_t-1, el_p),
-                          name="25-10"+str(el_i)+str(el_t)+str(el_p))
-            # hcm.addConstr(MO2(el_i, el_t, el_p)
-            #               - MF(el_i+1, el_t-1, el_p)
-            #               - OFRF(el_i+1, el_t-1, el_p)
-            #               + ONRF(el_i, el_t-1, el_p)
-            #               - (L[el_i]*KQ[el_i][el_t][el_p])
-            #               + NV(el_i, el_t-1, el_p)
-            #               <= M_MO2*I_UV[el_i][el_t][el_p][1],
-            #               name="3.86"+str(el_i)+str(el_t)+str(el_p))
-            # hcm.addConstr(MO2(el_i, el_t, el_p)
-            #               - MF(el_i+1, el_t-1, el_p)
-            #               - OFRF(el_i+1, el_t-1, el_p)
-            #               + ONRF(el_i, el_t-1, el_p)
-            #               - (L[el_i]*KQ[el_i][el_t][el_p])
-            #               + NV(el_i, el_t-1, el_p)
-            #               >= -M_MO2*I_UV[el_i][el_t][el_p][1],
-            #               name="3.86"+str(el_i)+str(el_t)+str(el_p))
-            # hcm.addConstr(MO2(el_i, el_t, el_p) - SC[el_i][el_p]*(1/Th)
-            #               <= M_MO2*I_UV[el_i][el_t][el_p][0],
-            #               name="3.86"+str(el_i)+str(el_t)+str(el_p))
-            # hcm.addConstr(MO2(el_i, el_t, el_p) - SC[el_i][el_p]*(1/Th)
-            #               >= -M_MO2*I_UV[el_i][el_t][el_p][0],
-            #               name="3.86"+str(el_i)+str(el_t)+str(el_p))
+            # hcm.addConstr(MO2(el_i, el_t, el_p) ==
+            #               SF(el_i, el_t-1, el_p) - ONRF(el_i, el_t, el_p) + (L[el_i]*KQ[el_i][el_t][el_p]) - NV(el_i, el_t-1, el_p),
+            #               name="25-10"+str(el_i)+str(el_t)+str(el_p))
+            hcm.addConstr(MO2(el_i, el_t, el_p)
+                          - SF(el_i, el_t-1, el_p)
+                          + ONRF(el_i, el_t-1, el_p)
+                          - (L[el_i]*KQ[el_i][el_t][el_p])
+                          + NV(el_i, el_t-1, el_p)
+                          <= M_MO2*I_UV[el_i][el_t][el_p][1],
+                          name="3.86"+str(el_i)+str(el_t)+str(el_p))
+            hcm.addConstr(MO2(el_i, el_t, el_p)
+                          - SF(el_i, el_t-1, el_p)
+                          + ONRF(el_i, el_t-1, el_p)
+                          - (L[el_i]*KQ[el_i][el_t][el_p])
+                          + NV(el_i, el_t-1, el_p)
+                          >= -M_MO2*I_UV[el_i][el_t][el_p][1],
+                          name="3.86"+str(el_i)+str(el_t)+str(el_p))
+            hcm.addConstr(MO2(el_i, el_t, el_p) - SC[el_i][el_p]*(1/Th)
+                          <= M_MO2*I_UV[el_i][el_t][el_p][0],
+                          name="3.86"+str(el_i)+str(el_t)+str(el_p))
+            hcm.addConstr(MO2(el_i, el_t, el_p) - SC[el_i][el_p]*(1/Th)
+                          >= -M_MO2*I_UV[el_i][el_t][el_p][0],
+                          name="3.86"+str(el_i)+str(el_t)+str(el_p))
 print("step 21 done")
 ########################################################################################################################
 
@@ -1140,32 +1143,39 @@ print("step 22 done")
 for el_i in xrange(NS):
     for el_t in xrange(S):
         for el_p in xrange(P):
-            hcm.addConstr(SF(el_i, el_t, el_p) == MF(el_i+1,el_t,el_p) + OFRF(el_i+1, el_t, el_p),
+            hcm.addConstr(SF(el_i, el_t, el_p) == MF(el_i+1, el_t, el_p) + OFRF(el_i+1, el_t, el_p),
                           name="3.112"+str(el_i)+str(el_t)+str(el_p))
 
 #hcm.update()
 print("step 24 done")
 # Step 25: Update number of vehicles and unserved vehicles on the segment
-for el_i in xrange(-1,NS):  # TODO: NS-1 correct? If so specify value for NV[0][t][p] & UV[0] (0?)
+# for el_t in xrange(S):
+#     for el_p in xrange(P):
+#         hcm.addConstr(UV(-1,el_t,el_p) == SD[0][el_p]/Th - MF(0,el_t,el_p) + UV(-1,el_t-1, el_p),
+#                       name="3.114_-1_"+str(el_t)+"_"+str(el_p))
+for el_i in xrange(NS):  # TODO: NS-1 correct? If so specify value for NV[0][t][p] & UV[0] (0?)
     for el_t in xrange(S):
         for el_p in xrange(P):
             # Constraint determining number of vehicles on the segment
             hcm.addConstr(NV(el_i, el_t, el_p) == NV(el_i, el_t-1, el_p) + MF(el_i, el_t, el_p)
-                        + ONRF(el_i, el_t, el_p) - MF(el_i+1, el_t, el_p) - OFRF(el_i+1 , el_t, el_p),
-                        name="3.113" +str(el_i)+str(el_t)+str(el_p))
+                        + ONRF(el_i, el_t, el_p) - MF(el_i+1, el_t, el_p) - OFRF(el_i+1, el_t, el_p),
+                        name="3.113" + str(el_i)+str(el_t)+str(el_p))
 
             # Constraint updating the number of unserved vehicles
-            hcm.addConstr(UV(el_i, el_t, el_p) == NV(el_i, el_t, el_p) - KB[el_i][el_p]*L[el_i],
-                          name = "3.114"+str(el_i)+str(el_t)+str(el_p))
+            hcm.addConstr(UV(el_i, el_t, el_p) == NV(el_i, el_t, el_p) - func_KB(el_i, el_p)*L[el_i],
+                          name="3.114"+str(el_i)+str(el_t)+str(el_p))
 print("step 25 done")
 hcm.update()
 model_build_time=time.time()
 print("Model Built: "+str(model_build_time - init_time))
 #hcm.setParam(gbp.GRB.param.ConcurrentMIP, 32)
 #hcm.write("hcm.mst")
+hcm.read('sto_cq3.mst')
+hcm.update()
+hcm.setParam(gbp.GRB.param.SubMIPNodes, 5000000)
 hcm.optimize()
-#hcm.computeIIS()
-#hcm.write('model.ilp')
+# #hcm.computeIIS()
+# #hcm.write('model.ilp')
 optimize_finish_time = time.time()
 print("Model Solved: "+str(optimize_finish_time - model_build_time))
 #
@@ -1177,26 +1187,26 @@ if printFile:
             for i in xrange(NS):
                 varCount+=1
                 f.write(str(varCount)
-                      + ", "+ str(i)
+                      + ", " + str(i)
                       + ", " + str(p)
                       + ", " + str(t)
-                      + ", " + str(NV(i,t, p).X)
-                      + ", " + str(MF(i,t, p).X/Th)
+                      + ", " + str(NV(i, t, p).X)
+                      + ", " + str(MF(i, t, p).X/Th)
                       + ", " + str(MI[i][t][p].X/Th)
-                      + ", " + str(MO1(i,t, p).X/Th)
-                      + ", " + str(MO2(i,t, p).X/Th)
-                      + ", " + str(MO3(i,t, p).X/Th)
+                      + ", " + str(MO1(i, t, p).X/Th)
+                      + ", " + str(MO2(i, t, p).X/Th)
+                      + ", " + str(MO3(i, t, p).X/Th)
                       #+ ", " + str(ONRI[i][t][p].X)
                       #+ ", " + str(ONRD[i][p])
                       #+ ", " + str(ONRQ(i,t, p).X)
                       #+ ", " + str(ONRF_I[i][t][p][0].X)
                       #+ ", " + str(ONRF_I[i][t][p][1].X)
                       #+ ", " + str(ONRO[i][t][p].X)
-                      + ", " + str(ONRF(i,t, p).X/Th)
-                      + ", " + str(OFRF(i,t, p).X/Th)
+                      + ", " + str(ONRF(i, t, p).X/Th)
+                      + ", " + str(OFRF(i, t, p).X/Th)
                       + ", " + str(DEF_A[i][t][p].X)
                       + ", " + str(DEF[i][t][p].X)
-                      + ", " + str(UV(i,t,p).X)
+                      + ", " + str(UV(i, t, p).X)
                       + ", " + str(I_UV[i][t][p][0].X)
                       + ", " + str(I_UV[i][t][p][1].X)+"\n")
     f.close()
@@ -1250,5 +1260,91 @@ else:
                     s+= ", " + str(UV(i-1, t - 1, p).X)
                 print(s)
 
-
-# Set Lower/Upper Bounds
+# t1=time.time()
+# for el_i in xrange(NS):                               # TODO start loop at 0?
+#     NV(el_i, -1, 0).Start = KB[el_i][el_p]*L[el_i]
+#     for el_p in xrange(1,P):
+#         NV(el_i, -1, el_p).Start = KB[el_i][el_p]*L[el_i]+UV(el_i, S-1, el_p-1).Start
+#     for el_t in xrange(S):
+#         for el_p in xrange(P):
+#             #print(str(el_i)+","+str(el_t)+","+str(el_p))
+#             #steps 1-5 by MST
+#             #Step 9
+#             if el_i is 0 and el_p is 0 and el_t is 0:
+#                 MI[el_i][el_t][el_p].Start = MF(el_i-1, el_t, el_p) + ONRF(el_i-1, el_t, el_p) - OFRF(el_i, el_t, el_p).Start + UV(el_i-1, el_t - 1, el_p)
+#             elif el_i is 0:
+#                 MI[el_i][el_t][el_p].Start = MF(el_i-1, el_t, el_p) + ONRF(el_i-1, el_t, el_p) - OFRF(el_i, el_t, el_p).Start + UV(el_i-1, el_t - 1, el_p).Start
+#             elif el_p is 0 and el_t is 0:
+#                 MI[el_i][el_t][el_p].Start = MF(el_i-1, el_t, el_p).Start + ONRF(el_i-1, el_t, el_p).Start - OFRF(el_i, el_t, el_p).Start + UV(el_i-1, el_t - 1, el_p)
+#             else:
+#                 MI[el_i][el_t][el_p].Start = MF(el_i-1, el_t, el_p).Start + ONRF(el_i-1, el_t, el_p).Start - OFRF(el_i, el_t, el_p).Start + UV(el_i-1, el_t - 1, el_p).Start
+#             #Steps 10-15 by MST
+#             #Step 16
+#             if el_p is 0 and el_t is 0:
+#                 MO1(el_i, el_t, el_p).Start = min(min(SC[el_i][el_p]/Th, MO2(el_i, el_t-1, el_p)), MO3(el_i, el_t-1, el_p))
+#                 #MO1(el_i, el_t, el_p).Start = min(MO1(el_i, el_t, el_p).Start, MO3(el_i, el_t-1, el_p))
+#                 #print(str(el_i)+","+str(el_t)+","+str(el_p)+","+str(MO1(el_i, el_t, el_p).Start)+","+str(min(min(SC[el_i][el_p]/Th, MO2(el_i, el_t-1, el_p)), MO3(el_i, el_t-1, el_p))))
+#                 KQ[el_i][el_t][el_p].Start = 0
+#                 MO2(el_i, el_t, el_p).Start = SC[el_i][el_p]/Th
+#                 MO3(el_i, el_t, el_p).Start = SC[el_i][el_p]/Th
+#             else:
+#                 MO1(el_i, el_t, el_p).Start = min(min(SC[el_i][el_p]/Th, MO2(el_i, el_t-1, el_p).Start), MO3(el_i, el_t-1, el_p).Start)
+#                 #Step 17-19
+#                 MO3(el_i, el_t, el_p).Start = SC[el_i][el_p]/Th
+#                 #Step 20
+#                 KQ[el_i][el_t][el_p].Start = KJ - ((KJ - KC)*SF(el_i, el_t-1, el_p).Start)/(SC[el_i][el_p]/Th)
+#                 #Step 21
+#                 if KQ[el_i][el_t][el_p].Start > 0.01:
+#                     MO2(el_i, el_t, el_p).Start = SF(el_i, el_t-1, el_p).Start - ONRF(el_i, el_t,el_p).Start + (KQ[el_i][el_t][el_p].Start*L[el_i]) - NV(el_i, el_t-1, el_p).Start
+#                 else:
+#                     MO2(el_i, el_t, el_p).Start = SC[el_i][el_p]/Th
+#             #Step 22
+#             if el_i is 0:
+#                 MF(el_i, el_t, el_p).Start = min(min(min(min(SC[el_i][el_p]/Th,MO3(el_i, el_t, el_p).Start),MO2(el_i, el_t, el_p).Start), MO1(el_i, el_t, el_p).Start), MI[el_i][el_t][el_p].Start)
+#             else:
+#                 MF(el_i, el_t, el_p).Start = min(min(min(min(min(SC[el_i][el_p]/Th, SC[el_i-1][el_p]/Th),MO3(el_i, el_t, el_p).Start),MO2(el_i, el_t, el_p).Start), MO1(el_i, el_t, el_p).Start), MI[el_i][el_t][el_p].Start)
+#             #MF(el_i, el_t, el_p).Start = min(MF(el_i, el_t, el_p).Start, MO3(el_i, el_t, el_p).Start)
+#             #MF(el_i, el_t, el_p).Start = min(MF(el_i, el_t, el_p).Start, MO2(el_i, el_t, el_p).Start)
+#             #MF(el_i, el_t, el_p).Start = min(MF(el_i, el_t, el_p).Start, MO1(el_i, el_t, el_p).Start)
+#             #MF(el_i, el_t, el_p).Start = min(MF(el_i, el_t, el_p).Start, MI[el_i][el_t][el_p].Start)
+#             #Step 23 - 24
+#             if el_i > 0:
+#                 SF(el_i-1, el_t, el_p).Start = MF(el_i, el_t, el_p).Start+OFRF(el_i, el_t, el_p).Start
+#                 #Step 25
+#                 NV(el_i-1, el_t, el_p).Start = NV(el_i-1, el_t-1, el_p).Start + MF(el_i-1, el_t, el_p).Start + ONRF(el_i-1, el_t, el_p).Start - MF(el_i, el_t, el_p).Start -OFRF(el_i, el_t, el_p).Start
+#                 UV(el_i-1, el_t, el_p).Start = NV(el_i-1, el_t, el_p).Start - (KB[el_i-1][el_p]*L[el_i-1])
+#             else:
+#                 UV(el_i-1, el_t, el_p).Start = 0
+#         hcm.update()
+#
+# varCount = 0
+# for p in xrange(P):
+#     for t in xrange(S):
+#         for i in xrange(NS):
+#             varCount+=1
+#             s = str(varCount)
+#             s+=", "+ str(i)
+#             s+= ", " + str(p)
+#             s+= ", " + str(t)
+#             s+= ", " + str(NV(i, t, p).Start)
+#             s+= ", " + str(MF(i, t, p).Start)
+#             s+= ", " + str(MI[i][t][p].Start)
+#             s+= ", " + str(MO1(i, t, p).Start)
+#             s+= ", " + str(MO2(i, t, p).Start)
+#             s+= ", " + str(MO3(i, t, p).Start)
+#             #s+= ", " + str(ONRI[i][t][p].X)
+#             #s+= ", " + str(ONRD[i][p])
+#             #s+=", " + str(ONRQ(i,t, p).X)
+#             #s+= ", " + str(ONRF_I[i][t][p][0].X)
+#             #s+= ", " + str(ONRF_I[i][t][p][1].X)
+#             #s+= ", " + str(ONRO[i][t][p].X)
+#             s+= ", " + str(ONRF(i,t, p).Start)
+#             s+= ", " + str(OFRF(i,t, p).Start)
+#             s+= ", " + str(UV(i,t,p).Start)
+#             if p < 0 or (p is 0 and t is 0):
+#                 s+=", 0.0"
+#             else:
+#                 s+= ", " + str(UV(i-1, t - 1, p).Start)
+#             print(s)
+#
+# print('Completed in: '+str(time.time()-t1))
