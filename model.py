@@ -108,22 +108,24 @@ NVv = []  # NV in segment i at step t in interval p
 DEF = []    # Deficit in flow at segment i at time step t in interval p
 DEF_A = []  # Auxiliary Variable to hold the Deficit as it is determined by Min function
 UVv = []  # Unserved vehicles: additional # of vehicles stored in segment i at the end of step t in interval p
+SCv = [] # Capacity of a segment, allows for capacity drop to take effect
 
 for el_i in xrange(NS+1):
-    MFv.append([[hcm.addVar(vtype=gbp.GRB.CONTINUOUS, name='MF'+str(el_i)+str(el_t)+str(el_p)) for el_p in xrange(P)] for el_t in xrange(S)])
-    ONRFv.append([[hcm.addVar(vtype=gbp.GRB.CONTINUOUS, name='ONRF'+str(el_i)+str(el_t)+str(el_p)) for el_p in xrange(P)] for el_t in xrange(S)])
-    ONRQv.append([[hcm.addVar(vtype=gbp.GRB.CONTINUOUS, name='ONRQ'+str(el_i)+str(el_t)+str(el_p)) for el_p in xrange(P)] for el_t in xrange(S)])
-    OFRFv.append([[hcm.addVar(vtype=gbp.GRB.CONTINUOUS, name='OFRF'+str(el_i)+str(el_t)+str(el_p)) for el_p in xrange(P)] for el_t in xrange(S)])
-    MI.append([[hcm.addVar(vtype=gbp.GRB.CONTINUOUS, name='MI'+str(el_i)+str(el_t)+str(el_p)) for el_p in xrange(P)] for el_t in xrange(S)])
-    MO1v.append([[hcm.addVar(vtype=gbp.GRB.CONTINUOUS, name='MO1'+str(el_i)+str(el_t)+str(el_p)) for el_p in xrange(P)] for el_t in xrange(S)])
-    MO2v.append([[hcm.addVar(vtype=gbp.GRB.CONTINUOUS, name='MO2'+str(el_i)+str(el_t)+str(el_p)) for el_p in xrange(P)] for el_t in xrange(S)])
-    MO3v.append([[hcm.addVar(vtype=gbp.GRB.CONTINUOUS, name='MO3'+str(el_i)+str(el_t)+str(el_p)) for el_p in xrange(P)] for el_t in xrange(S)])
-    KQ.append([[hcm.addVar(vtype=gbp.GRB.CONTINUOUS, name='KQ'+str(el_i)+str(el_t)+str(el_p)) for el_p in xrange(P)] for el_t in xrange(S)])
-    SFv.append([[hcm.addVar(vtype=gbp.GRB.CONTINUOUS, name='SF'+str(el_i)+str(el_t)+str(el_p)) for el_p in xrange(P)] for el_t in xrange(S)])
+    MFv.append([[hcm.addVar(vtype=gbp.GRB.CONTINUOUS, name='MF'+str(el_i)+'_'+str(el_t)+'_'+str(el_p)) for el_p in xrange(P)] for el_t in xrange(S)])
+    ONRFv.append([[hcm.addVar(vtype=gbp.GRB.CONTINUOUS, name='ONRF'+str(el_i)+'_'+str(el_t)+'_'+str(el_p)) for el_p in xrange(P)] for el_t in xrange(S)])
+    ONRQv.append([[hcm.addVar(vtype=gbp.GRB.CONTINUOUS, name='ONRQ'+str(el_i)+'_'+str(el_t)+'_'+str(el_p)) for el_p in xrange(P)] for el_t in xrange(S)])
+    OFRFv.append([[hcm.addVar(vtype=gbp.GRB.CONTINUOUS, name='OFRF'+str(el_i)+'_'+str(el_t)+'_'+str(el_p)) for el_p in xrange(P)] for el_t in xrange(S)])
+    MI.append([[hcm.addVar(vtype=gbp.GRB.CONTINUOUS, name='MI'+str(el_i)+'_'+str(el_t)+'_'+str(el_p)) for el_p in xrange(P)] for el_t in xrange(S)])
+    MO1v.append([[hcm.addVar(vtype=gbp.GRB.CONTINUOUS, name='MO1'+str(el_i)+'_'+str(el_t)+'_'+str(el_p)) for el_p in xrange(P)] for el_t in xrange(S)])
+    MO2v.append([[hcm.addVar(vtype=gbp.GRB.CONTINUOUS, name='MO2'+str(el_i)+'_'+str(el_t)+'_'+str(el_p)) for el_p in xrange(P)] for el_t in xrange(S)])
+    MO3v.append([[hcm.addVar(vtype=gbp.GRB.CONTINUOUS, name='MO3'+str(el_i)+'_'+str(el_t)+'_'+str(el_p)) for el_p in xrange(P)] for el_t in xrange(S)])
+    KQ.append([[hcm.addVar(vtype=gbp.GRB.CONTINUOUS, name='KQ'+str(el_i)+'_'+str(el_t)+'_'+str(el_p)) for el_p in xrange(P)] for el_t in xrange(S)])
+    SFv.append([[hcm.addVar(vtype=gbp.GRB.CONTINUOUS, name='SF'+str(el_i)+'_'+str(el_t)+'_'+str(el_p)) for el_p in xrange(P)] for el_t in xrange(S)])
     NVv.append([[hcm.addVar(vtype=gbp.GRB.CONTINUOUS, name='NV'+str(el_i)+str(el_t-1)+str(el_p)) for el_p in xrange(P)] for el_t in xrange(S+1)])
-    DEF.append([[hcm.addVar(vtype=gbp.GRB.CONTINUOUS, name='DEF'+str(el_i)+str(el_t)+str(el_p)) for el_p in xrange(P)] for el_t in xrange(S)])
-    DEF_A.append([[hcm.addVar(lb=-1*gbp.GRB.INFINITY, ub=gbp.GRB.INFINITY, vtype=gbp.GRB.CONTINUOUS, name='DEF'+str(el_i)+str(el_t)+str(el_p)) for el_p in xrange(P)] for el_t in xrange(S)])
-    UVv.append([[hcm.addVar(vtype=gbp.GRB.CONTINUOUS, name='UV'+str(el_i)+str(el_t)+str(el_p)) for el_p in xrange(P)] for el_t in xrange(S)])
+    DEF.append([[hcm.addVar(vtype=gbp.GRB.CONTINUOUS, name='DEF'+str(el_i)+'_'+str(el_t)+'_'+str(el_p)) for el_p in xrange(P)] for el_t in xrange(S)])
+    DEF_A.append([[hcm.addVar(lb=-1*gbp.GRB.INFINITY, ub=gbp.GRB.INFINITY, vtype=gbp.GRB.CONTINUOUS, name='DEF'+str(el_i)+'_'+str(el_t)+'_'+str(el_p)) for el_p in xrange(P)] for el_t in xrange(S)])
+    UVv.append([[hcm.addVar(vtype=gbp.GRB.CONTINUOUS, name='UV'+str(el_i)+'_'+str(el_t)+'_'+str(el_p)) for el_p in xrange(P)] for el_t in xrange(S)])
+    SCv.append([[hcm.addVar(vtype=gbp.GRB.CONTINUOUS, name='SC'+str(el_i)+'_'+str(el_t)+'_'+str(el_p)) for el_p in xrange(P)] for el_t in xrange(S)])
 
 ###### Creating Expressions for Necessary Variables
 def MF(i, t, p):
@@ -250,24 +252,24 @@ for el_i in xrange(NS+1):
         for el_p in xrange(P):
             MO1_I[el_i][el_t].append(
                 [hcm.addVar(vtype=gbp.GRB.BINARY,
-                            name = "MO1_I"+str(el_i)+str(el_t)+str(el_p)+str(el)) for el in xrange(2)])
+                            name = "MO1_I"+str(el_i)+'_'+str(el_t)+'_'+str(el_p)+'_'+str(el)) for el in xrange(2)])
             MO1_A[el_i][el_t].append(hcm.addVar(vtype=gbp.GRB.CONTINUOUS,
-                            name='MO1_A'+str(el_i)+str(el_t)+str(el_p)))
+                            name='MO1_A'+str(el_i)+'_'+str(el_t)+'_'+str(el_p)))
             I_UV[el_i][el_t].append(
                 [hcm.addVar(vtype=gbp.GRB.BINARY,
-                            name = "I_UV"+str(var_id)+str(el_i)+str(el_t)+str(el_p))for var_id in xrange(2)])
+                            name = "I_UV"+str(var_id)+str(el_i)+'_'+str(el_t)+'_'+str(el_p))for var_id in xrange(2)])
             MO3_A[el_i][el_t].append(
                 [hcm.addVar(vtype=gbp.GRB.CONTINUOUS,
-                            name='MO3_A'+str(el)+str(el_i)+str(el_t)+str(el_p)) for el in xrange(4)])
+                            name='MO3_A'+str(el)+str(el_i)+'_'+str(el_t)+'_'+str(el_p)) for el in xrange(4)])
             MO3_I[el_i][el_t].append(
                 [hcm.addVar(vtype=gbp.GRB.BINARY,
-                            name='MO3_I'+str(el)+str(el_i)+str(el_t)+str(el_p)) for el in xrange(8)])
+                            name='MO3_I'+str(el)+str(el_i)+'_'+str(el_t)+'_'+str(el_p)) for el in xrange(8)])
             MF_A[el_i][el_t].append(
                 [hcm.addVar(vtype=gbp.GRB.CONTINUOUS,
-                            name='MF_A'+str(el)+str(el_i)+str(el_t)+str(el_p)) for el in xrange(4)])
+                            name='MF_A'+str(el)+str(el_i)+'_'+str(el_t)+'_'+str(el_p)) for el in xrange(4)])
             MF_I[el_i][el_t].append(
                 [hcm.addVar(vtype=gbp.GRB.BINARY,
-                            name='MF_I'+str(el)+str(el_i)+str(el_t)+str(el_p)) for el in xrange(10)])
+                            name='MF_I'+str(el)+str(el_i)+'_'+str(el_t)+'_'+str(el_p)) for el in xrange(10)])
 
 
 ########################################## Creating ONR Node Only Variables ############################################
@@ -277,8 +279,8 @@ ONRO_I = []  # Binary DVs for Eqn 25-18, ONRO=Min(RM, ONRC, Max(Min(MF+ONRF,MO3+
 ONRI = []  # Input flow rate desiring to enter the merge point at ONR node i during step t in interval p
 ONRF_I = []  # Binary DVs for Eqns 25-19 and 25-20, ONRI<ONRO => ONRF=ONRI, ONRI>ONRO => ONRF=ONRO
 for el_i in xrange(len(Ntilde)): #nee NS
-    ONRI.append([[hcm.addVar(vtype=gbp.GRB.CONTINUOUS, name='ONRI'+str(el_i)+str(el_t)+str(el_p)) for el_p in xrange(P)] for el_t in xrange(S)])
-    ONRO.append([[hcm.addVar(vtype=gbp.GRB.CONTINUOUS, name='ONRO'+str(el_i)+str(el_t)+str(el_p)) for el_p in xrange(P)] for el_t in xrange(S)])
+    ONRI.append([[hcm.addVar(vtype=gbp.GRB.CONTINUOUS, name='ONRI'+str(el_i)+'_'+str(el_t)+'_'+str(el_p)) for el_p in xrange(P)] for el_t in xrange(S)])
+    ONRO.append([[hcm.addVar(vtype=gbp.GRB.CONTINUOUS, name='ONRO'+str(el_i)+'_'+str(el_t)+'_'+str(el_p)) for el_p in xrange(P)] for el_t in xrange(S)])
     ONRO_A.append([])
     ONRF_I.append([])
     ONRO_I.append([])
@@ -290,13 +292,13 @@ for el_i in xrange(len(Ntilde)): #nee NS
             # Creating auxilary variables
             ONRO_A[el_i][el_t].append(
                 [hcm.addVar(vtype=gbp.GRB.CONTINUOUS,
-                                                  name='ONRO_A1'+str(el_i)+str(el_t)+str(el_p)+str(el)) for el in xrange(4)])
+                                                  name='ONRO_A1'+str(el_i)+'_'+str(el_t)+'_'+str(el_p)+'_'+str(el)) for el in xrange(4)])
             ONRF_I[el_i][el_t].append(
                 [hcm.addVar(vtype=gbp.GRB.BINARY,
-                                                  name='ONRF_A'+str(el)+str(el_i)+str(el_t)+str(el_p)) for el in xrange(2)])
+                                                  name='ONRF_A'+str(el)+str(el_i)+'_'+str(el_t)+'_'+str(el_p)) for el in xrange(2)])
             ONRO_I[el_i][el_t].append(
                 [hcm.addVar(vtype=gbp.GRB.BINARY,
-                            name = "ONRO_I"+str(el_i)+str(el_t)+str(el_p)+str(el)) for el in xrange(5)])
+                            name = "ONRO_I"+str(el_i)+'_'+str(el_t)+'_'+str(el_p)+'_'+str(el)) for el in xrange(5)])
 
 
 ########################################## Creating OFR Node Only Variables ############################################
@@ -311,11 +313,11 @@ for el_i in xrange(len(Ftilde)):
         for el_p in xrange(P):
             DEF_I[el_i][el_t].append(
                 hcm.addVar(vtype=gbp.GRB.BINARY,
-                            name = "DEF_I"+str(el_i)+str(el_t)+str(el_p)))
+                            name = "DEF_I"+str(el_i)+'_'+str(el_t)+'_'+str(el_p)))
             OFRF_I[el_i][el_t].append(
-                [hcm.addVar(vtype=gbp.GRB.BINARY, name='OFRF_I'+str(0)+str(el_i)+str(el_t)+str(el_p)+"0"),
+                [hcm.addVar(vtype=gbp.GRB.BINARY, name='OFRF_I'+str(0)+str(el_i)+'_'+str(el_t)+'_'+str(el_p)+"_0"),
                  hcm.addVar(vtype=gbp.GRB.INTEGER, ub=2.0,
-                            name='OFRF_I'+str(1)+str(el_i)+str(el_t)+str(el_p)+"1")])
+                            name='OFRF_I'+str(1)+str(el_i)+'_'+str(el_t)+'_'+str(el_p)+"_1")])
 
 ########################################################################################################################
 
@@ -394,35 +396,35 @@ for el_i in xrange(NS+1):
                     if el_t is 0:
                         a1 = sum(SD[el_i-1][0:el_p])*(1/Th) # Add Segment demand from first to previous period
                         a1-= sum([sum([MF(el_i-1, el1, el2)+ONRF(el_i-1, el1, el2) for el1 in xrange(S)]) for el2 in xrange(el_p)]) # Subtract (MF+ONRF) of previous node
-                        hcm.addConstr(DEF_A[el_i][el_t][el_p] == a1, name="DEF_TEMP_A"+str(el_i)+str(el_t)+str(el_p))
+                        hcm.addConstr(DEF_A[el_i][el_t][el_p] == a1, name="DEF_TEMP_A"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
                     else:
-                        hcm.addConstr(DEF_A[el_i][el_t][el_p] == DEF_A[el_i][el_t-1][el_p] + MF(el_i-1, el_t-1, el_p) + ONRF(el_i-1, el_t-1, el_p), name="DEF_TEMP_A"+str(el_i)+str(el_t)+str(el_p))
+                        hcm.addConstr(DEF_A[el_i][el_t][el_p] == DEF_A[el_i][el_t-1][el_p] + MF(el_i-1, el_t-1, el_p) + ONRF(el_i-1, el_t-1, el_p), name="DEF_TEMP_A"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
                     #### Setting DEF to be max of DEF_A and 0
                     # Checking to see if DEF_A is greater than 0
                     hcm.addConstr(DEF_A[el_i][el_t][el_p] - def_zero_tol
                                   <= big_m * DEF_I[ofr_i][el_t][el_p],
-                              name='DEF_E1'+str(el_i)+str(el_t)+str(el_p)) # DEF_I=1 => DEF_A>0
+                              name='DEF_E1'+str(el_i)+'_'+str(el_t)+'_'+str(el_p)) # DEF_I=1 => DEF_A>0
                     hcm.addConstr(def_zero_tol-DEF_A[el_i][el_t][el_p]
                                   <= big_m * (1 - DEF_I[ofr_i][el_t][el_p]),
-                              name='DEF_E2'+str(el_i)+str(el_t)+str(el_p)) # DEF_I=0 => DEF_A<=0
+                              name='DEF_E2'+str(el_i)+'_'+str(el_t)+'_'+str(el_p)) # DEF_I=0 => DEF_A<=0
                     # Setting DEF to be a1 (when DEF_I=1)
                     hcm.addConstr(DEF[el_i][el_t][el_p] - DEF_A[el_i][el_t][el_p]
                                   <= big_m * (1 - DEF_I[ofr_i][el_t][el_p]),
-                              name='DEF_E3'+str(el_i)+str(el_t)+str(el_p))
+                              name='DEF_E3'+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
                     hcm.addConstr(DEF[el_i][el_t][el_p] - DEF_A[el_i][el_t][el_p]
                                   >= -1*big_m * (1 - DEF_I[ofr_i][el_t][el_p]),
-                              name='DEF_E4'+str(el_i)+str(el_t)+str(el_p))
+                              name='DEF_E4'+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
                     # Setting DEF to be 0 (when DEF_A<=0)
                     hcm.addConstr(DEF[el_i][el_t][el_p]
                                   <= big_m*DEF_I[ofr_i][el_t][el_p],
-                              name='DEF_E5'+str(el_i)+str(el_t)+str(el_p))
+                              name='DEF_E5'+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
                     hcm.addConstr(DEF[el_i][el_t][el_p]
                                   >= -1*big_m*DEF_I[ofr_i][el_t][el_p],
-                              name='DEF_E6'+str(el_i)+str(el_t)+str(el_p))
+                              name='DEF_E6'+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
                 else:
                     # Force Deficit to be 0 (debugging purposes)
-                    hcm.addConstr(DEF_A[el_i][el_t][el_p] == 0.0, name='DEF_TEMP_A'+str(el_i)+str(el_t)+str(el_p))
-                    hcm.addConstr(DEF[el_i][el_t][el_p] == 0.0, name='DEF_TEMP_A'+str(el_i)+str(el_t)+str(el_p))
+                    hcm.addConstr(DEF_A[el_i][el_t][el_p] == 0.0, name='DEF_TEMP_A'+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
+                    hcm.addConstr(DEF[el_i][el_t][el_p] == 0.0, name='DEF_TEMP_A'+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
 ########################################################################################################################
 
 
@@ -431,11 +433,11 @@ for el_i in xrange(NS+1):
                 # Constraints checking if there is a deficit
                 # (Now redundant, can simply use DEF_I)
                 #hcm.addConstr(DEF[el_i][el_t][el_p] - def_zero_tol <= big_m * OFRF_I[ofr_i][el_t][el_p][0],
-                #              name='OFRF_IF_DEF1'+str(el_i)+str(el_t)+str(el_p))  # OFRF_Ii,t,p,0 = 1 implies DEF > 0
+                #              name='OFRF_IF_DEF1'+str(el_i)+'_'+str(el_t)+'_'+str(el_p))  # OFRF_Ii,t,p,0 = 1 implies DEF > 0
                 #hcm.addConstr(def_zero_tol - DEF[el_i][el_t][el_p] <= big_m * (1 - OFRF_I[ofr_i][el_t][el_p][0]),
-                #              name='OFRF_IF_DEF2'+str(el_i)+str(el_t)+str(el_p))  # OFRF_Ii,t,p,0 = 0 implies DEF < 0
+                #              name='OFRF_IF_DEF2'+str(el_i)+'_'+str(el_t)+'_'+str(el_p))  # OFRF_Ii,t,p,0 = 0 implies DEF < 0
                 hcm.addConstr(OFRF_I[ofr_i][el_t][el_p][0] - DEF_I[ofr_i][el_t][el_p] == 0,
-                              name='OFRF_IF_DEF2'+str(el_i)+str(el_t)+str(el_p))
+                              name='OFRF_IF_DEF2'+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
 
                 # Constraint that activates (or deactivates) situation 1/2 based on deficit check
                 # If there is a deficit, i_0=0.
@@ -444,9 +446,9 @@ for el_i in xrange(NS+1):
                 # i_0=1 (DEF>0) => i_1>=0 & i_1<=1
                 # i_0=0 (DEF=0) => i_1>=2 & i_1<=2
                 hcm.addConstr(OFRF_I[ofr_i][el_t][el_p][1] >= 2 - 2 * OFRF_I[ofr_i][el_t][el_p][0], # OFRF_I[ofr_i][el_t][el_p][0]
-                              name='OFRF_IF_DEF3'+str(el_i)+str(el_t)+str(el_p))
+                              name='OFRF_IF_DEF3'+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
                 hcm.addConstr(OFRF_I[ofr_i][el_t][el_p][1] <= 2-OFRF_I[ofr_i][el_t][el_p][0], # OFRF_I[ofr_i][el_t][el_p][0]
-                              name='OFRF_IF_DEF4'+str(el_i)+str(el_t)+str(el_p)) # big_m=1 b/c i_1<=2 (ub)
+                              name='OFRF_IF_DEF4'+str(el_i)+'_'+str(el_t)+'_'+str(el_p)) # big_m=1 b/c i_1<=2 (ub)
 
                 # Constraints to check to see if situation 1 or situation 2 is true. OFRF_Ii,t,p,1 (i_1) = 1 implies that
                 # situation 1 is used, while if OFRF_Ii,t,p,1 (i_1) = 0 imples that situation 2 is used.
@@ -454,12 +456,12 @@ for el_i in xrange(NS+1):
                               - MF(el_i-1, el_t, el_p)
                               - ONRF(el_i-1, el_t, el_p)
                               <= big_m * OFRF_I[ofr_i][el_t][el_p][1],
-                              name="OFRF_IF_S1"+str(el_i)+str(el_t)+str(el_p))
+                              name="OFRF_IF_S1"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
                 hcm.addConstr(MF(el_i-1, el_t, el_p)
                               + ONRF(el_i-1, el_t, el_p)
                               - DEF[el_i][el_t][el_p]
                               <= big_m * (OFRF_I[ofr_i][el_t][el_p][1] - 1),           # Reversed because i_1 can = 2
-                              name="OFRF_IF_S2"+str(el_i)+str(el_t)+str(el_p))
+                              name="OFRF_IF_S2"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
 
                     # Situation 1: If upstream mainline flow plus the flow from an ONR at the upstream node is less than
                     # the deficit for this time step, then the OFR flow is equal to the mainline and the ONR flows times
@@ -469,12 +471,12 @@ for el_i in xrange(NS+1):
                               - ofr_tp1*MFv[el_i-1][el_t][el_p]
                               - ofr_tp1*ONRF(el_i-1, el_t, el_p)
                               <= big_m*(OFRF_I[ofr_i][el_t][el_p][1] - 1),
-                              name='OFRF_E1_1'+str(el_i)+str(el_t)+str(el_p))
+                              name='OFRF_E1_1'+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
                 hcm.addConstr(OFRF(el_i, el_t, el_p)
                               - ofr_tp1*MFv[el_i-1][el_t][el_p]
                               - ofr_tp1*ONRF(el_i-1, el_t, el_p)
                               >= -1*big_m * (OFRF_I[ofr_i][el_t][el_p][1] - 1),
-                              name='OFRF_E1_2'+str(el_i)+str(el_t)+str(el_p))
+                              name='OFRF_E1_2'+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
 ###################################################### Eq 25-24 ########################################################
                     # Situation 2: If the deficit is less than the upstream mainline flow plus the ONR flow from an ONR
                     # at the upstream node (if present)
@@ -486,14 +488,14 @@ for el_i in xrange(NS+1):
                               - ofr_tp2_2*ONRF(el_i-1, el_t, el_p)
                               + ofr_tp2_2*DEF[el_i][el_t][el_p]
                               <= big_m*OFRF_I[ofr_i][el_t][el_p][1],
-                              name='OFRF_E2_1'+str(el_i)+str(el_t)+str(el_p))
+                              name='OFRF_E2_1'+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
                 hcm.addConstr(OFRF(el_i, el_t, el_p)
                               - ofr_tp2_1*DEF[el_i][el_t][el_p]
                               - ofr_tp2_2*MFv[el_i-1][el_t][el_p]
                               - ofr_tp2_2*ONRF(el_i-1, el_t, el_p)
                               + ofr_tp2_2*DEF[el_i][el_t][el_p]
                               >= -1*big_m*OFRF_I[ofr_i][el_t][el_p][1],
-                              name='OFRF_E2_2'+str(el_i)+str(el_t)+str(el_p))
+                              name='OFRF_E2_2'+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
 
 ###################################################### Eq 25-25 ########################################################
                 # Step 8: If there is no deficit (DEF[i,t,p]=0), use OFR flow without deficit method
@@ -502,16 +504,16 @@ for el_i in xrange(NS+1):
                               - ofr_tp3*MFv[el_i-1][el_t][el_p]
                               - ofr_tp3*ONRF(el_i-1, el_t, el_p)
                               <= big_m * OFRF_I[ofr_i][el_t][el_p][0],
-                              name='OFRF_E3_1'+str(el_i)+str(el_t)+str(el_p))
+                              name='OFRF_E3_1'+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
                 hcm.addConstr(OFRF(el_i, el_t, el_p)
                               - ofr_tp3*MFv[el_i-1][el_t][el_p]
                               - ofr_tp3*ONRF(el_i-1, el_t, el_p)
                               >= -1*big_m * OFRF_I[ofr_i][el_t][el_p][0],
-                              name='OFRF_E3_2'+str(el_i)+str(el_t)+str(el_p))
+                              name='OFRF_E3_2'+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
     else:  # The segment is not an offramp
         for el_t in xrange(S):
             for el_p in xrange(P):
-                hcm.addConstr(OFRF(el_i, el_t, el_p) == 0.0, name='OFRF_E3'+str(el_i)+str(el_t)+str(el_p))
+                hcm.addConstr(OFRF(el_i, el_t, el_p) == 0.0, name='OFRF_E3'+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
 print("step 8 done")
 ########################################################################################################################
 
@@ -526,7 +528,7 @@ for el_i in xrange(NS):                               # TODO start loop at 0?
                           + ONRF(el_i-1, el_t, el_p)    # ONR flow at upstream segment (node)
                           - OFRF(el_i, el_t, el_p)      # OFR flow at current segment
                           + UV(el_i-1, el_t - 1, el_p), # Unserved vehs in the upstream segment at the prev time step
-                          name='MI_E'+str(el_i)+str(el_t)+str(el_p))
+                          name='MI_E'+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
 print("step 9 done")
 ########################################################################################################################
 
@@ -543,7 +545,7 @@ for el_i in xrange(NS):
                 hcm.addConstr(ONRI[onr_i][el_t][el_p] ==
                               ONRD[el_i][el_p]*(1/Th)    # ONR demand
                               + ONRQ(el_i, el_t-1, el_p),   # Queued vehicles on ONR at the previous step (t-1=-1 case implemented in function def)
-                              name='ONRI_E'+str(el_i)+str(el_t)+str(el_p))
+                              name='ONRI_E'+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
 
 ###################################################### Eq 25-18 ########################################################
                 # a1 = min of MO3 & MF
@@ -564,144 +566,144 @@ for el_i in xrange(NS):
                     ########## Minimum #1: Min of MF & MO3
                     hcm.addConstr(MF(el_i+1, el_t-1, el_p) - MO3(el_i, el_t-1, el_p)
                                   <= big_m * ONRO_I[onr_i][el_t][el_p][0],
-                                  name='ONRO_MIN1_1'+str(el_i)+str(el_t)+str(el_p)) # ONRO_I0=1 => MF > MO3
+                                  name='ONRO_MIN1_1'+str(el_i)+'_'+str(el_t)+'_'+str(el_p)) # ONRO_I0=1 => MF > MO3
                     hcm.addConstr(MO3(el_i, el_t-1, el_p) - MF(el_i+1, el_t-1, el_p)
                                   <= big_m * (1 - ONRO_I[onr_i][el_t][el_p][0]),
-                                  name='ONRO_MIN1_2'+str(el_i)+str(el_t)+str(el_p)) # ONRO_I0=0 => MF < MO3
+                                  name='ONRO_MIN1_2'+str(el_i)+'_'+str(el_t)+'_'+str(el_p)) # ONRO_I0=0 => MF < MO3
                     # If ONRO_I0 = 0, setting ONRO_A0 = MF
                     hcm.addConstr(ONRO_A[onr_i][el_t][el_p][0] - MF(el_i+1, el_t-1, el_p)
                                   <= big_m * ONRO_I[onr_i][el_t][el_p][0],
-                                  name='ONRO_MIN1_3'+str(el_i)+str(el_t)+str(el_p))
+                                  name='ONRO_MIN1_3'+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
                     hcm.addConstr(ONRO_A[onr_i][el_t][el_p][0] - MF(el_i+1, el_t-1, el_p)
                                   >= -1*big_m * ONRO_I[onr_i][el_t][el_p][0],
-                                  name='ONRO_MIN1_4'+str(el_i)+str(el_t)+str(el_p))
+                                  name='ONRO_MIN1_4'+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
                     # If ONRO_I0 = 1, setting ONRO_A0 = MO3
                     hcm.addConstr(ONRO_A[onr_i][el_t][el_p][0] - MO3(el_i, el_t-1, el_p)
                                   <= big_m * (1 - ONRO_I[onr_i][el_t][el_p][0]),
-                                  name='ONRO_MIN1_5'+str(el_i)+str(el_t)+str(el_p))
+                                  name='ONRO_MIN1_5'+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
                     hcm.addConstr(ONRO_A[onr_i][el_t][el_p][0] - MO3(el_i, el_t-1, el_p)
                                   >= -1*big_m * (1 - ONRO_I[onr_i][el_t][el_p][0]),
-                                  name='ONRO_MIN1_6'+str(el_i)+str(el_t)+str(el_p))
+                                  name='ONRO_MIN1_6'+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
 
                     ########## Minimum #2: Min of ONRO_A0+ONRF & SC
                     hcm.addConstr(ONRO_A[onr_i][el_t][el_p][0] + ONRF(el_i, el_t-1, el_p) - func_SC(el_i,el_p)*(1/Th)
                                   <= big_m * ONRO_I[onr_i][el_t][el_p][1],
-                                  name='ONRO_MIN2_1'+str(el_i)+str(el_t)+str(el_p)) # ONRO_I1=1 => ONRO_A0+ONRF > SC
+                                  name='ONRO_MIN2_1'+str(el_i)+'_'+str(el_t)+'_'+str(el_p)) # ONRO_I1=1 => ONRO_A0+ONRF > SC
                     hcm.addConstr(func_SC(el_i,el_p)*(1/Th) - ONRO_A[onr_i][el_t][el_p][0] - ONRF(el_i, el_t-1, el_p)
                                   <= big_m * (1 - ONRO_I[onr_i][el_t][el_p][1]),
-                                  name='ONRO_MIN2_2'+str(el_i)+str(el_t)+str(el_p)) # ONRO_I1=0 => ONRO_A0+ONRF < SC
+                                  name='ONRO_MIN2_2'+str(el_i)+'_'+str(el_t)+'_'+str(el_p)) # ONRO_I1=0 => ONRO_A0+ONRF < SC
                     # If ONRO_I1 = 0, setting ONRO_A1 = ONRO_A0+ONRF
                     hcm.addConstr(ONRO_A[onr_i][el_t][el_p][1] - ONRO_A[onr_i][el_t][el_p][0] - ONRF(el_i, el_t-1, el_p)
                                   <= big_m * ONRO_I[onr_i][el_t][el_p][1],
-                                  name='ONRO_MIN2_3'+str(el_i)+str(el_t)+str(el_p))
+                                  name='ONRO_MIN2_3'+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
                     hcm.addConstr(ONRO_A[onr_i][el_t][el_p][1] - ONRO_A[onr_i][el_t][el_p][0] - ONRF(el_i, el_t-1, el_p)
                                   >= -1*big_m * ONRO_I[onr_i][el_t][el_p][1],
-                                  name='ONRO_MIN2_4'+str(el_i)+str(el_t)+str(el_p))
+                                  name='ONRO_MIN2_4'+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
                     # If ONRO_I1 = 1, setting ONRO_A1 = SC
                     hcm.addConstr(ONRO_A[onr_i][el_t][el_p][1] - func_SC(el_i,el_p)*(1/Th)
                                   <= big_m * (1 - ONRO_I[onr_i][el_t][el_p][1]),
-                                  name='ONRO_MIN2_5'+str(el_i)+str(el_t)+str(el_p))
+                                  name='ONRO_MIN2_5'+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
                     hcm.addConstr(ONRO_A[onr_i][el_t][el_p][1] - func_SC(el_i,el_p)*(1/Th)
                                   >= -1*big_m * (1 - ONRO_I[onr_i][el_t][el_p][1]),
-                                  name='ONRO_MIN2_6'+str(el_i)+str(el_t)+str(el_p))
+                                  name='ONRO_MIN2_6'+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
                 else:
                     hcm.addConstr(ONRO_A[onr_i][el_t][el_p][1] - func_SC(el_i,el_p)*(1/Th)==0.0,
-                                  name='ONRO_MIN2_5'+str(el_i)+str(el_t)+str(el_p))
+                                  name='ONRO_MIN2_5'+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
 
                 ########## Maximum #1: Max of ONRO_A1-MI & ONRO_A1/(2*N)
                 hcm.addConstr(ONRO_A[onr_i][el_t][el_p][1] - MI[el_i][el_t][el_p]
                               - ONRO_A[onr_i][el_t][el_p][1] * (1.0/(2 * N[el_i][el_p]))
                               <= big_m * ONRO_I[onr_i][el_t][el_p][2],
-                              name='ONRO_MAX1_1'+str(el_i)+str(el_t)+str(el_p)) # ONRO_I2=1 => ONRO_A1-MI > ONRO_A1/2N
+                              name='ONRO_MAX1_1'+str(el_i)+'_'+str(el_t)+'_'+str(el_p)) # ONRO_I2=1 => ONRO_A1-MI > ONRO_A1/2N
                 hcm.addConstr(ONRO_A[onr_i][el_t][el_p][1] * (1.0/(2 * N[el_i][el_p]))
                               - ONRO_A[onr_i][el_t][el_p][1] + MI[el_i][el_t][el_p]
                               <= big_m * (1 - ONRO_I[onr_i][el_t][el_p][2]),
-                              name='ONRO_MAX1_2'+str(el_i)+str(el_t)+str(el_p)) # ONRO_I2=0 => ONRO_A1-MI < ONRO_A1/2N
+                              name='ONRO_MAX1_2'+str(el_i)+'_'+str(el_t)+'_'+str(el_p)) # ONRO_I2=0 => ONRO_A1-MI < ONRO_A1/2N
                 # If ONRO_I2 = 1, setting ONRO_A2 = ONRO_A1-MI
                 hcm.addConstr(ONRO_A[onr_i][el_t][el_p][2] - ONRO_A[onr_i][el_t][el_p][1] + MI[el_i][el_t][el_p]
                               <= big_m * (1 - ONRO_I[onr_i][el_t][el_p][2]),
-                              name='ONRO_MAX1_3'+str(el_i)+str(el_t)+str(el_p))
+                              name='ONRO_MAX1_3'+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
                 hcm.addConstr(ONRO_A[onr_i][el_t][el_p][2] - ONRO_A[onr_i][el_t][el_p][1] + MI[el_i][el_t][el_p]
                               >= -1*big_m * (1 - ONRO_I[onr_i][el_t][el_p][2]),
-                              name='ONRO_MAX1_4'+str(el_i)+str(el_t)+str(el_p))
+                              name='ONRO_MAX1_4'+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
                 # If ONRO_I2 = 0, setting ONRO_A2 = ONRO_A1/(2*N)
                 hcm.addConstr(ONRO_A[onr_i][el_t][el_p][2] - ONRO_A[onr_i][el_t][el_p][1] * (1.0/(2 * N[el_i][el_p]))
                               <= big_m * ONRO_I[onr_i][el_t][el_p][2],
-                              name='ONRO_MAX1_5'+str(el_i)+str(el_t)+str(el_p))
+                              name='ONRO_MAX1_5'+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
                 hcm.addConstr(ONRO_A[onr_i][el_t][el_p][2] - ONRO_A[onr_i][el_t][el_p][1] * (1.0/(2 * N[el_i][el_p]))
                               >= -1*big_m * ONRO_I[onr_i][el_t][el_p][2],
-                              name='ONRO_MAX1_6'+str(el_i)+str(el_t)+str(el_p))
+                              name='ONRO_MAX1_6'+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
 
                 ########## Minimum #3: Min of ONRO_A2 & ONRC
                 hcm.addConstr(ONRO_A[onr_i][el_t][el_p][2] - ONRC(el_i, el_t, el_p)
                               <= big_m * ONRO_I[onr_i][el_t][el_p][3],
-                              name='ONRO_MIN3_1'+str(el_i)+str(el_t)+str(el_p)) # ONRO_I3=1 => ONRO_A2 > ONRC
+                              name='ONRO_MIN3_1'+str(el_i)+'_'+str(el_t)+'_'+str(el_p)) # ONRO_I3=1 => ONRO_A2 > ONRC
                 hcm.addConstr(ONRC(el_i, el_t, el_p) - ONRO_A[onr_i][el_t][el_p][2]
                               <= big_m * (1 - ONRO_I[onr_i][el_t][el_p][3]),
-                              name='ONRO_MIN3_2'+str(el_i)+str(el_t)+str(el_p)) # ONRO_I3=0 => ONRO_A2 < ONRC
+                              name='ONRO_MIN3_2'+str(el_i)+'_'+str(el_t)+'_'+str(el_p)) # ONRO_I3=0 => ONRO_A2 < ONRC
                 # If ONRO_I3 = 0, setting ONRO_A3 = ONRO_A2
                 hcm.addConstr(ONRO_A[onr_i][el_t][el_p][3] - ONRO_A[onr_i][el_t][el_p][2]
                               <= big_m * ONRO_I[onr_i][el_t][el_p][3],
-                              name='ONRO_MIN3_3'+str(el_i)+str(el_t)+str(el_p))
+                              name='ONRO_MIN3_3'+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
                 hcm.addConstr(ONRO_A[onr_i][el_t][el_p][3] - ONRO_A[onr_i][el_t][el_p][2]
                               >= -1*big_m * ONRO_I[onr_i][el_t][el_p][3],
-                              name='ONRO_MIN3_4'+str(el_i)+str(el_t)+str(el_p))
+                              name='ONRO_MIN3_4'+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
                 # If ONRO_I3 = 1, setting ONRO_A3 = ONRC
                 hcm.addConstr(ONRO_A[onr_i][el_t][el_p][3] - ONRC(el_i, el_t, el_p)
                               <= big_m * (1 - ONRO_I[onr_i][el_t][el_p][3]),
-                              name='ONRO_MIN3_5'+str(el_i)+str(el_t)+str(el_p))
+                              name='ONRO_MIN3_5'+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
                 hcm.addConstr(ONRO_A[onr_i][el_t][el_p][3] - ONRC(el_i, el_t, el_p)
                               >= -1*big_m * (1 - ONRO_I[onr_i][el_t][el_p][3]),
-                              name='ONRO_MIN3_6'+str(el_i)+str(el_t)+str(el_p))
+                              name='ONRO_MIN3_6'+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
 
                 ########## Minimum #4: Min of ONRO_A3 & RM
                 hcm.addConstr(ONRO_A[onr_i][el_t][el_p][3] - RM[el_i][el_p]
                               <= big_m * ONRO_I[onr_i][el_t][el_p][4],
-                              name='ONRO_MIN4_1'+str(el_i)+str(el_t)+str(el_p)) # ONRO_I4=1 => ONRO_A3 > RM
+                              name='ONRO_MIN4_1'+str(el_i)+'_'+str(el_t)+'_'+str(el_p)) # ONRO_I4=1 => ONRO_A3 > RM
                 hcm.addConstr(RM[el_i][el_p] - ONRO_A[onr_i][el_t][el_p][3]
                               <= big_m * (1 - ONRO_I[onr_i][el_t][el_p][4]),
-                              name='ONRO_MIN4_2'+str(el_i)+str(el_t)+str(el_p)) # ONRO_I4=0 => ONRO_A3 < RM
+                              name='ONRO_MIN4_2'+str(el_i)+'_'+str(el_t)+'_'+str(el_p)) # ONRO_I4=0 => ONRO_A3 < RM
                 # If ONRO_I4 = 0, setting ONRO = ONRO_A3
                 hcm.addConstr(ONRO[onr_i][el_t][el_p] - ONRO_A[onr_i][el_t][el_p][3]
                               <= big_m * ONRO_I[onr_i][el_t][el_p][4],
-                              name='ONRO_MIN4_3'+str(el_i)+str(el_t)+str(el_p))
+                              name='ONRO_MIN4_3'+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
                 hcm.addConstr(ONRO[onr_i][el_t][el_p] - ONRO_A[onr_i][el_t][el_p][3]
                               >= -1*big_m * ONRO_I[onr_i][el_t][el_p][4],
-                              name='ONRO_MIN4_4'+str(el_i)+str(el_t)+str(el_p))
+                              name='ONRO_MIN4_4'+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
                 # If ONRO_I4 = 1, setting ONRO = $M
                 hcm.addConstr(ONRO[onr_i][el_t][el_p] - RM[el_i][el_p]
                               <= big_m * (1 - ONRO_I[onr_i][el_t][el_p][4]),
-                              name='ONRO_MIN4_5'+str(el_i)+str(el_t)+str(el_p))
+                              name='ONRO_MIN4_5'+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
                 hcm.addConstr(ONRO[onr_i][el_t][el_p] - RM[el_i][el_p]
                               >= -1*big_m * (1 - ONRO_I[onr_i][el_t][el_p][4]),
-                              name='ONRO_MIN4_6'+str(el_i)+str(el_t)+str(el_p))
+                              name='ONRO_MIN4_6'+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
 
 ###################################################### Eq 25-19 ########################################################
                 # Step 13: Is ONRI < ONRO? If so, ONRF = ONRI. Else, ONRF = ONRO.
                 hcm.addConstr(ONRO[onr_i][el_t][el_p] - ONRI[onr_i][el_t][el_p]
                               <= big_m*ONRF_I[onr_i][el_t][el_p][0],
-                              name="ONRF_IF1"+str(el_i)+str(el_t)+str(el_p)) # ONRF_I0 = 1 => ONRO > ONRI
+                              name="ONRF_IF1"+str(el_i)+'_'+str(el_t)+'_'+str(el_p)) # ONRF_I0 = 1 => ONRO > ONRI
                 hcm.addConstr(ONRI[onr_i][el_t][el_p] - ONRO[onr_i][el_t][el_p]
                               <= big_m*(1 - ONRF_I[onr_i][el_t][el_p][0]),
-                              name="ONRF_IF2"+str(el_i)+str(el_t)+str(el_p)) # ONRF_I0 = 0 => ONRO < ONRI
+                              name="ONRF_IF2"+str(el_i)+'_'+str(el_t)+'_'+str(el_p)) # ONRF_I0 = 0 => ONRO < ONRI
 
                 # Step 15: ONRF_I0 = 1 => ONRI < ONRO => ONRF = ONRI
                 # (Step 15 before step 14 b/c Re-ordered for chapter equation numbering)
                 hcm.addConstr(ONRF(el_i, el_t, el_p) - ONRI[onr_i][el_t][el_p]
                               <= big_m * (1 - ONRF_I[onr_i][el_t][el_p][0]),
-                              name="ONRF_E3"+str(el_i)+str(el_t)+str(el_p))
+                              name="ONRF_E3"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
                 hcm.addConstr(ONRF(el_i, el_t, el_p) - ONRI[onr_i][el_t][el_p]
                               >= -1*big_m * (1 - ONRF_I[onr_i][el_t][el_p][0]),
-                              name="ONRF_E4"+str(el_i)+str(el_t)+str(el_p))
+                              name="ONRF_E4"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
 
 ###################################################### Eq 25-20 ########################################################
                 # Step 14: ONRF_I0 = 0 => ONR0 < ONRI => ONRF = ONR0
                 hcm.addConstr(ONRF(el_i, el_t, el_p) - ONRO[onr_i][el_t][el_p]
                               <= big_m*ONRF_I[onr_i][el_t][el_p][0],
-                              name="ONRF_E1"+str(el_i)+str(el_t)+str(el_p))
+                              name="ONRF_E1"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
                 hcm.addConstr(ONRF(el_i, el_t, el_p) - ONRO[onr_i][el_t][el_p]
                               >= -1*big_m*ONRF_I[onr_i][el_t][el_p][0],
-                              name="ONRF_E2"+str(el_i)+str(el_t)+str(el_p))
+                              name="ONRF_E2"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
 
 ###################################################### Eq 25-21 ########################################################
                 # ONRF_I0 = 0 => ONR0 < ONRI => Update number of vehicles on the ramp queue
@@ -711,24 +713,24 @@ for el_i in xrange(NS):
                               - ONRI[onr_i][el_t][el_p]
                               + ONRO[onr_i][el_t][el_p]
                               <= big_m*ONRF_I[onr_i][el_t][el_p][0],
-                              name="ONRQ_E1"+str(el_i)+str(el_t)+str(el_p))
+                              name="ONRQ_E1"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
                 hcm.addConstr(ONRQ(el_i, el_t, el_p)
                               - ONRQ(el_i, el_t-1, el_p)
                               - ONRI[onr_i][el_t][el_p]
                               + ONRO[onr_i][el_t][el_p]
                               >= -1*big_m*ONRF_I[onr_i][el_t][el_p][0],
-                              name="ONRQ_E2"+str(el_i)+str(el_t)+str(el_p))
+                              name="ONRQ_E2"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
                 # If ONRI < ONRO (ONRF_I0 = 1), entire ONRQ is served, and is set to be 0
                 hcm.addConstr(ONRQ(el_i, el_t, el_p) <= big_m * (1 - ONRF_I[onr_i][el_t][el_p][0]),
-                              name="ONRQ_E3"+str(el_i)+str(el_t)+str(el_p))
+                              name="ONRQ_E3"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
                 hcm.addConstr(ONRQ(el_i, el_t, el_p) >= -1*big_m * (1 - ONRF_I[onr_i][el_t][el_p][0]),
-                              name="ONRQ_E4"+str(el_i)+str(el_t)+str(el_p))
+                              name="ONRQ_E4"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
 
 
     else:
         for el_t in xrange(S):
             for el_p in xrange(P):
-                hcm.addConstr(ONRF(el_i,el_t,el_p) == 0.0, name='ONRF'+str(el_i)+str(el_t)+str(el_p))
+                hcm.addConstr(ONRF(el_i,el_t,el_p) == 0.0, name='ONRF'+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
                 hcm.addConstr(ONRQ(el_i,el_t,el_p) == 0.0)
 print("Step 15 Done")
 ########################################################################################################################
@@ -746,46 +748,46 @@ for el_i in xrange(NS):
                 ########## Minimum #1: Min of SC-ONRF & MO2t-1
                 hcm.addConstr(func_SC(el_i,el_p)*(1/Th) - ONRF(el_i, el_t, el_p) - MO2(el_i, el_t-1, el_p)
                               <= big_m * MO1_I[el_i][el_t][el_p][0],
-                              name='MO1_MIN1_1'+str(el_i)+str(el_t)+str(el_p)) # MO1_I0=1 => SC-ONRF > MO2
+                              name='MO1_MIN1_1'+str(el_i)+'_'+str(el_t)+'_'+str(el_p)) # MO1_I0=1 => SC-ONRF > MO2
                 hcm.addConstr(MO2(el_i, el_t-1, el_p) - func_SC(el_i,el_p)*(1/Th) + ONRF(el_i, el_t, el_p)
                               <= big_m * (1 - MO1_I[el_i][el_t][el_p][0]),
-                              name='MO1_MIN1_2'+str(el_i)+str(el_t)+str(el_p)) # MO1_I0=0 => SC-ONRF < MO2
+                              name='MO1_MIN1_2'+str(el_i)+'_'+str(el_t)+'_'+str(el_p)) # MO1_I0=0 => SC-ONRF < MO2
                 # If MO1_I0 = 0, setting MO1_A0 = SC-ONRF
                 hcm.addConstr(MO1_A[el_i][el_t][el_p] - func_SC(el_i,el_p)*(1/Th) + ONRF(el_i, el_t, el_p)
                               <= big_m * MO1_I[el_i][el_t][el_p][0],
-                              name='MO1_MIN1_3'+str(el_i)+str(el_t)+str(el_p))
+                              name='MO1_MIN1_3'+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
                 hcm.addConstr(MO1_A[el_i][el_t][el_p] - func_SC(el_i,el_p)*(1/Th) + ONRF(el_i, el_t, el_p)
                               >= -1*big_m * MO1_I[el_i][el_t][el_p][0],
-                              name='MO1_MIN1_4'+str(el_i)+str(el_t)+str(el_p))
+                              name='MO1_MIN1_4'+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
                 # If MO1_I0 = 1, setting MO1_A0 = MO2t-1
                 hcm.addConstr(MO1_A[el_i][el_t][el_p] - MO2(el_i, el_t-1, el_p)
                               <= big_m * (1 - MO1_I[el_i][el_t][el_p][0]),
-                              name='MO1_MIN1_5'+str(el_i)+str(el_t)+str(el_p))
+                              name='MO1_MIN1_5'+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
                 hcm.addConstr(MO1_A[el_i][el_t][el_p] - MO2(el_i, el_t-1, el_p)
                               >= -1*big_m * (1 - MO1_I[el_i][el_t][el_p][0]),
-                              name='MO1_MIN1_6'+str(el_i)+str(el_t)+str(el_p))
+                              name='MO1_MIN1_6'+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
 
                 ########## Minimum #2: Min of MO1_A & MO3t-1
                 hcm.addConstr(MO1_A[el_i][el_t][el_p] - MO3(el_i, el_t-1, el_p)
                               <= big_m * MO1_I[el_i][el_t][el_p][1],
-                              name='MO1_MIN2_1'+str(el_i)+str(el_t)+str(el_p)) # MO1_I1=1 => MO1_A > MO3
+                              name='MO1_MIN2_1'+str(el_i)+'_'+str(el_t)+'_'+str(el_p)) # MO1_I1=1 => MO1_A > MO3
                 hcm.addConstr(MO3(el_i, el_t-1, el_p) - MO1_A[el_i][el_t][el_p]
                               <= big_m * (1 - MO1_I[el_i][el_t][el_p][1]),
-                              name='MO1_MIN2_2'+str(el_i)+str(el_t)+str(el_p)) # MO1_I1=0 => MO1_A < MO3
+                              name='MO1_MIN2_2'+str(el_i)+'_'+str(el_t)+'_'+str(el_p)) # MO1_I1=0 => MO1_A < MO3
                 # If MO1_I1 = 0, setting MO1 = MO1_A
                 hcm.addConstr(MO1(el_i, el_t, el_p) - MO1_A[el_i][el_t][el_p]
                               <= big_m * MO1_I[el_i][el_t][el_p][1],
-                              name='MO1_MIN2_3'+str(el_i)+str(el_t)+str(el_p))
+                              name='MO1_MIN2_3'+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
                 hcm.addConstr(MO1(el_i, el_t, el_p) - MO1_A[el_i][el_t][el_p]
                               >= -1*big_m * MO1_I[el_i][el_t][el_p][1],
-                              name='MO1_MIN2_4'+str(el_i)+str(el_t)+str(el_p))
+                              name='MO1_MIN2_4'+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
                 # If MO1_I1 = 1, setting MO1 = MO3t-1
                 hcm.addConstr(MO1(el_i, el_t, el_p) - MO3(el_i, el_t-1, el_p)
                               <= big_m * (1 - MO1_I[el_i][el_t][el_p][1]),
-                              name='MO1_MIN2_5'+str(el_i)+str(el_t)+str(el_p))
+                              name='MO1_MIN2_5'+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
                 hcm.addConstr(MO1(el_i, el_t, el_p) - MO3(el_i, el_t-1, el_p)
                               >= -1*big_m * (1 - MO1_I[el_i][el_t][el_p][1]),
-                              name='MO1_MIN2_6'+str(el_i)+str(el_t)+str(el_p))
+                              name='MO1_MIN2_6'+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
 print("step 16 done")
 ########################################################################################################################
 
@@ -798,11 +800,11 @@ for el_i in xrange(NS):
         for (el_p) in xrange(P):
             hcm.addConstr(UV(el_i,el_t,el_p) - uv_zero_tol
                           <= M_UV* I_UV[el_i][el_t][el_p][0],
-                          name="I_UV0"+str(el_i)+str(el_t)+str(el_p)) # I_UV0=1 => UV>0 (Queue Present)
+                          name="I_UV0"+str(el_i)+'_'+str(el_t)+'_'+str(el_p)) # I_UV0=1 => UV>0 (Queue Present)
             hcm.addConstr(uv_zero_tol - UV(el_i,el_t,el_p)
                           <= M_UV * I_UV[el_i][el_t][el_p][1],
-                          name="I_UV1"+str(el_i)+str(el_t)+str(el_p)) # I_UV0=0 => UV<=0 (No Queue Present)
-            hcm.addConstr(I_UV[el_i][el_t][el_p][0]+I_UV[el_i][el_t][el_p][1] == 1, name="I_UVE"+str(el_i)+str(el_t)+str(el_p))
+                          name="I_UV1"+str(el_i)+'_'+str(el_t)+'_'+str(el_p)) # I_UV0=0 => UV<=0 (No Queue Present)
+            hcm.addConstr(I_UV[el_i][el_t][el_p][0]+I_UV[el_i][el_t][el_p][1] == 1, name="I_UVE"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
 print("step 17 done")
 
 # Step 18 Is there a front clearing queue in this time interval
@@ -829,117 +831,117 @@ for el_i in xrange(NS):  # TODO Check NS minus 1?
             if True or not front_clearing_queue_present[el_i][el_p]:
                 #print(str(el_i)+", "+str(el_p)+", "+str(el_t)+", "+"false")
                 # If there is no front clearing queue, this value is set to 1e6 and effectively ignored
-                hcm.addConstr(MO3(el_i,el_t,el_p) == func_SC(el_i,el_p)*(1/Th), name="MO3_NFCQ"+str(el_i)+str(el_t)+str(el_p))
+                hcm.addConstr(MO3(el_i,el_t,el_p) == func_SC(el_i,el_p)*(1/Th), name="MO3_NFCQ"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
             else :
                 #print(str(el_i)+", "+str(el_p)+", "+str(el_t)+", "+"true")
-                #hcm.addConstr(MO3(el_i,el_t,el_p) == M_MO3[el_i][el_t][el_p][15],name = "3.84b"+str(el_i)+str(el_t)+str(el_p))
+                #hcm.addConstr(MO3(el_i,el_t,el_p) == M_MO3[el_i][el_t][el_p][15],name = "3.84b"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
                 # Binary indicator variable constraint
                 hcm.addConstr(MO3_I[el_i][el_t][el_p][0]+MO3_I[el_i][el_t][el_p][1] == 2 - I_UV[el_i][el_t][el_p][0],
-                               name = "3.65"+str(el_i)+str(el_t)+str(el_p))
+                               name = "3.65"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
                 # Minimum of MO1 and (MO2-OFRF)
                 hcm.addConstr(MO1(el_i+1, el_t - WTT(el_i, el_p), el_p)
                     - (MO2(el_i+1, el_t-WTT(el_i, el_p), el_p) + OFRF(el_i+1, el_t-WTT(el_i, el_p), el_p))
-                    <= M_MO3[el_i][el_t][el_p][0]*MO3_I[el_i][el_t][el_p][0], name = "3.63"+str(el_i)+str(el_t)+str(el_p))
+                    <= M_MO3[el_i][el_t][el_p][0]*MO3_I[el_i][el_t][el_p][0], name = "3.63"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
                 hcm.addConstr((MO2(el_i+1, el_t-WTT(el_i, el_p), el_p) + OFRF(el_i+1, el_t-WTT(el_i, el_p), el_p))
                     - MO1(el_i+1, el_t - WTT(el_i, el_p), el_p)
-                    <= M_MO3[el_i][el_t][el_p][0]*MO3_I[el_i][el_t][el_p][1], name = "3.64"+str(el_i)+str(el_t)+str(el_p))
+                    <= M_MO3[el_i][el_t][el_p][0]*MO3_I[el_i][el_t][el_p][1], name = "3.64"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
                 # Setting minimum to MO3_A[i][t][p][0]
                 hcm.addConstr(MO3_A[el_i][el_t][el_p][0] - MO1(el_i+1, el_t - WTT(el_i, el_p), el_p)
                     >= -M_MO3[el_i][el_t][el_p][1]*MO3_I[el_i][el_t][el_p][0],
-                              name = "3.66a"+str(el_i)+str(el_t)+str(el_p))
+                              name = "3.66a"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
                 hcm.addConstr(MO3_A[el_i][el_t][el_p][0] - MO1(el_i+1, el_t - WTT(el_i, el_p), el_p)
                     <= M_MO3[el_i][el_t][el_p][1]*MO3_I[el_i][el_t][el_p][0],
-                              name = "3.66b"+str(el_i)+str(el_t)+str(el_p))
+                              name = "3.66b"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
                 hcm.addConstr(MO3_A[el_i][el_t][el_p][0] - (MO2(el_i+1, el_t-WTT(el_i, el_p), el_p) + OFRF(el_i+1, el_t-WTT(el_i, el_p), el_p))
                     >= -M_MO3[el_i][el_t][el_p][2]*MO3_I[el_i][el_t][el_p][1],
-                              name = "3.67a"+str(el_i)+str(el_t)+str(el_p))
+                              name = "3.67a"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
                 hcm.addConstr(MO3_A[el_i][el_t][el_p][0] - (MO2(el_i+1, el_t-WTT(el_i, el_p), el_p) + OFRF(el_i+1, el_t-WTT(el_i, el_p), el_p))
                     <= M_MO3[el_i][el_t][el_p][2]*MO3_I[el_i][el_t][el_p][1],
-                              name = "3.67b"+str(el_i)+str(el_t)+str(el_p))
+                              name = "3.67b"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
                 # Minimum of MO3[i+1][t-WTT][p] and MO3_A
                 hcm.addConstr(MO3_A[el_i][el_t][el_p][0]
                     - (MO3(el_i+1, el_t-WTT(el_i, el_p), el_p) + OFRF(el_i+1, el_t-WTT(el_i, el_p), el_p))
-                    <= M_MO3[el_i][el_t][el_p][3]*MO3_I[el_i][el_t][el_p][2], name = "3.68"+str(el_i)+str(el_t)+str(el_p))
+                    <= M_MO3[el_i][el_t][el_p][3]*MO3_I[el_i][el_t][el_p][2], name = "3.68"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
                 hcm.addConstr((MO3(el_i+1, el_t-WTT(el_i, el_p), el_p) + OFRF(el_i+1, el_t-WTT(el_i, el_p), el_p))
                     - MO3_A[el_i][el_t][el_p][0]
-                    <= M_MO3[el_i][el_t][el_p][4]*MO3_I[el_i][el_t][el_p][3], name = "3.69"+str(el_i)+str(el_t)+str(el_p))
+                    <= M_MO3[el_i][el_t][el_p][4]*MO3_I[el_i][el_t][el_p][3], name = "3.69"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
                 # Binary indicator variable constraint
                 hcm.addConstr(MO3_I[el_i][el_t][el_p][2]+MO3_I[el_i][el_t][el_p][3] == 2 - I_UV[el_i][el_t][el_p][0],
-                        name = "3.70"+str(el_i)+str(el_t)+str(el_p))
+                        name = "3.70"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
                 # Setting minimum to MO3_A[i][t][p][1]
                 hcm.addConstr(MO3_A[el_i][el_t][el_p][1] - MO3_A[el_i][el_t][el_p][0]
                     >= - M_MO3[el_i][el_t][el_p][5]*MO3_I[el_i][el_t][el_p][2],
-                              name = "3.71a"+str(el_i)+str(el_t)+str(el_p))
+                              name = "3.71a"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
                 hcm.addConstr(MO3_A[el_i][el_t][el_p][1] - MO3_A[el_i][el_t][el_p][0]
                     <= M_MO3[el_i][el_t][el_p][5]*MO3_I[el_i][el_t][el_p][2],
-                              name = "3.71b"+str(el_i)+str(el_t)+str(el_p))
+                              name = "3.71b"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
                 hcm.addConstr(MO3_A[el_i][el_t][el_p][1] - (MO3(el_i+1, el_t-WTT(el_i, el_p), el_p) + OFRF(el_i+1, el_t-WTT(el_i, el_p), el_p))
                     >= - M_MO3[el_i][el_t][el_p][6]*MO3_I[el_i][el_t][el_p][3],
-                              name = "3.72a"+str(el_i)+str(el_t)+str(el_p))
+                              name = "3.72a"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
                 hcm.addConstr(MO3_A[el_i][el_t][el_p][1] - (MO3(el_i+1, el_t-WTT(el_i, el_p), el_p) + OFRF(el_i+1, el_t-WTT(el_i, el_p), el_p))
                     <= M_MO3[el_i][el_t][el_p][6]*MO3_I[el_i][el_t][el_p][3],
-                              name = "3.72b"+str(el_i)+str(el_t)+str(el_p))
+                              name = "3.72b"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
                 # Minimum of MO3_A[i][t][p][1] and SC[i][p]
                 temp_sc = generate_sc(el_i, el_t-WTT(el_i, el_p), el_p)
                 hcm.addConstr(MO3_A[el_i][el_t][el_p][1] - temp_sc
                     <=M_MO3[el_i][el_t][el_p][7]*MO3_I[el_i][el_t][el_p][4],
-                              name = "3.73"+str(el_i)+str(el_t)+str(el_p))
+                              name = "3.73"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
                 hcm.addConstr(temp_sc - MO3_A[el_i][el_t][el_p][1]
                     <=M_MO3[el_i][el_t][el_p][8]*MO3_I[el_i][el_t][el_p][5],
-                              name = "3.74"+str(el_i)+str(el_t)+str(el_p))
+                              name = "3.74"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
                 # Binary Indicator variable constraint
                 hcm.addConstr(MO3_I[el_i][el_t][el_p][4]+MO3_I[el_i][el_t][el_p][5] == 2-I_UV[el_i][el_t][el_p][0],
-                              name = "3.75"+str(el_i)+str(el_t)+str(el_p))
+                              name = "3.75"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
                 # Setting minimum to MO3_A[i][t][p][2]
                 hcm.addConstr(MO3_A[el_i][el_t][el_p][2] - MO3_A[el_i][el_t][el_p][1]
                     >= - M_MO3[el_i][el_t][el_p][9]*MO3_I[el_i][el_t][el_p][4],
-                              name = "3.76a"+str(el_i)+str(el_t)+str(el_p))
+                              name = "3.76a"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
                 hcm.addConstr(MO3_A[el_i][el_t][el_p][2] - MO3_A[el_i][el_t][el_p][1]
                     <= M_MO3[el_i][el_t][el_p][9]*MO3_I[el_i][el_t][el_p][4],
-                              name = "3.76b"+str(el_i)+str(el_t)+str(el_p))
+                              name = "3.76b"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
                 hcm.addConstr(MO3_A[el_i][el_t][el_p][2] - temp_sc
                     >= - M_MO3[el_i][el_t][el_p][10]*MO3_I[el_i][el_t][el_p][5],
-                              name = "3.77a"+str(el_i)+str(el_t)+str(el_p))
+                              name = "3.77a"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
                 hcm.addConstr(MO3_A[el_i][el_t][el_p][2] - temp_sc
                     <= M_MO3[el_i][el_t][el_p][10]*MO3_I[el_i][el_t][el_p][5],
-                              name = "3.77b"+str(el_i)+str(el_t)+str(el_p))
+                              name = "3.77b"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
                 # Minimum of MO3_A[i][t][p][2] and SC+OFRF
                 temp_sc = generate_sc(el_i+1, el_t-WTT(el_i, el_p), el_p)
                 hcm.addConstr(MO3_A[el_i][el_t][el_p][2] - (temp_sc+OFRF(el_i+1, el_t-WTT(el_i, el_p), el_p))
                     <=M_MO3[el_i][el_t][el_p][11]*MO3_I[el_i][el_t][el_p][6],
-                              name = "3.78"+str(el_i)+str(el_t)+str(el_p))
+                              name = "3.78"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
                 hcm.addConstr((temp_sc+OFRF(el_i+1, el_t-WTT(el_i, el_p), el_p)) - MO3_A[el_i][el_t][el_p][1]
                     <=M_MO3[el_i][el_t][el_p][11]*MO3_I[el_i][el_t][el_p][7],
-                              name = "3.79"+str(el_i)+str(el_t)+str(el_p))
+                              name = "3.79"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
                 # Binary Indicator variable constraints
                 hcm.addConstr(MO3_I[el_i][el_t][el_p][6]+MO3_I[el_i][el_t][el_p][7] == 2-I_UV[el_i][el_t][el_p][0],
-                              name = "3.80"+str(el_i)+str(el_t)+str(el_p))
+                              name = "3.80"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
                 # Setting minimum to MO3_A[i][t][p][3]
                 hcm.addConstr(MO3_A[el_i][el_t][el_p][3] - MO3_A[el_i][el_t][el_p][2]
                     >= - M_MO3[el_i][el_t][el_p][12]*MO3_I[el_i][el_t][el_p][6],
-                              name = "3.81a"+str(el_i)+str(el_t)+str(el_p))
+                              name = "3.81a"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
                 hcm.addConstr(MO3_A[el_i][el_t][el_p][3] - MO3_A[el_i][el_t][el_p][2]
                     <= M_MO3[el_i][el_t][el_p][12]*MO3_I[el_i][el_t][el_p][6],
-                              name = "3.81b"+str(el_i)+str(el_t)+str(el_p))
+                              name = "3.81b"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
                 hcm.addConstr(MO3_A[el_i][el_t][el_p][3] - (temp_sc+OFRF(el_i+1, el_t-WTT(el_i, el_p), el_p))
                     >= - M_MO3[el_i][el_t][el_p][13]*MO3_I[el_i][el_t][el_p][7],
-                              name = "3.82a"+str(el_i)+str(el_t)+str(el_p))
+                              name = "3.82a"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
                 hcm.addConstr(MO3_A[el_i][el_t][el_p][3] - (temp_sc+OFRF(el_i+1, el_t-WTT(el_i, el_p), el_p))
                     <= M_MO3[el_i][el_t][el_p][13]*MO3_I[el_i][el_t][el_p][7],
-                              name = "3.82b"+str(el_i)+str(el_t)+str(el_p))
+                              name = "3.82b"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
                 # Setting to MO3[i][t][p], or setting MO3[i][t][p] to a large value if no front clearing queue
                 hcm.addConstr(MO3(el_i,el_t,el_p) - (MO3_A[el_i][el_t][el_p][3] - ONRF(el_i, el_t, el_p))
                     >= - M_MO3[el_i][el_t][el_p][14]*(1-I_UV[el_i][el_t][el_p][0]),
-                              name = "3.83a"+str(el_i)+str(el_t)+str(el_p))
+                              name = "3.83a"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
                 hcm.addConstr(MO3(el_i,el_t,el_p) - (MO3_A[el_i][el_t][el_p][3] - ONRF(el_i, el_t, el_p))
                     <= M_MO3[el_i][el_t][el_p][14]*(1-I_UV[el_i][el_t][el_p][0]),
-                              name = "3.83b"+str(el_i)+str(el_t)+str(el_p))
+                              name = "3.83b"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
                 hcm.addConstr(MO3(el_i,el_t,el_p) - M_MO3[el_i][el_t][el_p][15]
                     >= - M_MO3[el_i][el_t][el_p][15]*(I_UV[el_i][el_t][el_p][0]),
-                              name = "3.84a"+str(el_i)+str(el_t)+str(el_p))
+                              name = "3.84a"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
                 hcm.addConstr(MO3(el_i,el_t,el_p) - M_MO3[el_i][el_t][el_p][15]
                     <= M_MO3[el_i][el_t][el_p][15]*(I_UV[el_i][el_t][el_p][0]),
-                              name = "3.84b"+str(el_i)+str(el_t)+str(el_p))
+                              name = "3.84b"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
 print("step 19 done")
 
 ########################################################################################################################
@@ -951,7 +953,7 @@ for el_i in xrange(NS):  # TODO -1?
     for el_t in xrange(S):  # Todo account for "t-1"
         for el_p in xrange(P):
             hcm.addConstr(KQ[el_i][el_t][el_p] == KJ - (Th*(KJ-KC)/func_SC(el_i, el_p))*SF(el_i+1, el_t-1, el_p),
-                          name="3.85"+str(el_i)+str(el_t)+str(el_p))
+                          name="3.85"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
 print("step 20 done")
 ########################################################################################################################
 
@@ -962,30 +964,30 @@ M_MO2 = 10000
 for el_i in xrange(NS):  # TODO -1?
     for el_t in xrange(S):  # Todo account for "t-1" (MF/OFRF/ONRF/NV) (NV fixed)
         for el_p in xrange(P):
-            #hcm.addConstr(MO2(el_i, el_t, el_p) == func_SC(el_i,el_p),name="3.86"+str(el_i)+str(el_t)+str(el_p))
+            #hcm.addConstr(MO2(el_i, el_t, el_p) == func_SC(el_i,el_p),name="3.86"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
             # hcm.addConstr(MO2(el_i, el_t, el_p) ==
             #               SF(el_i, el_t-1, el_p) - ONRF(el_i, el_t, el_p) + (func_L(el_i)*KQ[el_i][el_t][el_p]) - NV(el_i, el_t-1, el_p),
-            #               name="25-10"+str(el_i)+str(el_t)+str(el_p))
+            #               name="25-10"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
             hcm.addConstr(MO2(el_i, el_t, el_p)
                           - SF(el_i, el_t-1, el_p)
                           + ONRF(el_i, el_t-1, el_p)
                           - (func_L(el_i)*KQ[el_i][el_t][el_p])
                           + NV(el_i, el_t-1, el_p)
                           <= M_MO2*I_UV[el_i][el_t][el_p][1],
-                          name="3.86"+str(el_i)+str(el_t)+str(el_p))
+                          name="3.86"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
             hcm.addConstr(MO2(el_i, el_t, el_p)
                           - SF(el_i, el_t-1, el_p)
                           + ONRF(el_i, el_t-1, el_p)
                           - (func_L(el_i)*KQ[el_i][el_t][el_p])
                           + NV(el_i, el_t-1, el_p)
                           >= -M_MO2*I_UV[el_i][el_t][el_p][1],
-                          name="3.86"+str(el_i)+str(el_t)+str(el_p))
+                          name="3.86"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
             hcm.addConstr(MO2(el_i, el_t, el_p) - func_SC(el_i,el_p)*(1/Th)
                           <= M_MO2*I_UV[el_i][el_t][el_p][0],
-                          name="3.86"+str(el_i)+str(el_t)+str(el_p))
+                          name="3.86"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
             hcm.addConstr(MO2(el_i, el_t, el_p) - func_SC(el_i,el_p)*(1/Th)
                           >= -M_MO2*I_UV[el_i][el_t][el_p][0],
-                          name="3.86"+str(el_i)+str(el_t)+str(el_p))
+                          name="3.86"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
 print("step 21 done")
 ########################################################################################################################
 
@@ -1007,141 +1009,141 @@ for el_i in xrange(NS):
             # Mininum of Mainline Input (MI) and Mainline Output 1 (MO1)
             hcm.addConstr(MI[el_i][el_t][el_p] - MO1(el_i, el_t, el_p)
                     <= M_MF[el_i][el_t][el_p][0] * MF_I[el_i][el_t][el_p][0],
-                          name="3.87"+str(el_i)+str(el_t)+str(el_p))
+                          name="3.87"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
             hcm.addConstr(MO1(el_i, el_t, el_p) - MI[el_i][el_t][el_p]
                     <= M_MF[el_i][el_t][el_p][0] * MF_I[el_i][el_t][el_p][1],
-                          name="3.88"+str(el_i)+str(el_t)+str(el_p))
+                          name="3.88"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
             # Binary indicator variable constraint
             if use_sos:
                     hcm.addSOS(gbp.GRB.SOS_TYPE1, [MF_I[el_i][el_t][el_p][0],MF_I[el_i][el_t][el_p][1]])
             else:
                 hcm.addConstr(MF_I[el_i][el_t][el_p][0] + MF_I[el_i][el_t][el_p][1] == 1,
-                              name="3.89"+str(el_i)+str(el_t)+str(el_p))
+                              name="3.89"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
             # Setting minimum to MF_A[i][t][p][0]
             hcm.addConstr(MF_A[el_i][el_t][el_p][0] - MI[el_i][el_t][el_p]
                 <= M_MF[el_i][el_t][el_p][1] * MF_I[el_i][el_t][el_p][0],
-                          name="3.90a"+str(el_i)+str(el_t)+str(el_p))
+                          name="3.90a"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
             hcm.addConstr(MF_A[el_i][el_t][el_p][0] - MI[el_i][el_t][el_p]
                 >= -M_MF[el_i][el_t][el_p][1] * MF_I[el_i][el_t][el_p][0],
-                          name="3.90b"+str(el_i)+str(el_t)+str(el_p))
+                          name="3.90b"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
             hcm.addConstr(MF_A[el_i][el_t][el_p][0] - MO1(el_i, el_t, el_p)
                 <= M_MF[el_i][el_t][el_p][2] * MF_I[el_i][el_t][el_p][1],
-                          name="3.91a"+str(el_i)+str(el_t)+str(el_p))
+                          name="3.91a"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
             hcm.addConstr(MF_A[el_i][el_t][el_p][0] - MO1(el_i, el_t, el_p)
                 >= -M_MF[el_i][el_t][el_p][2] * MF_I[el_i][el_t][el_p][1],
-                          name="3.91b"+str(el_i)+str(el_t)+str(el_p))
+                          name="3.91b"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
 
             # Minimum of MF_A[i][t][p][0] and Mainline Output 2 (MO2)
             hcm.addConstr(MF_A[el_i][el_t][el_p][0] - MO2(el_i, el_t, el_p)
                     <= M_MF[el_i][el_t][el_p][3] * MF_I[el_i][el_t][el_p][2],
-                          name="3.92"+str(el_i)+str(el_t)+str(el_p))
+                          name="3.92"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
             hcm.addConstr(MO2(el_i, el_t, el_p) - MF_A[el_i][el_t][el_p][0]
                     <= M_MF[el_i][el_t][el_p][3] * MF_I[el_i][el_t][el_p][3],
-                          name="3.93"+str(el_i)+str(el_t)+str(el_p))
+                          name="3.93"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
             # Binary indicator variable constraint
             if use_sos:
                     hcm.addSOS(gbp.GRB.SOS_TYPE1, [MF_I[el_i][el_t][el_p][2],MF_I[el_i][el_t][el_p][3]])
             else:
                 hcm.addConstr(MF_I[el_i][el_t][el_p][2] + MF_I[el_i][el_t][el_p][3] == 1,
-                          name="3.94"+str(el_i)+str(el_t)+str(el_p))
+                          name="3.94"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
             # Setting minimum to MF_A[i][t][p][1]
             hcm.addConstr(MF_A[el_i][el_t][el_p][1] - MF_A[el_i][el_t][el_p][0]
                 <= M_MF[el_i][el_t][el_p][4] * MF_I[el_i][el_t][el_p][2],
-                          name="3.95a"+str(el_i)+str(el_t)+str(el_p))
+                          name="3.95a"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
             hcm.addConstr(MF_A[el_i][el_t][el_p][1] - MF_A[el_i][el_t][el_p][0]
                 >= -M_MF[el_i][el_t][el_p][4] * MF_I[el_i][el_t][el_p][2],
-                          name="3.95b"+str(el_i)+str(el_t)+str(el_p))
+                          name="3.95b"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
             hcm.addConstr(MF_A[el_i][el_t][el_p][1] - MO2(el_i, el_t, el_p)
                 <= M_MF[el_i][el_t][el_p][5] * MF_I[el_i][el_t][el_p][3],
-                          name="3.96a"+str(el_i)+str(el_t)+str(el_p))
+                          name="3.96a"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
             hcm.addConstr(MF_A[el_i][el_t][el_p][1] - MO2(el_i, el_t, el_p)
                 >= -M_MF[el_i][el_t][el_p][5] * MF_I[el_i][el_t][el_p][3],
-                          name="3.96b"+str(el_i)+str(el_t)+str(el_p))
+                          name="3.96b"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
 
             # Minimum of MF_A[i][t][p][1] and Mainline Output 3 (MO3)
             hcm.addConstr(MF_A[el_i][el_t][el_p][1] - MO3(el_i, el_t, el_p)
                     <= M_MF[el_i][el_t][el_p][6] * MF_I[el_i][el_t][el_p][4],
-                          name="3.97"+str(el_i)+str(el_t)+str(el_p))
+                          name="3.97"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
             hcm.addConstr(MO3(el_i, el_t, el_p) - MF_A[el_i][el_t][el_p][1]
                     <= M_MF[el_i][el_t][el_p][6] * MF_I[el_i][el_t][el_p][5],
-                          name="3.98"+str(el_i)+str(el_t)+str(el_p))
+                          name="3.98"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
             # Binary indicator variable constraint
             if use_sos:
                     hcm.addSOS(gbp.GRB.SOS_TYPE1, [MF_I[el_i][el_t][el_p][4],MF_I[el_i][el_t][el_p][5]])
             else:
                 hcm.addConstr(MF_I[el_i][el_t][el_p][4] + MF_I[el_i][el_t][el_p][5] == 1,
-                          name="3.99"+str(el_i)+str(el_t)+str(el_p))
+                          name="3.99"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
             # Setting minimum to MF_A[i][t][p][2]
             hcm.addConstr(MF_A[el_i][el_t][el_p][2] - MF_A[el_i][el_t][el_p][1]
                 <= M_MF[el_i][el_t][el_p][7] * MF_I[el_i][el_t][el_p][4],
-                          name="3.100a"+str(el_i)+str(el_t)+str(el_p))
+                          name="3.100a"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
             hcm.addConstr(MF_A[el_i][el_t][el_p][2] - MF_A[el_i][el_t][el_p][1]
                 >= -M_MF[el_i][el_t][el_p][7] * MF_I[el_i][el_t][el_p][4],
-                          name="3.100b"+str(el_i)+str(el_t)+str(el_p))
+                          name="3.100b"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
             hcm.addConstr(MF_A[el_i][el_t][el_p][2] - MO3(el_i, el_t, el_p)
                 <= M_MF[el_i][el_t][el_p][8] * MF_I[el_i][el_t][el_p][5],
-                          name="3.101a"+str(el_i)+str(el_t)+str(el_p))
+                          name="3.101a"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
             hcm.addConstr(MF_A[el_i][el_t][el_p][2] - MO3(el_i, el_t, el_p)
                 >= -M_MF[el_i][el_t][el_p][8] * MF_I[el_i][el_t][el_p][5],
-                          name="3.101b"+str(el_i)+str(el_t)+str(el_p))
+                          name="3.101b"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
 
             # Minimum of MF_A[i][t][p][2] and Segment Capacity (SC) of current segment (of loop)
             hcm.addConstr(MF_A[el_i][el_t][el_p][2] - func_SC(el_i,el_p)*(1/Th)
                     <= M_MF[el_i][el_t][el_p][9] * MF_I[el_i][el_t][el_p][6],
-                          name="3.102"+str(el_i)+str(el_t)+str(el_p))
+                          name="3.102"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
             hcm.addConstr(func_SC(el_i,el_p)*(1/Th) - MF_A[el_i][el_t][el_p][2]
                     <= M_MF[el_i][el_t][el_p][9] * MF_I[el_i][el_t][el_p][7],
-                          name="3.103"+str(el_i)+str(el_t)+str(el_p))
+                          name="3.103"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
             # Binary indicator variable constraint
             if use_sos:
                     hcm.addSOS(gbp.GRB.SOS_TYPE1, [MF_I[el_i][el_t][el_p][6],MF_I[el_i][el_t][el_p][7]])
             else:
                 hcm.addConstr(MF_I[el_i][el_t][el_p][6] + MF_I[el_i][el_t][el_p][7] == 1,
-                          name="3.104"+str(el_i)+str(el_t)+str(el_p))
+                          name="3.104"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
             # Setting minimum to MF_A[i][t][p][3]
             hcm.addConstr(MF_A[el_i][el_t][el_p][3] - MF_A[el_i][el_t][el_p][2]
                 <= M_MF[el_i][el_t][el_p][10] * MF_I[el_i][el_t][el_p][6],
-                          name="3.105a"+str(el_i)+str(el_t)+str(el_p))
+                          name="3.105a"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
             hcm.addConstr(MF_A[el_i][el_t][el_p][3] - MF_A[el_i][el_t][el_p][2]
                 >= -M_MF[el_i][el_t][el_p][10] * MF_I[el_i][el_t][el_p][6],
-                          name="3.105b"+str(el_i)+str(el_t)+str(el_p))
+                          name="3.105b"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
             hcm.addConstr(MF_A[el_i][el_t][el_p][3] - func_SC(el_i,el_p)*(1/Th)
                 <= M_MF[el_i][el_t][el_p][11] * MF_I[el_i][el_t][el_p][7],
-                          name="3.106a"+str(el_i)+str(el_t)+str(el_p))
+                          name="3.106a"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
             hcm.addConstr(MF_A[el_i][el_t][el_p][3] - func_SC(el_i,el_p)*(1/Th)
                 >= -M_MF[el_i][el_t][el_p][11] * MF_I[el_i][el_t][el_p][7],
-                          name="3.106b"+str(el_i)+str(el_t)+str(el_p))
+                          name="3.106b"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
 
             if el_i > 0: # Only consider if not 1st segment
                 # Minimum of MF_A[i][t][p][3] and Segment Capacity (SC) of previous segment
                 hcm.addConstr(MF_A[el_i][el_t][el_p][3] - SC[el_i - 1][el_p]*(1/Th)
                         <= M_MF[el_i][el_t][el_p][12] * MF_I[el_i][el_t][el_p][8],
-                              name="3.107"+str(el_i)+str(el_t)+str(el_p))
+                              name="3.107"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
                 hcm.addConstr(SC[el_i - 1][el_p]*(1/Th) - MF_A[el_i][el_t][el_p][3]
                         <= M_MF[el_i][el_t][el_p][12] * MF_I[el_i][el_t][el_p][9],
-                              name="3.108"+str(el_i)+str(el_t)+str(el_p))
+                              name="3.108"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
                 # Binary indicator variable constraint
                 if use_sos:
                     hcm.addSOS(gbp.GRB.SOS_TYPE1, [MF_I[el_i][el_t][el_p][8],MF_I[el_i][el_t][el_p][9]])
                 else:
                     hcm.addConstr(MF_I[el_i][el_t][el_p][8] + MF_I[el_i][el_t][el_p][9] == 1,
-                              name="3.109"+str(el_i)+str(el_t)+str(el_p))
+                              name="3.109"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
                 # Setting minimum to MF[i][t][p]
                 hcm.addConstr(MF(el_i,el_t,el_p) - MF_A[el_i][el_t][el_p][3]
                         <= M_MF[el_i][el_t][el_p][13] * MF_I[el_i][el_t][el_p][8],
-                              name="3.110a"+str(el_i)+str(el_t)+str(el_p))
+                              name="3.110a"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
                 hcm.addConstr(MF(el_i,el_t,el_p) - MF_A[el_i][el_t][el_p][3]
                         >= -M_MF[el_i][el_t][el_p][13] * MF_I[el_i][el_t][el_p][8],
-                              name="3.110b"+str(el_i)+str(el_t)+str(el_p))
+                              name="3.110b"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
                 hcm.addConstr(MF(el_i,el_t,el_p) - SC[el_i-1][el_p]*(1/Th)
                         <= M_MF[el_i][el_t][el_p][14] * MF_I[el_i][el_t][el_p][9],
-                              name="3.111a"+str(el_i)+str(el_t)+str(el_p))
+                              name="3.111a"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
                 hcm.addConstr(MF(el_i,el_t,el_p) - SC[el_i-1][el_p]*(1/Th)
                         >= -M_MF[el_i][el_t][el_p][14] * MF_I[el_i][el_t][el_p][9],
-                              name="3.111b"+str(el_i)+str(el_t)+str(el_p))
+                              name="3.111b"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
             else:
                 hcm.addConstr(MF(el_i,el_t,el_p) == MF_A[el_i][el_t][el_p][3],
-                              name="3.111a"+str(el_i)+str(el_t)+str(el_p))
+                              name="3.111a"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
 
 
 print("step 22 done")
@@ -1154,7 +1156,7 @@ for el_i in xrange(NS):
     for el_t in xrange(S):
         for el_p in xrange(P):
             hcm.addConstr(SF(el_i, el_t, el_p) == MF(el_i+1, el_t, el_p) + OFRF(el_i+1, el_t, el_p),
-                          name="3.112"+str(el_i)+str(el_t)+str(el_p))
+                          name="3.112"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
 
 #hcm.update()
 print("step 24 done")
@@ -1169,11 +1171,11 @@ for el_i in xrange(NS):  # TODO: NS-1 correct? If so specify value for NV[0][t][
             # Constraint determining number of vehicles on the segment
             hcm.addConstr(NV(el_i, el_t, el_p) == NV(el_i, el_t-1, el_p) + MF(el_i, el_t, el_p)
                         + ONRF(el_i, el_t, el_p) - MF(el_i+1, el_t, el_p) - OFRF(el_i+1, el_t, el_p),
-                        name="3.113" + str(el_i)+str(el_t)+str(el_p))
+                        name="3.113" + str(el_i)+'_'+str(el_t)+'_'+str(el_p))
 
             # Constraint updating the number of unserved vehicles
             hcm.addConstr(UV(el_i, el_t, el_p) == NV(el_i, el_t, el_p) - func_KB(el_i, el_p)*func_L(el_i),
-                          name="3.114"+str(el_i)+str(el_t)+str(el_p))
+                          name="3.114"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
 print("step 25 done")
 hcm.update()
 model_build_time=time.time()
