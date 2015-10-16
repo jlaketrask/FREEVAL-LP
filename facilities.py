@@ -509,10 +509,10 @@ def extract(example_problem):
         Wtilde = []   # List of Weave segments
         P = 3  # number of time intervals (periods) in the analysis period
         Ptilde = [el for el in xrange(P)]  # List of time intervals
-        S = 3 #4 * 15  # Number of time steps in a single interval (each step is 15 seconds)
+        S = 3#4 * 15  # Number of time steps in a single interval (each step is 15 seconds)
         Ttilde = [el for el in xrange(S)]  # List of time steps
         Th = 4*S  # Number of time steps in 1 hour
-        alpha = 7  # %
+        alpha = 0.07  # %
 
         facility_data = read_facility_data_from_file("sto_cq3.csv", NS, P)
 
@@ -548,7 +548,7 @@ def extract(example_problem):
         S = 3#4 * 15  # Number of time steps in a single interval (each step is 15 seconds)
         Ttilde = [el for el in xrange(S)]  # List of time steps
         Th = 4*S  # Number of time steps in 1 hour
-        alpha = 5  # %
+        alpha = 0.07  # %
 
         facility_data = read_facility_data_from_file("sto_cq_nq3.csv", NS, P)
 

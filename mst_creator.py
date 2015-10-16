@@ -31,3 +31,9 @@ def mst_creator(input_file_name, output_file_name):
         #f2.write('NV'+'\n')
     f1.close()
     f2.close()
+
+def model_debut():
+    NS = 5
+    el_p=1
+    for (el_i) in xrange(NS):
+        print(str(func_KB(el_i, el_p)*func_L(el_i) + UV(el_i, S-1, el_p-1).X))
