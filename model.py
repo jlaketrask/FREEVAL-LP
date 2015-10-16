@@ -918,7 +918,7 @@ for el_i in xrange(NS):  # TODO Check NS minus 1?
                     <=M_MO3[el_i][el_t][el_p][11]*MO3_I[el_i][el_t][el_p][7],
                               name = "3.79"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
                 # Binary Indicator variable constraints
-                hcm.addConstr(MO3_I[el_i][el_t][el_p][6]+MO3_I[el_i][el_t][el_p][7] == 2-I_UVv[el_i][el_t][el_p][0],
+                hcm.addConstr(MO3_I[el_i][el_t][el_p][6]+MO3_I[el_i][el_t][el_p][7] == 2-I_UV(el_i, el_t, el_p),
                               name = "3.80"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
                 # Setting minimum to MO3_A[i][t][p][3]
                 hcm.addConstr(MO3_A[el_i][el_t][el_p][3] - MO3_A[el_i][el_t][el_p][2]
@@ -979,20 +979,20 @@ for el_i in xrange(NS):  # TODO -1?
                               + ONRF(el_i, el_t-1, el_p)
                               - (func_L(el_i)*KQ[el_i][el_t][el_p])
                               + NV(el_i, el_t-1, el_p)
-                              <= M_MO2*(1-I_UV(el_i, el_t-1, el_p)),
+                              <= M_MO2*(1-I_UV(el_i+1, el_t-1, el_p)),
                               name="3.86"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
                 hcm.addConstr(MO2(el_i, el_t, el_p)
                               - SF(el_i, el_t-1, el_p)
                               + ONRF(el_i, el_t-1, el_p)
                               - (func_L(el_i)*KQ[el_i][el_t][el_p])
                               + NV(el_i, el_t-1, el_p)
-                              >= -M_MO2*(1-I_UV(el_i-1, el_t-1, el_p)),
+                              >= -M_MO2*(1-I_UV(el_i+1, el_t-1, el_p)),
                               name="3.86"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
                 hcm.addConstr(MO2(el_i, el_t, el_p) - func_SC(el_i, el_t, el_p)
-                              <= M_MO2*I_UV(el_i-1, el_t-1, el_p),
+                              <= M_MO2*I_UV(el_i+1, el_t-1, el_p),
                               name="3.86"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
                 hcm.addConstr(MO2(el_i, el_t, el_p) - func_SC(el_i, el_t, el_p)
-                              >= -M_MO2*I_UV(el_i, el_t-1, el_p),
+                              >= -M_MO2*I_UV(el_i+1, el_t-1, el_p),
                               name="3.86"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
             else:
                 hcm.addConstr(MO2(el_i, el_t, el_p) == func_SC(el_i, el_t, el_p),
@@ -1184,7 +1184,7 @@ for el_i in xrange(NS):  # TODO: NS-1 correct? If so specify value for NV[0][t][
                           name="3.114"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
 #################################################### Eqn 25-29 #########################################################
             if el_i > 0:
-                hcm.addConstr(func_SC(el_i, el_t, el_p) == (1.0 - I_UV(el_i-1, el_t, el_p)*alpha) * (SC[el_i][el_p]/Th),
+                hcm.addConstr(func_SC(el_i, el_t, el_p) == (1.0 - I_UV(el_i-1, el_t-1, el_p)*alpha) * (SC[el_i][el_p]/Th),
                               name='SC_E'+str(el_i)+str(el_t)+str(el_p))
             else:
                 hcm.addConstr(func_SC(el_i, el_t, el_p) == SC[el_i][el_p]/Th,
@@ -1260,6 +1260,7 @@ else:
                 #s+= ", " + str(ONRF_I[i][t][p][1].X)
                 #s+= ", " + str(ONRO[i][t][p].X)
                 s+= ", " + str(ONRF(i,t, p).X)
+                #s+= ", " + str(ONRQ(i,t, p).X)
                 s+= ", " + str(OFRF(i,t, p).X)
                 s+= ", " + str(DEF_A[i][t][p].X)
                 s+= ", " + str(DEF[i][t][p].X)
