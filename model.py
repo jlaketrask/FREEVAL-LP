@@ -979,20 +979,20 @@ for el_i in xrange(NS):  # TODO -1?
                               + ONRF(el_i, el_t-1, el_p)
                               - (func_L(el_i)*KQ[el_i][el_t][el_p])
                               + NV(el_i, el_t-1, el_p)
-                              <= M_MO2*(1-I_UV(el_i+1, el_t-1, el_p)),
+                              <= M_MO2*(1-I_UV(el_i, el_t-1, el_p)),
                               name="3.86"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
                 hcm.addConstr(MO2(el_i, el_t, el_p)
                               - SF(el_i, el_t-1, el_p)
                               + ONRF(el_i, el_t-1, el_p)
                               - (func_L(el_i)*KQ[el_i][el_t][el_p])
                               + NV(el_i, el_t-1, el_p)
-                              >= -M_MO2*(1-I_UV(el_i+1, el_t-1, el_p)),
+                              >= -M_MO2*(1-I_UV(el_i, el_t-1, el_p)),
                               name="3.86"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
                 hcm.addConstr(MO2(el_i, el_t, el_p) - func_SC(el_i, el_t, el_p)
-                              <= M_MO2*I_UV(el_i+1, el_t-1, el_p),
+                              <= M_MO2*I_UV(el_i, el_t-1, el_p),
                               name="3.86"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
                 hcm.addConstr(MO2(el_i, el_t, el_p) - func_SC(el_i, el_t, el_p)
-                              >= -M_MO2*I_UV(el_i+1, el_t-1, el_p),
+                              >= -M_MO2*I_UV(el_i, el_t-1, el_p),
                               name="3.86"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
             else:
                 hcm.addConstr(MO2(el_i, el_t, el_p) == func_SC(el_i, el_t, el_p),
@@ -1286,6 +1286,8 @@ else:
                     s+=", 0.0"
                 else:
                     s+= ", " + str(UV(i-1, t - 1, p).X)
+                s+=", " + str(SF(i, t, p).X)
+                s+=", " + str(KQ[i][t][p].X)
                 print(s)
 
 # s= ' '
