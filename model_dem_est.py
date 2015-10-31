@@ -45,12 +45,24 @@ SD = fd["SD"] # Segment demand for segment i in time interval p
 # (1) Estimated demand (ED) and background density (KB)
 EDv = facilities.compute_estimated_demand(SC, SD)
 #KB = compute_background_density(ED, Ftilde, Ntilde)
-KB = fd["KB"]
-def func_KB(i,p):
-    if (i < 0):
-        return KB[0][p]
-    else:
-        return KB[i][p]
+#KB = fd["KB"]
+
+nv_res = zeros((NS, S, P))
+uv_res = zeros((NS, S, P))
+f = open('ipdet_10step_dem_est.csv', 'r')
+f.readline()
+for line in f:
+    tokens = line.split(',')
+    nv_res[int(tokens[0])][int(tokens[2])][int(tokens[1])] = float(tokens[3])
+    uv_res[int(tokens[0])][int(tokens[2])][int(tokens[1])] = float(tokens[12])
+f.close()
+
+
+# def func_KB(i,p):
+#     if (i < 0):
+#         return KB[0][p]
+#     else:
+#         return KB[i][p]
 
 def func_SC(i, t, p):
     if t < 0:
@@ -102,6 +114,12 @@ DEF = []    # Deficit in flow at segment i at time step t in interval p
 DEF_A = []  # Auxiliary Variable to hold the Deficit as it is determined by Min function
 UVv = []  # Unserved vehicles: additional # of vehicles stored in segment i at the end of step t in interval p
 SCv = [] # Capacity of a segment, allows for capacity drop to take effect
+NV_delta = [] # Variables to minimize the difference between observed and computed NV
+UV_delta = [] # Variables to minimize the difference between observed and computed UV
+KBv = []  # Background density
+
+for el_i in xrange(NS):
+    KBv.append([hcm.addVar(vtype=gbp.GRB.CONTINUOUS, name='KB'+str(el_i)+'_'+str(el_p)) for el_p in xrange(P)])
 
 for el_i in xrange(NS+1):
     MFv.append([[hcm.addVar(vtype=gbp.GRB.CONTINUOUS, name='MF'+str(el_i)+'_'+str(el_t)+'_'+str(el_p)) for el_p in xrange(P)] for el_t in xrange(S)])
@@ -119,6 +137,8 @@ for el_i in xrange(NS+1):
     DEF_A.append([[hcm.addVar(lb=-1*gbp.GRB.INFINITY, ub=gbp.GRB.INFINITY, vtype=gbp.GRB.CONTINUOUS, name='DEF'+str(el_i)+'_'+str(el_t)+'_'+str(el_p)) for el_p in xrange(P)] for el_t in xrange(S)])
     UVv.append([[hcm.addVar(vtype=gbp.GRB.CONTINUOUS, name='UV'+str(el_i)+'_'+str(el_t)+'_'+str(el_p)) for el_p in xrange(P)] for el_t in xrange(S)])
     SCv.append([[hcm.addVar(vtype=gbp.GRB.CONTINUOUS, name='SC'+str(el_i)+'_'+str(el_t)+'_'+str(el_p)) for el_p in xrange(P)] for el_t in xrange(S)])
+    NV_delta.append([[hcm.addVar(vtype=gbp.GRB.CONTINUOUS, name='NV_delta'+str(el_i)+str(el_t-1)+str(el_p)) for el_p in xrange(P)] for el_t in xrange(S)])
+    UV_delta.append([[hcm.addVar(vtype=gbp.GRB.CONTINUOUS, name='NV_delta'+str(el_i)+str(el_t-1)+str(el_p)) for el_p in xrange(P)] for el_t in xrange(S)])
 
 ###### Creating Expressions for Necessary Variables
 def MF(i, t, p):
@@ -230,12 +250,12 @@ UV_up = [[hcm.addVar(vtype=gbp.GRB.CONTINUOUS, name='NV'+str(-1)+str(el_t)+str(e
 I_UVv_up = [[hcm.addVar(vtype=gbp.GRB.BINARY, name='NV'+str(-1)+str(el_t)+str(el_p))for el_p in xrange(P)] for el_t in xrange(S)]
 ################################ Creating Aux and Binary DVs for Node Only Variables ###################################
 MO1_I = []
-MO1_A = []   # List of auxiliary variables for step 16
-I_UVv = [] # Array to hold binary indicator variables for step 17
-MO3_A = [] # 4D array holding Auxiliary variables for step 19
-MO3_I = [] # 4D array holding indicator variables for step 19
-MF_A = [] # 4D array holding Auxiliary variables for step 22
-MF_I = [] # 4D array holding indicator variables for step 22
+MO1_A = []  # List of auxiliary variables for step 16
+I_UVv = []  # Array to hold binary indicator variables for step 17
+MO3_A = []  # 4D array holding Auxiliary variables for step 19
+MO3_I = []  # 4D array holding indicator variables for step 19
+MF_A = []   # 4D array holding Auxiliary variables for step 22
+MF_I = []   # 4D array holding indicator variables for step 22
 for el_i in xrange(NS+1):
     MO1_I.append([])
     MO1_A.append([])
@@ -326,13 +346,16 @@ for el_i in xrange(len(Ftilde)):
 hcm.update()
 
 # Setting objective
-sum_nv = 0
+#sum_nv = 0
+sum_nv_delta = 0
 for el_i in xrange(NS):
     for el_t in xrange(S):
         for el_p in xrange(P):
-            sum_nv += (NV(el_i, el_t, el_p))
+            #sum_nv += (NV(el_i, el_t, el_p))
+            sum_nv_delta += NV_delta[el_i][el_t][el_p] #+ UV_delta[el_i][el_t][el_p]
 
-hcm.setObjective(sum_nv, gbp.GRB.MINIMIZE)
+#hcm.setObjective(sum_nv, gbp.GRB.MINIMIZE)
+hcm.setObjective(sum_nv_delta, gbp.GRB.MINIMIZE)
 hcm.update()
 
 ################## DEPRECATED: ED IS A CONSTANT BASED ON KB #####################################################################################################################################################
@@ -369,7 +392,8 @@ hcm.update()
 ##### Need to calculate KB from Undersat
 for el_i in xrange(NS):  # Does not set minimum number of vehicles for the final node (vba_code.txt line 184-185)
     for el_p in xrange(P):  # Note that the lambda function on UV accounts for the case p = -1 (UV = 0 in that case)
-        hcm.addConstr(NV(el_i, -1, el_p) == func_KB(el_i, el_p)*func_L(el_i) + UV(el_i, S-1, el_p-1),
+        #hcm.addConstr(NV(el_i, -1, el_p) == func_KB(el_i, el_p)*func_L(el_i) + UV(el_i, S-1, el_p-1),
+        hcm.addConstr(NV(el_i, -1, el_p) == KBv[el_i][el_p]*func_L(el_i) + UV(el_i, S-1, el_p-1),
                       name='NV_E'+str(el_i)+str(0)+str(el_p))
         #hcm.addConstr(func_SC(el_i, 0, el_p) == SC[el_i][el_p]/Th,
         #              name='SC_E'+str(el_i)+str(0)+str(el_p))
@@ -1180,7 +1204,7 @@ for el_i in xrange(NS):  # TODO: NS-1 correct? If so specify value for NV[0][t][
                           name="3.113" + str(el_i)+'_'+str(el_t)+'_'+str(el_p))
 #################################################### Eqn 25-28 #########################################################
             # Constraint updating the number of unserved vehicles
-            hcm.addConstr(UV(el_i, el_t, el_p) == NV(el_i, el_t, el_p) - func_KB(el_i, el_p)*func_L(el_i),
+            hcm.addConstr(UV(el_i, el_t, el_p) == NV(el_i, el_t, el_p) - KBv[el_i][el_p]*func_L(el_i),
                           name="3.114"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
 #################################################### Eqn 25-29 #########################################################
             if el_i > 0:
@@ -1193,6 +1217,21 @@ for el_t in xrange(S):
     for el_p in xrange(P):
         hcm.addConstr(UV(-1, el_t, el_p) == 0.0, name='UV-1'+'_'+str(el_t)+'_'+str(el_p))
 print("step 25 done")
+
+###################################### Add Objective Abs Val Constraints ###############################################
+for el_i in xrange(NS):
+    for el_t in xrange(S):
+        for el_p in xrange(P):
+            hcm.addConstr(NV_delta[el_i][el_t][el_p] >= NV(el_i, el_t, el_p) - nv_res[el_i][el_t][el_p],
+                          name='Obj_Constr1_'+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
+            hcm.addConstr(NV_delta[el_i][el_t][el_p] >= nv_res[el_i][el_t][el_p] - NV(el_i, el_t, el_p),
+                          name='Obj_Constr2_'+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
+            hcm.addConstr(UV_delta[el_i][el_t][el_p] >= UV(el_i, el_t, el_p) - uv_res[el_i][el_t][el_p],
+                          name='Obj_Constr3_'+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
+            hcm.addConstr(UV_delta[el_i][el_t][el_p] >= uv_res[el_i][el_t][el_p] - UV(el_i, el_t, el_p),
+                          name='Obj_Constr4_'+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
+########################################################################################################################
+
 hcm.update()
 model_build_time=time.time()
 print("Model Built: "+str(model_build_time - init_time))
@@ -1248,22 +1287,22 @@ else:
                 s+= ", " + str(p)
                 s+= ", " + str(t)
                 s+= ", " + str(NV(i, t, p).X)
-                s+= ", " + str(MF(i, t, p).X)
-                s+= ", " + str(MI[i][t][p].X)
-                s+= ", " + str(MO1(i, t, p).X)
-                s+= ", " + str(MO2(i, t, p).X)
-                s+= ", " + str(MO3(i, t, p).X)
+                #s+= ", " + str(MF(i, t, p).X)
+                #s+= ", " + str(MI[i][t][p].X)
+                #s+= ", " + str(MO1(i, t, p).X)
+                #s+= ", " + str(MO2(i, t, p).X)
+                #s+= ", " + str(MO3(i, t, p).X)
                 #s+= ", " + str(ONRI[i][t][p].X)
                 #s+= ", " + str(ONRD[i][p])
                 #s+=", " + str(ONRQ(i,t, p).X)
                 #s+= ", " + str(ONRF_I[i][t][p][0].X)
                 #s+= ", " + str(ONRF_I[i][t][p][1].X)
                 #s+= ", " + str(ONRO[i][t][p].X)
-                s+= ", " + str(ONRF(i,t, p).X)
+                #s+= ", " + str(ONRF(i,t, p).X)
                 #s+= ", " + str(ONRQ(i,t, p).X)
-                s+= ", " + str(OFRF(i,t, p).X)
+                #s+= ", " + str(OFRF(i,t, p).X)
                 #s+= ", " + str(DEF_A[i][t][p].X)
-                s+= ", " + str(DEF[i][t][p].X)
+                #s+= ", " + str(DEF[i][t][p].X)
                 #if i in Ftilde:
                 #    s+= ", " + str(DEF_I[Ftilde.index(i)][t][p].X)
                 #    s+= ", " + str(OFRF_I[Ftilde.index(i)][t][p][0].X)
@@ -1286,9 +1325,15 @@ else:
                 #    s+=", 0.0"
                 #else:
                 #    s+= ", " + str(UV(i-1, t - 1, p).X)
-                s+=", " + str(SF(i, t, p).X)
-                s+=", " + str(KQ[i][t][p].X)
+                #s+=", " + str(SF(i, t, p).X)
+                #s+=", " + str(KQ[i][t][p].X)
                 print(s)
+
+print('##############################################################')
+for p in xrange(P):
+    for i in xrange(NS):
+        print(str(i)+','+str(p)+','+str(KBv[i][p].X))
+
 
 # s= ' '
 # t1=time.time()
