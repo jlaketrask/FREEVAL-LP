@@ -53,6 +53,7 @@ f = open('fc_3step2_nvuv.csv', 'r')
 f.readline()
 for line in f:
     tokens = line.split(',')
+    print(tokens[3])
     nv_observed[int(tokens[0])][int(tokens[2])][int(tokens[1])] = float(tokens[3])
     uv_observed[int(tokens[0])][int(tokens[2])][int(tokens[1])] = float(tokens[12])
 f.close()
@@ -116,7 +117,8 @@ UVv = []  # Unserved vehicles: additional # of vehicles stored in segment i at t
 SCv = [] # Capacity of a segment, allows for capacity drop to take effect
 NV_delta = [] # Variables to minimize the difference between observed and computed NV
 UV_delta = [] # Variables to minimize the difference between observed and computed UV
-CAFv = []  # Background density
+KBv = []  # Background density
+CAFv = []  # Capacity Adjustment Factors
 
 use_CAF_period_and_segment = False
 
@@ -127,6 +129,7 @@ else:
     for el_i in xrange(NS):
         #if el_i is 4:
         CAFv.append(hcm.addVar(vtype=gbp.GRB.CONTINUOUS, ub=1.0, name='KB'+str(el_i)))
+        KBv.append([hcm.addVar(vtype=gbp.GRB.CONTINUOUS, name='KB'+str(el_i)+'_'+str(el_p)) for el_p in xrange(P)])
         #else:
         #    CAFv.append(hcm.addVar(vtype=gbp.GRB.CONTINUOUS, lb=1.0, ub=1.0, name='KB'+str(el_i)))
 
@@ -401,7 +404,7 @@ hcm.update()
 ##### Need to calculate KB from Undersat
 for el_i in xrange(NS):  # Does not set minimum number of vehicles for the final node (vba_code.txt line 184-185)
     for el_p in xrange(P):  # Note that the lambda function on UV accounts for the case p = -1 (UV = 0 in that case)
-        hcm.addConstr(NV(el_i, -1, el_p) == func_KB(el_i, el_p)*func_L(el_i) + UV(el_i, S-1, el_p-1),
+        hcm.addConstr(NV(el_i, -1, el_p) == KBv[el_i][el_p]*func_L(el_i) + UV(el_i, S-1, el_p-1),
                       name='NV_E'+str(el_i)+str(0)+str(el_p))
         #hcm.addConstr(func_SC(el_i, 0, el_p) == SC[el_i][el_p]/Th,
         #              name='SC_E'+str(el_i)+str(0)+str(el_p))
@@ -1155,10 +1158,10 @@ for el_i in xrange(NS):
 
             if el_i > 0: # Only consider if not 1st segment
                 # Minimum of MF_A[i][t][p][3] and Segment Capacity (SC) of previous segment
-                hcm.addConstr(MF_A[el_i][el_t][el_p][3] - SC[el_i - 1][el_p]*(1/Th)
+                hcm.addConstr(MF_A[el_i][el_t][el_p][3] - func_SC(el_i-1, el_t, el_p)  #SC[el_i - 1][el_p]*(1/Th)
                         <= M_MF[el_i][el_t][el_p][12] * MF_I[el_i][el_t][el_p][8],
                               name="3.107"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
-                hcm.addConstr(SC[el_i - 1][el_p]*(1/Th) - MF_A[el_i][el_t][el_p][3]
+                hcm.addConstr(func_SC(el_i-1, el_t, el_p) - MF_A[el_i][el_t][el_p][3]  #SC[el_i - 1][el_p]*(1/Th)
                         <= M_MF[el_i][el_t][el_p][12] * MF_I[el_i][el_t][el_p][9],
                               name="3.108"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
                 # Binary indicator variable constraint
@@ -1174,14 +1177,14 @@ for el_i in xrange(NS):
                 hcm.addConstr(MF(el_i,el_t,el_p) - MF_A[el_i][el_t][el_p][3]
                         >= -M_MF[el_i][el_t][el_p][13] * MF_I[el_i][el_t][el_p][8],
                               name="3.110b"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
-                hcm.addConstr(MF(el_i,el_t,el_p) - SC[el_i-1][el_p]*(1/Th)
+                hcm.addConstr(MF(el_i,el_t,el_p) - func_SC(el_i-1, el_t, el_p)      #SC[el_i-1][el_p]*(1/Th)
                         <= M_MF[el_i][el_t][el_p][14] * MF_I[el_i][el_t][el_p][9],
                               name="3.111a"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
-                hcm.addConstr(MF(el_i,el_t,el_p) - SC[el_i-1][el_p]*(1/Th)
+                hcm.addConstr(MF(el_i, el_t, el_p) - func_SC(el_i-1, el_t, el_p)    #SC[el_i-1][el_p]*(1/Th)
                         >= -M_MF[el_i][el_t][el_p][14] * MF_I[el_i][el_t][el_p][9],
                               name="3.111b"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
             else:
-                hcm.addConstr(MF(el_i,el_t,el_p) == MF_A[el_i][el_t][el_p][3],
+                hcm.addConstr(MF(el_i, el_t, el_p) == MF_A[el_i][el_t][el_p][3],
                               name="3.111a"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
 
 
@@ -1210,7 +1213,7 @@ for el_i in xrange(NS):  # TODO: NS-1 correct? If so specify value for NV[0][t][
                           name="3.113" + str(el_i)+'_'+str(el_t)+'_'+str(el_p))
 #################################################### Eqn 25-28 #########################################################
             # Constraint updating the number of unserved vehicles
-            hcm.addConstr(UV(el_i, el_t, el_p) == NV(el_i, el_t, el_p) - func_KB(el_i, el_p)*func_L(el_i),
+            hcm.addConstr(UV(el_i, el_t, el_p) == NV(el_i, el_t, el_p) - KBv[el_i][el_p]*func_L(el_i),
                           name="3.114"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
 #################################################### Eqn 25-29 #########################################################
             # Capacity Drop
@@ -1248,6 +1251,7 @@ print("Model Built: "+str(model_build_time - init_time))
 #hcm.read('sto_cq3.mst')
 hcm.update()
 # hcm.setParam(gbp.GRB.param.SubMIPNodes, 5000000)
+hcm.setParam(gbp.GRB.param.TimeLimit, 300)
 hcm.optimize()
 #hcm.presolve()
 #hcm.computeIIS()
@@ -1333,9 +1337,46 @@ else:
                 s+=", " + str(KQ[i][t][p].X)
                 print(s)
 
-print('##############################################################')
+print('######################## CAF #################################')
 for i in xrange(NS):
-        print(str(i)+','+str(p)+','+str(CAFv[i].X))  ## CAFv[i][p]
+    print(str(i)+','+str(p)+','+str(CAFv[i].X))  ## CAFv[i][p]
+
+print('########################  KB  ################################')
+for p in xrange(P):
+    for i in xrange(NS):
+        print(str(i)+','+str(p)+','+str(KBv[i][p].X))
+
+# Calc average segment flow
+SFavg = zeros((NS, P))
+for i in xrange(NS):
+    for p in xrange(P):
+        tempSum = 0
+        for t in xrange(S):
+            tempSum = tempSum + SF(i,t,p).X
+        SFavg[i][p] = Th/15.0 * tempSum
+
+NVavg = zeros((NS, P))
+for i in xrange(NS):
+    for p in xrange(P):
+        tempSum = 0
+        for t in xrange(S):
+            tempSum = tempSum + NV(i,t,p).X
+        NVavg[i][p] = 1/15.0 * tempSum
+
+Kavg = zeros((NS, P))
+for i in xrange(NS):
+    for p in xrange(P):
+        Kavg[i][p] = NVavg[i][p] / L[i]
+
+Uavg = zeros((NS, P))
+for i in xrange(NS):
+    for p in xrange(P):
+        Uavg[i][p] = SFavg[i][p] / Kavg[i][p]
+
+print('########################  U  #################################')
+for p in xrange(P):
+    for i in xrange(NS):
+        print(str(i)+','+str(p)+','+str(Uavg[i][p]))
 
 
 # s= ' '
