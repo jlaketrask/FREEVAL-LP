@@ -1,6 +1,6 @@
 from __future__ import division
 import time
-import facilities_caf_calibration
+import facilities
 import gurobipy as gbp
 from numpy import *
 from constraintGenerator import generate_max_constrs, generate_min_constrs, sum_add_t, sum_sum_add_t_p
@@ -8,13 +8,14 @@ __author__ = 'jltrask'
 
 use_sos = False
 printFile = False
+use_dta_objective = False
 def_const_type = 0
-example_problem = 5
+example_problem = 20
 
 init_time = time.time()
 
 # Importing Facility
-fd = facilities_caf_calibration.extract(example_problem)
+fd = facilities.extract(example_problem)
 NS = fd["NS"]
 Stilde = fd["Stilde"]
 Ftilde = fd["Ftilde"]  # List of OFR segments
@@ -43,20 +44,19 @@ OFRD = fd["OFRD"]  # Demand flow rate for OFR at node i in interval p
 SD = fd["SD"] # Segment demand for segment i in time interval p
 # Precomputing known values
 # (1) Estimated demand (ED) and background density (KB)
-EDv = facilities_caf_calibration.compute_estimated_demand(SC, SD)
+EDv = facilities.compute_estimated_demand(SC, SD)
 #KB = compute_background_density(ED, Ftilde, Ntilde)
 KB = fd["KB"]
 
 nv_observed = zeros((NS, S, P))
 uv_observed = zeros((NS, S, P))
-f = open('fc_3step2_nvuv.csv', 'r')
+f = open(fd["nvuv_fname"], 'r')
 f.readline()
 for line in f:
     tokens = line.split(',')
     nv_observed[int(tokens[0])][int(tokens[2])][int(tokens[1])] = float(tokens[3])
     uv_observed[int(tokens[0])][int(tokens[2])][int(tokens[1])] = float(tokens[12])
 f.close()
-
 
 def func_KB(i,p):
     if (i < 0):
@@ -118,25 +118,13 @@ NV_delta = [] # Variables to minimize the difference between observed and comput
 UV_delta = [] # Variables to minimize the difference between observed and computed UV
 CAFv = []  # Capacity Adjustment Factors
 
-use_CAF_period_and_segment = False
-
-if use_CAF_period_and_segment:
-    for el_i in xrange(NS):
-        CAFv.append([hcm.addVar(vtype=gbp.GRB.CONTINUOUS, ub=1.0, name='KB'+str(el_i)+'_'+str(el_p)) for el_p in xrange(P)])
-else:
-    for el_i in xrange(NS):
-        #if el_i is 4:
-        CAFv.append(hcm.addVar(vtype=gbp.GRB.CONTINUOUS, ub=1.0, name='KB'+str(el_i)))
-        #else:
-        #    CAFv.append(hcm.addVar(vtype=gbp.GRB.CONTINUOUS, lb=1.0, ub=1.0, name='KB'+str(el_i)))
-
 for el_i in xrange(NS+1):
     MFv.append([[hcm.addVar(vtype=gbp.GRB.CONTINUOUS, name='MF'+str(el_i)+'_'+str(el_t)+'_'+str(el_p)) for el_p in xrange(P)] for el_t in xrange(S)])
     ONRFv.append([[hcm.addVar(vtype=gbp.GRB.CONTINUOUS, name='ONRF'+str(el_i)+'_'+str(el_t)+'_'+str(el_p)) for el_p in xrange(P)] for el_t in xrange(S)])
     ONRQv.append([[hcm.addVar(vtype=gbp.GRB.CONTINUOUS, name='ONRQ'+str(el_i)+'_'+str(el_t)+'_'+str(el_p)) for el_p in xrange(P)] for el_t in xrange(S)])
+    OFRFv.append([[hcm.addVar(vtype=gbp.GRB.CONTINUOUS, name='OFRF'+str(el_i)+'_'+str(el_t)+'_'+str(el_p)) for el_p in xrange(P)] for el_t in xrange(S)])
     DEF.append([[hcm.addVar(vtype=gbp.GRB.CONTINUOUS, name='DEF'+str(el_i)+'_'+str(el_t)+'_'+str(el_p)) for el_p in xrange(P)] for el_t in xrange(S)])
     DEF_A.append([[hcm.addVar(lb=-1*gbp.GRB.INFINITY, ub=gbp.GRB.INFINITY, vtype=gbp.GRB.CONTINUOUS, name='DEF'+str(el_i)+'_'+str(el_t)+'_'+str(el_p)) for el_p in xrange(P)] for el_t in xrange(S)])
-    OFRFv.append([[hcm.addVar(vtype=gbp.GRB.CONTINUOUS, name='OFRF'+str(el_i)+'_'+str(el_t)+'_'+str(el_p)) for el_p in xrange(P)] for el_t in xrange(S)])
     MI.append([[hcm.addVar(vtype=gbp.GRB.CONTINUOUS, name='MI'+str(el_i)+'_'+str(el_t)+'_'+str(el_p)) for el_p in xrange(P)] for el_t in xrange(S)])
     MO1v.append([[hcm.addVar(vtype=gbp.GRB.CONTINUOUS, name='MO1'+str(el_i)+'_'+str(el_t)+'_'+str(el_p)) for el_p in xrange(P)] for el_t in xrange(S)])
     MO2v.append([[hcm.addVar(vtype=gbp.GRB.CONTINUOUS, name='MO2'+str(el_i)+'_'+str(el_t)+'_'+str(el_p)) for el_p in xrange(P)] for el_t in xrange(S)])
@@ -259,12 +247,12 @@ UV_up = [[hcm.addVar(vtype=gbp.GRB.CONTINUOUS, name='NV'+str(-1)+str(el_t)+str(e
 I_UVv_up = [[hcm.addVar(vtype=gbp.GRB.BINARY, name='NV'+str(-1)+str(el_t)+str(el_p))for el_p in xrange(P)] for el_t in xrange(S)]
 ################################ Creating Aux and Binary DVs for Node Only Variables ###################################
 MO1_I = []
-MO1_A = []  # List of auxiliary variables for step 16
-I_UVv = []  # Array to hold binary indicator variables for step 17
-MO3_A = []  # 4D array holding Auxiliary variables for step 19
-MO3_I = []  # 4D array holding indicator variables for step 19
-MF_A = []   # 4D array holding Auxiliary variables for step 22
-MF_I = []   # 4D array holding indicator variables for step 22
+MO1_A = []   # List of auxiliary variables for step 16
+I_UVv = [] # Array to hold binary indicator variables for step 17
+MO3_A = [] # 4D array holding Auxiliary variables for step 19
+MO3_I = [] # 4D array holding indicator variables for step 19
+MF_A = [] # 4D array holding Auxiliary variables for step 22
+MF_I = [] # 4D array holding indicator variables for step 22
 for el_i in xrange(NS+1):
     MO1_I.append([])
     MO1_A.append([])
@@ -333,38 +321,38 @@ for el_i in xrange(len(Ntilde)): #nee NS
 
 ########################################## Creating OFR Node Only Variables ############################################
 DEF_I = []  # Binary DV for Eqn 25-22, Def=Max(0,DEF_A)
-OFRF_I = [] # Binary and Integer DV for Eqns 25-23 to 25-25, OFRF with and w/o deficit method
 for el_i in xrange(len(Ftilde)):
     DEF_I.append([])
-    OFRF_I.append([])
     for el_t in xrange(S):
         DEF_I[el_i].append([])
-        OFRF_I[el_i].append([])
         for el_p in xrange(P):
             DEF_I[el_i][el_t].append(
                 hcm.addVar(vtype=gbp.GRB.BINARY,
                             name = "DEF_I"+str(el_i)+'_'+str(el_t)+'_'+str(el_p)))
-            OFRF_I[el_i][el_t].append(
-                [hcm.addVar(vtype=gbp.GRB.BINARY, name='OFRF_I'+str(0)+str(el_i)+'_'+str(el_t)+'_'+str(el_p)+"_0"),
-                 hcm.addVar(vtype=gbp.GRB.INTEGER, ub=2.0,
-                            name='OFRF_I'+str(1)+str(el_i)+'_'+str(el_t)+'_'+str(el_p)+"_1")])
-
 ########################################################################################################################
 
 # Integrating variables into model
 hcm.update()
 
 # Setting objective
-#sum_nv = 0
-sum_nv_delta = 0
-for el_i in xrange(NS):
-    for el_t in xrange(S):
-        for el_p in xrange(P):
-            #sum_nv += (NV(el_i, el_t, el_p))
-            sum_nv_delta += NV_delta[el_i][el_t][el_p] #+ UV_delta[el_i][el_t][el_p]
+if use_dta_objective:
+    sum_nv = 0
+    sum_uv = 0
+    for el_i in xrange(NS):
+        for el_t in xrange(S):
+            for el_p in xrange(P):
+                sum_nv += (NV(el_i, el_t, el_p))
+                sum_uv += (UV(el_i, el_t, el_p))
+    hcm.setObjective(sum_nv+sum_uv, gbp.GRB.MINIMIZE)
+else:
+    sum_nv_delta = 0
+    for el_i in xrange(NS):
+        for el_t in xrange(S):
+            for el_p in xrange(P):
+                sum_nv_delta += NV_delta[el_i][el_t][el_p] #+ UV_delta[el_i][el_t][el_p]
+    hcm.setObjective(sum_nv_delta, gbp.GRB.MINIMIZE)
 
-#hcm.setObjective(sum_nv, gbp.GRB.MINIMIZE)
-hcm.setObjective(sum_nv_delta, gbp.GRB.MINIMIZE)
+
 hcm.update()
 
 ################## DEPRECATED: ED IS A CONSTANT BASED ON KB #####################################################################################################################################################
@@ -420,131 +408,54 @@ for el_i in xrange(NS):
         # Convert segment idx to ofr var idx (for DEF_I, OFRF_I)
         ofr_i = Ftilde.index(el_i)
         # Calculate possible deficit from upstream queue (Note el_i-1 okay because the first segment cannot be OFR)
-        for el_t in xrange(S):
-            hcm.addConstr(DEF[el_i][el_t][0] == 0.0, name='DEF_E'+str(el_i)+str(el_t)+str(0)) # ASSUMED NO DEFICIT IN THE FIRST PERIOD
-            ofr_tp3 = OFRD[el_i][0]/SD[el_i-1][0]
-            hcm.addConstr(OFRF(el_i, el_t, 0) == ofr_tp3*MFv[el_i-1][el_t][0] + ofr_tp3*ONRF(el_i-1, el_t, 0),
-                              name='OFRF_E3_1'+str(el_i)+str(el_t)+str(0))
-            for el_p in xrange(1,P):
-                if def_const_type is 0: # Updated DEF_A equations
-                    a1 = 0
-                    if el_t is 0:
-                        a1 = sum(SD[el_i-1][0:el_p])*(1/Th) # Add Segment demand from first to previous period
-                        a1-= sum([sum([MF(el_i-1, el1, el2)+ONRF(el_i-1, el1, el2) for el1 in xrange(S)]) for el2 in xrange(el_p)]) # Subtract (MF+ONRF) of previous node
-                        hcm.addConstr(DEF_A[el_i][el_t][el_p] == a1, name="DEF_TEMP_A"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
-                    else:
-                        hcm.addConstr(DEF_A[el_i][el_t][el_p] == DEF_A[el_i][el_t-1][el_p] + MF(el_i-1, el_t-1, el_p) + ONRF(el_i-1, el_t-1, el_p), name="DEF_TEMP_A"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
-                    #### Setting DEF to be max of DEF_A and 0
-                    # Checking to see if DEF_A is greater than 0
-                    hcm.addConstr(DEF_A[el_i][el_t][el_p] - def_zero_tol
-                                  <= big_m * DEF_I[ofr_i][el_t][el_p],
-                              name='DEF_E1'+str(el_i)+'_'+str(el_t)+'_'+str(el_p)) # DEF_I=1 => DEF_A>0
-                    hcm.addConstr(def_zero_tol-DEF_A[el_i][el_t][el_p]
-                                  <= big_m * (1 - DEF_I[ofr_i][el_t][el_p]),
-                              name='DEF_E2'+str(el_i)+'_'+str(el_t)+'_'+str(el_p)) # DEF_I=0 => DEF_A<=0
-                    # Setting DEF to be a1 (when DEF_I=1)
-                    hcm.addConstr(DEF[el_i][el_t][el_p] - DEF_A[el_i][el_t][el_p]
-                                  <= big_m * (1 - DEF_I[ofr_i][el_t][el_p]),
-                              name='DEF_E3'+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
-                    hcm.addConstr(DEF[el_i][el_t][el_p] - DEF_A[el_i][el_t][el_p]
-                                  >= -1*big_m * (1 - DEF_I[ofr_i][el_t][el_p]),
-                              name='DEF_E4'+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
-                    # Setting DEF to be 0 (when DEF_A<=0)
-                    hcm.addConstr(DEF[el_i][el_t][el_p]
-                                  <= big_m*DEF_I[ofr_i][el_t][el_p],
-                              name='DEF_E5'+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
-                    hcm.addConstr(DEF[el_i][el_t][el_p]
-                                  >= -1*big_m*DEF_I[ofr_i][el_t][el_p],
-                              name='DEF_E6'+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
+        for el_p in xrange(P):
+
+            ##################################################################
+            #Attempt #1: Deficit, no enforced upper bound
+            #lhs_sum1 = gbp.quicksum(OFRF(el_i,t,el_p) for t in xrange(S)) # Sum t=1 S OFRF(i,t,p)
+            #lhs_sum2 = gbp.quicksum(OFRD[el_i][x]/4.0 - gbp.quicksum(OFRF(el_i,t1, x) for t1 in xrange(S)) for x in xrange(el_p))  # Effective OFR Demand-Flow Deficit preceeding period p
+            #hcm.addConstr(lhs_sum1 - OFRD[el_i][el_p]/4.0- lhs_sum2 <= 0.0)
+            #hcm.addConstr(lhs_sum1 - OFRD[el_i][el_p]/4.0 <= 0.0)
+            ##################################################################
+
+            ##################################################################
+            #Attempt #2:
+            for el_t in xrange(S):
+                # Effective OFR Demand-Flow Deficit preceeding period p
+                lhs_sum1 = gbp.quicksum(OFRD[el_i][x]/4.0 - gbp.quicksum(OFRF(el_i, tau, x) for tau in xrange(S)) for x in xrange(el_p))  # uses el_p and not el_p-1 since xrange is exclusive
+                lhs_sum2 = gbp.quicksum(OFRF(el_i, tau, el_p) - OFRD[el_i][el_p]/Th for tau in xrange(el_t)) # uses el_t and not el_t-1 since xrange is exclusive
+                hcm.addConstr(OFRF(el_i, el_t, el_p) - OFRD[el_i][el_p]/Th - lhs_sum1 + lhs_sum2 <= 0.0)
+                hcm.addConstr(OFRF(el_i, el_t, el_p) - OFRD[el_i][el_p]/Th >= -1.0*big_m*DEF[el_i][el_t][el_p])
+                if el_t is 0:
+                    # Deficit sum for first step
+                    def_sum = gbp.quicksum(SD[el_i-1][x]/4.0 -gbp.quicksum(MF(el_i-1, tau , x) + ONRF(el_i-1, tau, x) for tau in xrange(S)) for x in xrange(el_p))
+                    hcm.addConstr(DEF_A[el_i][el_t][el_p] == def_sum, name="DEF_TEMP_A"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
                 else:
-                    # Force Deficit to be 0 (debugging purposes)
-                    hcm.addConstr(DEF_A[el_i][el_t][el_p] == 0.0, name='DEF_TEMP_A'+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
-                    hcm.addConstr(DEF[el_i][el_t][el_p] == 0.0, name='DEF_TEMP_A'+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
-########################################################################################################################
-
-
-###################################################### Eq 25-23 ########################################################
-                # Step 7: If there is a deficit (DEF[i,t,p]>0), use OFR flow with Deficit method
-                # Constraints checking if there is a deficit
-                # (Now redundant, can simply use DEF_I)
-                #hcm.addConstr(DEF[el_i][el_t][el_p] - def_zero_tol <= big_m * OFRF_I[ofr_i][el_t][el_p][0],
-                #              name='OFRF_IF_DEF1'+str(el_i)+'_'+str(el_t)+'_'+str(el_p))  # OFRF_Ii,t,p,0 = 1 implies DEF > 0
-                #hcm.addConstr(def_zero_tol - DEF[el_i][el_t][el_p] <= big_m * (1 - OFRF_I[ofr_i][el_t][el_p][0]),
-                #              name='OFRF_IF_DEF2'+str(el_i)+'_'+str(el_t)+'_'+str(el_p))  # OFRF_Ii,t,p,0 = 0 implies DEF < 0
-                hcm.addConstr(OFRF_I[ofr_i][el_t][el_p][0] - DEF_I[ofr_i][el_t][el_p] == 0,
-                              name='OFRF_IF_DEF2'+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
-
-                # Constraint that activates (or deactivates) situation 1/2 based on deficit check
-                # If there is a deficit, i_0=0.
-                # i_1 >= 2-2*i_0
-                # i_1 <= 2-i_0
-                # i_0=1 (DEF>0) => i_1>=0 & i_1<=1
-                # i_0=0 (DEF=0) => i_1>=2 & i_1<=2
-                hcm.addConstr(OFRF_I[ofr_i][el_t][el_p][1] >= 2 - 2 * OFRF_I[ofr_i][el_t][el_p][0], # OFRF_I[ofr_i][el_t][el_p][0]
-                              name='OFRF_IF_DEF3'+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
-                hcm.addConstr(OFRF_I[ofr_i][el_t][el_p][1] <= 2-OFRF_I[ofr_i][el_t][el_p][0], # OFRF_I[ofr_i][el_t][el_p][0]
-                              name='OFRF_IF_DEF4'+str(el_i)+'_'+str(el_t)+'_'+str(el_p)) # big_m=1 b/c i_1<=2 (ub)
-
-                # Constraints to check to see if situation 1 or situation 2 is true. OFRF_Ii,t,p,1 (i_1) = 1 implies that
-                # situation 1 is used, while if OFRF_Ii,t,p,1 (i_1) = 0 imples that situation 2 is used.
+                    hcm.addConstr(DEF_A[el_i][el_t][el_p] == DEF_A[el_i][el_t-1][el_p] - MF(el_i-1, el_t-1, el_p) - ONRF(el_i-1, el_t-1, el_p), name="DEF_TEMP_A"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
+                #### Setting DEF to be max of DEF_A and 0
+                # Checking to see if DEF_A is greater than 0
+                hcm.addConstr(DEF_A[el_i][el_t][el_p] - def_zero_tol
+                              <= big_m * DEF_I[ofr_i][el_t][el_p],
+                          name='DEF_E1'+str(el_i)+'_'+str(el_t)+'_'+str(el_p)) # DEF_I=1 => DEF_A>0
+                hcm.addConstr(def_zero_tol-DEF_A[el_i][el_t][el_p]
+                              <= big_m * (1 - DEF_I[ofr_i][el_t][el_p]),
+                          name='DEF_E2'+str(el_i)+'_'+str(el_t)+'_'+str(el_p)) # DEF_I=0 => DEF_A<=0
+                # Setting DEF to be a1 (when DEF_I=1)
+                hcm.addConstr(DEF[el_i][el_t][el_p] - DEF_A[el_i][el_t][el_p]
+                              <= big_m * (1 - DEF_I[ofr_i][el_t][el_p]),
+                          name='DEF_E3'+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
+                hcm.addConstr(DEF[el_i][el_t][el_p] - DEF_A[el_i][el_t][el_p]
+                              >= -1*big_m * (1 - DEF_I[ofr_i][el_t][el_p]),
+                          name='DEF_E4'+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
+                # Setting DEF to be 0 (when DEF_A<=0)
                 hcm.addConstr(DEF[el_i][el_t][el_p]
-                              - MF(el_i-1, el_t, el_p)
-                              - ONRF(el_i-1, el_t, el_p)
-                              <= big_m * OFRF_I[ofr_i][el_t][el_p][1],
-                              name="OFRF_IF_S1"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
-                hcm.addConstr(MF(el_i-1, el_t, el_p)
-                              + ONRF(el_i-1, el_t, el_p)
-                              - DEF[el_i][el_t][el_p]
-                              <= big_m * (OFRF_I[ofr_i][el_t][el_p][1] - 1),           # Reversed because i_1 can = 2
-                              name="OFRF_IF_S2"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
+                              <= big_m*DEF_I[ofr_i][el_t][el_p],
+                          name='DEF_E5'+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
+                hcm.addConstr(DEF[el_i][el_t][el_p]
+                              >= -1*big_m*DEF_I[ofr_i][el_t][el_p],
+                          name='DEF_E6'+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
+            ##################################################################
 
-                    # Situation 1: If upstream mainline flow plus the flow from an ONR at the upstream node is less than
-                    # the deficit for this time step, then the OFR flow is equal to the mainline and the ONR flows times
-                    # the OFR turning percentage in the preceeding itme interval
-                ofr_tp1 = OFRD[el_i][el_p-1]/SD[el_i-1][el_p-1]
-                hcm.addConstr(OFRF(el_i, el_t, el_p)
-                              - ofr_tp1*MFv[el_i-1][el_t][el_p]
-                              - ofr_tp1*ONRF(el_i-1, el_t, el_p)
-                              <= big_m*(OFRF_I[ofr_i][el_t][el_p][1] - 1),
-                              name='OFRF_E1_1'+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
-                hcm.addConstr(OFRF(el_i, el_t, el_p)
-                              - ofr_tp1*MFv[el_i-1][el_t][el_p]
-                              - ofr_tp1*ONRF(el_i-1, el_t, el_p)
-                              >= -1*big_m * (OFRF_I[ofr_i][el_t][el_p][1] - 1),
-                              name='OFRF_E1_2'+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
-###################################################### Eq 25-24 ########################################################
-                    # Situation 2: If the deficit is less than the upstream mainline flow plus the ONR flow from an ONR
-                    # at the upstream node (if present)
-                ofr_tp2_1 = OFRD[el_i][el_p-1]/SD[el_i-1][el_p-1]
-                ofr_tp2_2 = OFRD[el_i][el_p]/SD[el_i-1][el_p]
-                hcm.addConstr(OFRF(el_i, el_t, el_p)
-                              - ofr_tp2_1*DEF[el_i][el_t][el_p]
-                              - ofr_tp2_2*MFv[el_i-1][el_t][el_p]
-                              - ofr_tp2_2*ONRF(el_i-1, el_t, el_p)
-                              + ofr_tp2_2*DEF[el_i][el_t][el_p]
-                              <= big_m*OFRF_I[ofr_i][el_t][el_p][1],
-                              name='OFRF_E2_1'+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
-                hcm.addConstr(OFRF(el_i, el_t, el_p)
-                              - ofr_tp2_1*DEF[el_i][el_t][el_p]
-                              - ofr_tp2_2*MFv[el_i-1][el_t][el_p]
-                              - ofr_tp2_2*ONRF(el_i-1, el_t, el_p)
-                              + ofr_tp2_2*DEF[el_i][el_t][el_p]
-                              >= -1*big_m*OFRF_I[ofr_i][el_t][el_p][1],
-                              name='OFRF_E2_2'+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
-
-###################################################### Eq 25-25 ########################################################
-                # Step 8: If there is no deficit (DEF[i,t,p]=0), use OFR flow without deficit method
-                ofr_tp3 = OFRD[el_i][el_p]/SD[el_i-1][el_p]
-                hcm.addConstr(OFRF(el_i, el_t, el_p)
-                              - ofr_tp3*MFv[el_i-1][el_t][el_p]
-                              - ofr_tp3*ONRF(el_i-1, el_t, el_p)
-                              <= big_m * OFRF_I[ofr_i][el_t][el_p][0],
-                              name='OFRF_E3_1'+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
-                hcm.addConstr(OFRF(el_i, el_t, el_p)
-                              - ofr_tp3*MFv[el_i-1][el_t][el_p]
-                              - ofr_tp3*ONRF(el_i-1, el_t, el_p)
-                              >= -1*big_m * OFRF_I[ofr_i][el_t][el_p][0],
-                              name='OFRF_E3_2'+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
     else:  # The segment is not an offramp
         for el_t in xrange(S):
             for el_p in xrange(P):
@@ -743,12 +654,14 @@ for el_i in xrange(NS):
 ###################################################### Eq 25-21 ########################################################
                 # ONRF_I0 = 0 => ONR0 < ONRI => Update number of vehicles on the ramp queue
                 # ONRQ = ONRQt-1 + ONRI - ONRO
-                hcm.addConstr(ONRQ(el_i, el_t, el_p) # - ONRQ(el_i, el_t-1, el_p) # Originally incorrect
+                hcm.addConstr(ONRQ(el_i, el_t, el_p)
+                              - ONRQ(el_i, el_t-1, el_p)
                               - ONRI[onr_i][el_t][el_p]
                               + ONRO[onr_i][el_t][el_p]
                               <= big_m*ONRF_I[onr_i][el_t][el_p][0],
                               name="ONRQ_E1"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
-                hcm.addConstr(ONRQ(el_i, el_t, el_p) # - ONRQ(el_i, el_t-1, el_p)  # Originally incorrect
+                hcm.addConstr(ONRQ(el_i, el_t, el_p)
+                              - ONRQ(el_i, el_t-1, el_p)
                               - ONRI[onr_i][el_t][el_p]
                               + ONRO[onr_i][el_t][el_p]
                               >= -1*big_m*ONRF_I[onr_i][el_t][el_p][0],
@@ -1213,36 +1126,34 @@ for el_i in xrange(NS):  # TODO: NS-1 correct? If so specify value for NV[0][t][
             hcm.addConstr(UV(el_i, el_t, el_p) == NV(el_i, el_t, el_p) - func_KB(el_i, el_p)*func_L(el_i),
                           name="3.114"+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
 #################################################### Eqn 25-29 #########################################################
-            # Capacity Drop
-            #hcm.addConstr(func_SC(el_i, el_t, el_p) == (1.0 - I_UV(el_i-1, el_t-1, el_p)*alpha) * (SC[el_i][el_p]/Th),
-            #              name='SC_E'+str(el_i)+str(el_t)+str(el_p))
-            hcm.addConstr(func_SC(el_i, el_t, el_p) == CAFv[el_i] * (SC[el_i][el_p]/Th),  ##CAFv[el_i][el_p]
+            if el_i > 0:
+                hcm.addConstr(func_SC(el_i, el_t, el_p) == (1.0 - I_UV(el_i-1, el_t-1, el_p)*alpha) * (SC[el_i][el_p]/Th),
                               name='SC_E'+str(el_i)+str(el_t)+str(el_p))
-
+            else:
+                hcm.addConstr(func_SC(el_i, el_t, el_p) == SC[el_i][el_p]/Th,
+                              name='SC_E'+str(el_i)+str(el_t)+str(el_p))
 for el_t in xrange(S):
     for el_p in xrange(P):
         hcm.addConstr(UV(-1, el_t, el_p) == 0.0, name='UV-1'+'_'+str(el_t)+'_'+str(el_p))
 print("step 25 done")
 
 ###################################### Add Objective Abs Val Constraints ###############################################
-for el_i in xrange(NS):
-    for el_t in xrange(S):
-        for el_p in xrange(P):
-            hcm.addConstr(NV_delta[el_i][el_t][el_p] >= NV(el_i, el_t, el_p) - nv_observed[el_i][el_t][el_p],
-                          name='Obj_Constr1_'+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
-            hcm.addConstr(NV_delta[el_i][el_t][el_p] >= nv_observed[el_i][el_t][el_p] - NV(el_i, el_t, el_p),
-                          name='Obj_Constr2_'+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
-            hcm.addConstr(UV_delta[el_i][el_t][el_p] >= UV(el_i, el_t, el_p) - uv_observed[el_i][el_t][el_p],
-                          name='Obj_Constr3_'+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
-            hcm.addConstr(UV_delta[el_i][el_t][el_p] >= uv_observed[el_i][el_t][el_p] - UV(el_i, el_t, el_p),
-                          name='Obj_Constr4_'+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
+if use_dta_objective is False:
+    for el_i in xrange(NS):
+        for el_t in xrange(S):
+            for el_p in xrange(P):
+                hcm.addConstr(NV_delta[el_i][el_t][el_p] >= NV(el_i, el_t, el_p) - nv_observed[el_i][el_t][el_p],
+                              name='Obj_Constr1_'+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
+                hcm.addConstr(NV_delta[el_i][el_t][el_p] >= nv_observed[el_i][el_t][el_p] - NV(el_i, el_t, el_p),
+                              name='Obj_Constr2_'+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
+                hcm.addConstr(UV_delta[el_i][el_t][el_p] >= UV(el_i, el_t, el_p) - uv_observed[el_i][el_t][el_p],
+                              name='Obj_Constr3_'+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
+                hcm.addConstr(UV_delta[el_i][el_t][el_p] >= uv_observed[el_i][el_t][el_p] - UV(el_i, el_t, el_p),
+                              name='Obj_Constr4_'+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
 ########################################################################################################################
 
 hcm.update()
 model_build_time=time.time()
-print("Off-ramp/def constraints need updating")
-print("Queue must be contained in facility (UV(-1)=0)")
-print("No capacity drop")
 print("Model Built: "+str(model_build_time - init_time))
 #hcm.setParam(gbp.GRB.param.ConcurrentMIP, 32)
 #hcm.read('sto_cq3.mst')
@@ -1292,20 +1203,26 @@ else:
             for i in xrange(NS):
                 varCount+=1
                 #s = str(varCount)
-                s=str(i)
-                s+= ", " + str(p)
-                s+= ", " + str(t)
-                s+= ", " + str(NV(i, t, p).X)
-                s+= ", " + str(MF(i, t, p).X)
-                s+= ", " + str(MI[i][t][p].X)
-                s+= ", " + str(MO1(i, t, p).X)
-                s+= ", " + str(MO2(i, t, p).X)
-                s+= ", " + str(MO3(i, t, p).X)
+                s = str(i)
+                s += ", " + str(p)
+                s += ", " + str(t)
+                s += ", " + str(NV(i, t, p).X)
+                s += ", " + str(MF(i, t, p).X)
+                s += ", " + str(MI[i][t][p].X)
+                s += ", " + str(MO1(i, t, p).X)
+                s += ", " + str(MO2(i, t, p).X)
+                s += ", " + str(MO3(i, t, p).X)
+                #s+= ", " + str(ONRI[i][t][p].X)
+                #s+= ", " + str(ONRD[i][p])
+                #s+=", " + str(ONRQ(i,t, p).X)
+                #s+= ", " + str(ONRF_I[i][t][p][0].X)
+                #s+= ", " + str(ONRF_I[i][t][p][1].X)
+                #s+= ", " + str(ONRO[i][t][p].X)
+                s += ", " + str(ONRF(i,t, p).X)
                 #s+= ", " + str(ONRQ(i,t, p).X)
-                s+= ", " + str(ONRF(i,t, p).X)
-                s+= ", " + str(OFRF(i,t, p).X)
+                s += ", " + str(OFRF(i,t, p).X)
                 #s+= ", " + str(DEF_A[i][t][p].X)
-                s+= ", " + str(DEF[i][t][p].X)
+                s += ", " + str(DEF[i][t][p].X)
                 #if i in Ftilde:
                 #    s+= ", " + str(DEF_I[Ftilde.index(i)][t][p].X)
                 #    s+= ", " + str(OFRF_I[Ftilde.index(i)][t][p][0].X)
@@ -1315,7 +1232,6 @@ else:
                 #if i in Ntilde:
                 #    s+= ", " + str(ONRI[Ntilde.index(i)][t][p].X)
                 #    s+= ", " + str(ONRO[Ntilde.index(i)][t][p].X)
-                #    s+= ", " + str(ONRQ(i,t,p).X)
                 #    s+= ", " + str(ONRF_I[Ntilde.index(i)][t][p][0].X)
                 #    s+= ", " + str(ONRO_A[Ntilde.index(i)][t][p][0].X)
                 #    s+= ", " + str(ONRO_A[Ntilde.index(i)][t][p][1].X)
@@ -1333,128 +1249,25 @@ else:
                 s+=", " + str(KQ[i][t][p].X)
                 print(s)
 
-print('##############################################################')
-for i in xrange(NS):
-        print(str(i)+','+str(p)+','+str(CAFv[i].X))  ## CAFv[i][p]
+for seg in Ftilde:
+    for el_p in xrange(P):
+        OFRF_total = 0.0
+        for el_t in xrange(S):
+            OFRF_total+=OFRF(seg, el_t, el_p).X
+        print(str(seg)+','+str(el_p)+','+str(OFRF_total)+','+str(OFRD[seg][el_p]))
 
+print('Segment Demands')
+for per in xrange(P):
+    s = ''
+    for seg in xrange(NS):
+        s += str(SD[seg][per]/4.0) + ','
+    print(s)
 
-# s= ' '
-# t1=time.time()
-# print('Segment, Period, Step, MI, MO1, MO3, MO2, MF, SF, NV, UV')
-# for el_i in xrange(NS):                               # TODO start loop at 0?
-#     # NV(el_i, -1, 0).X = KB[el_i][0]*func_L(el_i)
-#     # for el_p in xrange(1,P):
-#     #     NV(el_i, -1, el_p).X = KB[el_i][el_p]*func_L(el_i)+UV(el_i, S-1, el_p-1).X
-#     for el_p in xrange(P):
-#         for el_t in xrange(S):
-#             s=''
-#             #print(str(el_i)+","+str(el_t)+","+str(el_p))
-#             s+=str(el_i)+","+str(el_p)+","+str(el_t)+', '
-#             #steps 1-5 by MST
-#             #Step 9 (MI)
-#             if el_i is 0 and el_p is 0 and el_t is 0:
-#                 s += str(MF(el_i-1, el_t, el_p) + ONRF(el_i-1, el_t, el_p) - OFRF(el_i, el_t, el_p).X + UV(el_i-1, el_t - 1, el_p))+', '
-#             elif el_i is 0:
-#                 s += str(MF(el_i-1, el_t, el_p) + ONRF(el_i-1, el_t, el_p) - OFRF(el_i, el_t, el_p).X + UV(el_i-1, el_t - 1, el_p).X)+', '
-#             elif el_p is 0 and el_t is 0:
-#                 s += str(MF(el_i-1, el_t, el_p).X + ONRF(el_i-1, el_t, el_p).X - OFRF(el_i, el_t, el_p).X + UV(el_i-1, el_t - 1, el_p))+', '
-#             else:
-#                 s += str(MF(el_i-1, el_t, el_p).X + ONRF(el_i-1, el_t, el_p).X - OFRF(el_i, el_t, el_p).X + UV(el_i-1, el_t - 1, el_p).X)+', '
-#             #Steps 10-15 by MST
-#             #hcm.update()
-#             #Step 16
-#             if el_p is 0 and el_t is 0:
-#                 #MO1
-#                 s += str(min(min(func_SC(el_i,el_p)/Th, MO2(el_i, el_t-1, el_p)), MO3(el_i, el_t-1, el_p)))+', '
-#                 #MO1(el_i, el_t, el_p).X = min(MO1(el_i, el_t, el_p).X, MO3(el_i, el_t-1, el_p))
-#                 #print(str(el_i)+","+str(el_t)+","+str(el_p)+","+str(MO1(el_i, el_t, el_p).X)+","+str(min(min(func_SC(el_i,el_p)/Th, MO2(el_i, el_t-1, el_p)), MO3(el_i, el_t-1, el_p))))
-#                 #KQ[el_i][el_t][el_p].X = 0
-#                 #MO3
-#                 s += str(func_SC(el_i,el_p)/Th)+', '
-#                 #MO2
-#                 s += str(func_SC(el_i,el_p)/Th)+', '
-#             else:
-#                 #MO1
-#                 s += str(min(min(func_SC(el_i,el_p)/Th, MO2(el_i, el_t-1, el_p).X), MO3(el_i, el_t-1, el_p).X))+', '
-#                 #Step 17-19
-#                 #MO3
-#                 s += str(func_SC(el_i,el_p)/Th)+', '
-#                 #Step 20
-#                 #KQ[el_i][el_t][el_p].X = KJ - ((KJ - KC)*SF(el_i, el_t-1, el_p).X)/(func_SC(el_i,el_p)/Th)
-#                 #Step 21
-#                 #hcm.update()
-#                 #MO2
-#                 if KQ[el_i][el_t][el_p].X > 0.01:
-#                     s += str(SF(el_i, el_t-1, el_p).X - ONRF(el_i, el_t,el_p).X + (KQ[el_i][el_t][el_p].X*func_L(el_i)) - NV(el_i, el_t-1, el_p).X)+', '
-#                 else:
-#                     s += str(func_SC(el_i,el_p)/Th)+', '
-#             #hcm.update()
-#             #Step 22
-#             temp_mf=0
-#             if el_i is 0:
-#                 #MF(el_i, el_t, el_p).X = min(min(min(min(func_SC(el_i,el_p)/Th,MO3(el_i, el_t, el_p).X),MO2(el_i, el_t, el_p).X), MO1(el_i, el_t, el_p).X), MI[el_i][el_t][el_p].X)
-#                 temp_mf = func_SC(el_i,el_p)/Th
-#             else:
-#                 #MF(el_i, el_t, el_p).X = min(min(min(min(min(func_SC(el_i,el_p)/Th, SC[el_i-1][el_p]/Th),MO3(el_i, el_t, el_p).X),MO2(el_i, el_t, el_p).X), MO1(el_i, el_t, el_p).X), MI[el_i][el_t][el_p].X)
-#                 temp_mf = min(func_SC(el_i,el_p)/Th, SC[el_i-1][el_p])
-#             #hcm.update()
-#             temp_mf = min(temp_mf, MO3(el_i, el_t, el_p).X)
-#             #hcm.update()
-#             temp_mf = min(temp_mf, MO2(el_i, el_t, el_p).X)
-#             #hcm.update()
-#             temp_mf = min(temp_mf, MO1(el_i, el_t, el_p).X)
-#             #hcm.update()
-#             #MF
-#             s += str(min(temp_mf, MI[el_i][el_t][el_p].X))+', '
-#             hcm.update()
-#             #Step 23 - 24
-#             if el_i > 0:
-#                 #SF
-#                 s += str(MF(el_i, el_t, el_p).X+OFRF(el_i, el_t, el_p).X)+', '
-#                 #Step 25
-#                 #NV
-#                 s += str(NV(el_i-1, el_t-1, el_p).X + MF(el_i-1, el_t, el_p).X + ONRF(el_i-1, el_t, el_p).X - MF(el_i, el_t, el_p).X - OFRF(el_i, el_t, el_p).X)+', '
-#                 #UV
-#                 s += str(NV(el_i-1, el_t, el_p).X - (KB[el_i-1][el_p]*L[el_i-1]))
-#             else:
-#                 #UV
-#                s += str(0)+', '+str(0)+', '+str(0)
-#             #hcm.update()
-#             #if el_i is NS-1:
-#             #    SF(el_i, el_t, el_p).X =SF(el_i-1, el_t, el_p).X
-#             #hcm.update()
-#             print(s)
-#         #hcm.update()
-
-# varCount = 0
-# for p in xrange(P):
-#     for t in xrange(S):
-#         for i in xrange(NS):
-#             varCount+=1
-#             s = str(varCount)
-#             s+=", "+ str(i)
-#             s+= ", " + str(p)
-#             s+= ", " + str(t)
-#             s+= ", " + str(NV(i, t, p).Start)
-#             s+= ", " + str(MF(i, t, p).Start)
-#             s+= ", " + str(MI[i][t][p].Start)
-#             s+= ", " + str(MO1(i, t, p).Start)
-#             s+= ", " + str(MO2(i, t, p).Start)
-#             s+= ", " + str(MO3(i, t, p).Start)
-#             #s+= ", " + str(ONRI[i][t][p].X)
-#             #s+= ", " + str(ONRD[i][p])
-#             #s+=", " + str(ONRQ(i,t, p).X)
-#             #s+= ", " + str(ONRF_I[i][t][p][0].X)
-#             #s+= ", " + str(ONRF_I[i][t][p][1].X)
-#             #s+= ", " + str(ONRO[i][t][p].X)
-#             s+= ", " + str(ONRF(i,t, p).Start)
-#             s+= ", " + str(OFRF(i,t, p).Start)
-#             s+= ", " + str(UV(i,t,p).Start)
-#             if p < 0 or (p is 0 and t is 0):
-#                 s+=", 0.0"
-#             else:
-#                 s+= ", " + str(UV(i-1, t - 1, p).Start)
-#             s+=", " + str(SF(i,t,p).Start)
-#             print(s)
-
-#print('Completed in: '+str(time.time()-t1))
+print('MF + ONRF')
+for per in xrange(P):
+    mf_sum = 0
+    onrf_sum = 0
+    for tau in xrange(S):
+        mf_sum += MF(0, tau, per).X
+        onrf_sum += ONRF(0, tau, per).X
+    print(str(mf_sum + onrf_sum) + ',' + str(mf_sum) + ',' + str(onrf_sum))
