@@ -2,6 +2,47 @@
 from numpy import zeros
 xrange = range
 
+#import matplotlib.pyplot as plt
+#from numpy import argsort
+#kq=[]
+#sf=[]
+#kbar=[]
+#asf=[]
+#f=open('temp.csv', 'r')
+#f.readline()
+#for line in f:
+#    tokens = line.split(',')
+#    kq.append(float(tokens[0]))
+#    sf.append(float(tokens[1]))
+#    kbar.append(float(tokens[2]))
+#    asf.append(float(tokens[3]))
+#    
+#kq_sorter = argsort(kq)
+#kbar_sorter = argsort(kbar)
+#xk1 = [kq[el] for el in kq_sorter]
+#ysf1 = [sf[el] for el in kq_sorter]
+#xk2 = [kbar[el] for el in kbar_sorter]
+#ysf2 = [asf[el] for el in kbar_sorter]
+#x3 = [el for el in range(0,361)]
+#x3.reverse()
+#y3 = [190*3-(145*3*el)/360 for el in x3]
+#x4 = [el for el in range(55,281)]
+#y4 = [(190*3-el)*(360/(145*3)) for el in x4]
+#fig = plt.figure(1)
+#plt.plot(xk1, ysf1, figure=fig, label='SF (KQ)')
+#plt.plot(xk2, ysf2, figure=fig, label='ASF (KBar)')
+#plt.plot(x3, y3, figure=fig, label = 'True F-D Line')
+#plt.plot(x4, y4, figure=fig, label = 'True ASF Line')
+#plt.title('Flow Density Graph')
+#plt.xlabel('Density')
+#plt.ylabel('Flow')
+#plt.legend()
+#plt.grid(True)
+#plt.savefig('fdc_mc5.png')
+#plt.show()
+
+
+
 def extract(example_problem):
     if example_problem is 0:
         # Model Check 1
@@ -11,41 +52,48 @@ def extract(example_problem):
         return facility
         
     elif example_problem is 1:
-        # Model Check 2
+        # Model Check 2 (off-ramp)
         facility = Facility('model_checks/model_check2.txt', 5)
         facility.fill_outputs('model_checks/mc2_5step.csv')
         facility.fill_nvuv('model_checks/mc2_5step_nvuv.csv', True)
         return facility
                 
     elif example_problem is 2:
-        # Model Check 3
+        # Model Check 3 (on-ramp 1)
         facility = Facility('model_checks/model_check3.txt', 5)
         facility.fill_outputs('model_checks/mc3_5step.csv')
         facility.fill_nvuv('model_checks/mc3_5step_nvuv.csv', True)
         return facility
                 
     elif example_problem is 3:
-        # Model Check 4
+        # Model Check 4 (on-ramp 2)
         facility = Facility('model_checks/model_check4.txt', 5)
         facility.fill_outputs('model_checks/mc4_5step.csv')
         facility.fill_nvuv('model_checks/mc4_5step_nvuv.csv', True)
         return facility
-                
+        
     elif example_problem is 4:
+        # Model Check 5 (MO2 test - Queue Spillback)
+        facility = Facility('model_checks/model_check5.txt', 5)
+        facility.fill_outputs('model_checks/mc5_5step.csv')
+        facility.fill_nvuv('model_checks/mc5_5step_nvuv.csv', True)
+        return facility
+                
+    elif example_problem is 5:
         # Model Check 1 with CAF of 0.98 at segment 3
         facility = Facility('model_checks/model_check1.txt', 5)
         facility.fill_outputs('model_checks/mc1_5step.csv')
         facility.fill_nvuv('model_checks/caf_calib1_5step_nvuv.csv', True)
         return facility
     
-    elif example_problem is 5:
+    elif example_problem is 6:
         # Modified GPEX1 with 60 step resolution
         facility = Facility('model_checks/gpex2_mod_full.txt', 60)
         facility.fill_outputs('model_checks/gpex2_full.csv')
         facility.fill_nvuv('model_checks/gpex2_full_nvuv.csv', True)
         return facility
         
-    elif example_problem is 6:
+    elif example_problem is 7:
         # Modified I-40 example with 60 step resolution
         facility = Facility('model_checks/i40_mod_full.txt', 60)
         facility.fill_outputs('model_checks/i40_full.csv')
@@ -377,8 +425,9 @@ class Facility:
         self.V = zeros((self.NS, self.P))
         self.SD = zeros((self.NS, self.P))
         self.ED = zeros((self.NS, self.P))
-        self.NV = []
-        self.UV = []
+        self.fNV = []
+        self.fUV = []
+        self.fSF = []
         self.Vhr = []
         self.__compute_segment_demand()
         
@@ -402,8 +451,9 @@ class Facility:
         self.__compute_estimated_demand()
         
     def fill_nvuv(self, fname, compute_Vhr):
-        self.NV = zeros((self.NS, self.S, self.P))
-        self.UV = zeros((self.NS, self.S, self.P))
+        self.fNV = zeros((self.NS, self.S, self.P))
+        self.fUV = zeros((self.NS, self.S, self.P))
+        self.fSF = zeros((self.NS, self.S, self.P))
         self.Vhr = zeros((self.NS, self.S, self.P))
         f = open(fname, 'r')
         f.readline()
@@ -412,8 +462,9 @@ class Facility:
             seg = int(tokens[0])
             per = int(tokens[1])
             step = int(tokens[2])
-            self.NV[seg][step][per] = float(tokens[3])
-            self.UV[seg][step][per] = float(tokens[12])
+            self.fNV[seg][step][per] = float(tokens[3])
+            self.fUV[seg][step][per] = float(tokens[12])
+            self.fSF[seg][step][per] = float(tokens[13])
             self.Vhr[seg][step][per] = float(tokens[13])*self.L_mi[seg]*self.Th/float(tokens[3])
         f.close()
         
