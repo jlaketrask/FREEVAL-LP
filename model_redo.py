@@ -1,7 +1,7 @@
 import time
 import model_check
+#from numpy import zeros
 import gurobipy as gbp
-from numpy import *
 __author__ = 'jltrask'
 
 xrange = range
@@ -12,7 +12,10 @@ use_full_res = True
 use_classic_mo2 = False
 use_dta_obj = False
 
-example_problem = 7
+example_problem = 6
+
+def zeros(shape):
+    return [[0 for el in xrange(shape[1])] for el2 in xrange(shape[0])]
 
 init_time = time.time()
 

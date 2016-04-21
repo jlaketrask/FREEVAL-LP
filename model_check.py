@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
-from numpy import zeros
+#from numpy import zeros
 xrange = range
+
+def zeros(shape):
+    return [[0 for el in xrange(shape[1])] for el2 in xrange(shape[0])]
 
 #import matplotlib.pyplot as plt
 #from numpy import argsort
