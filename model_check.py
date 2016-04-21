@@ -118,14 +118,14 @@ def read_facility_data_from_file(fname, NS, P):
         tokens = line.split(",")
         seg = int(tokens[1])
         per = int(tokens[2])
-        KB[seg, per] = float(tokens[3])
-        SC[seg, per] = float(tokens[4])
-        NL[seg, per] = float(tokens[5])
-        ONRD[seg, per] = float(tokens[6])
-        ONRC[seg, per] = float(tokens[7])
-        RM[seg, per] = float(tokens[8])
-        OFRD[seg, per] = float(tokens[9])
-        V[seg, per] = float(tokens[11])
+        KB[seg][per] = float(tokens[3])
+        SC[seg][per] = float(tokens[4])
+        NL[seg][per] = float(tokens[5])
+        ONRD[seg][per] = float(tokens[6])
+        ONRC[seg][per] = float(tokens[7])
+        RM[seg][per] = float(tokens[8])
+        OFRD[seg][per] = float(tokens[9])
+        V[seg][per] = float(tokens[11])
     facility = {"KB":KB.tolist(),
                 "SC":SC.tolist(),
                 "NL":NL.tolist(),
