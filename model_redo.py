@@ -15,7 +15,12 @@ use_dta_obj = False
 example_problem = 6
 
 def zeros(shape):
-    return [[0 for el in xrange(shape[1])] for el2 in xrange(shape[0])]
+    if len(shape) == 2:
+        return [[0 for el in xrange(shape[1])] for el2 in xrange(shape[0])]
+    elif len(shape) == 3:
+        return [[[0 for el in xrange(shape[2])] for el1 in xrange(shape[1])] for el2 in xrange(shape[0])]
+    else:
+        return [0 for el in xrange(shape[0])]
 
 init_time = time.time()
 
@@ -357,7 +362,7 @@ print("Init NV done")
 ################################################### Off-Ramp Flow ######################################################
 # Note: OFRF exists at the node at the downstream end of an OFR segment
 # If i is OFR Seg, OFRF is at node i+1 (node at downstream end of segment)
-big_m = sum(sum(fd.SD))  # TODO calculate more exact bound on what the deficit can be in each period?
+big_m = sum([sum(fd.SD[el]) for el in xrange(len(fd.SD))])  # TODO calculate more exact bound on what the deficit can be in each period?
 def_zero_tol = 0.01 # From vba_code.txt line 218
 for el_i in xrange(fd.NS+1):
     if el_i-1 in fd.Ftilde:  # Check if OFR at node. If i is OFR Seg, OFRF is at node i+1 (node at downstream end of segment)
@@ -618,7 +623,7 @@ for el_i in xrange(fd.NS+1):
             hcm.addConstr(MF(el_i, el_t, el_p) <= func_SC(el_i-1, el_t, el_p), name='MF_m6_'+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
             
 # Flow Conservation
-total_demand = sum(sum(fd.SD))/4
+total_demand = sum([sum(fd.SD[el]) for el in xrange(len(fd.SD))])/4
 hcm.addConstr(gbp.quicksum(gbp.quicksum(gbp.quicksum(SF(el_i, el_t, el_p) for el_p in xrange(fd.P)) for el_t in xrange(fd.S)) for el_i in xrange(fd.NS)) == total_demand,name='MF_Conservation')            
 print("MF done")
 ########################################################################################################################

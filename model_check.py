@@ -3,7 +3,12 @@
 xrange = range
 
 def zeros(shape):
-    return [[0 for el in xrange(shape[1])] for el2 in xrange(shape[0])]
+    if len(shape) == 2:
+        return [[0 for el in xrange(shape[1])] for el2 in xrange(shape[0])]
+    elif len(shape) == 3:
+        return [[[0 for el in xrange(shape[2])] for el1 in xrange(shape[1])] for el2 in xrange(shape[0])]
+    else:
+        return [0 for el in xrange(shape[0])]
 
 #import matplotlib.pyplot as plt
 #from numpy import argsort
@@ -442,14 +447,14 @@ class Facility:
             tokens = line.split(",")
             seg = int(tokens[1])
             per = int(tokens[2])
-            self.KB[seg, per] = float(tokens[3])
-            self.SC[seg, per] = float(tokens[4])
+            self.KB[seg][per] = float(tokens[3])
+            self.SC[seg][per] = float(tokens[4])
             # NL[seg, per] = float(tokens[5])
             # ONRD[seg, per] = float(tokens[6])
-            self.ONRC[seg, per] = float(tokens[7])
+            self.ONRC[seg][per] = float(tokens[7])
             # RM[seg, per] = float(tokens[8])
             # OFRD[seg, per] = float(tokens[9])
-            self.V[seg, per] = float(tokens[11])
+            self.V[seg][per] = float(tokens[11])
         f.close()
         self.__compute_estimated_demand()
         
