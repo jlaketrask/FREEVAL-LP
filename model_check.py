@@ -143,11 +143,11 @@ def extract(example_problem):
     elif example_problem is 16:
         facility = Facility('PaperExamples/i440_small.txt', 60)
         facility.fill_outputs('PaperExamples/i440_small.csv')
-        facility.V[0][0] = 50.17
-        facility.V[0][1] = 35.05
-        facility.V[0][2] = 23.75
-        facility.V[0][3] = 19.29
-        facility.V[0][4] = 37.64
+        facility.V[0][0] = 51.0
+        facility.V[0][1] = 51.0
+        facility.V[0][2] = 51.0
+        facility.V[0][3] = 51.0
+        facility.V[0][4] = 51.0
         facility.V[1][0] = 47.85
         facility.V[1][1] = 32.1
         facility.V[1][2] = 22.92
@@ -183,6 +183,44 @@ def extract(example_problem):
         facility.V[7][2] = 20.13
         facility.V[7][3] = 23.2
         facility.V[7][4] = 49.3
+        return facility
+    elif example_problem is 17:
+        facility = Facility('PaperExamples/i40_small.txt', 60)
+        facility.fill_outputs('PaperExamples/i40_small.csv')
+        facility.fill_nvuv('PaperExamples/i40_small_nvuv.csv', True)
+#        facility.V[0][0] = 69.0
+#        facility.V[0][1] = 64.8
+#        facility.V[0][2] = 67.5
+#        facility.V[0][3] = 68.3
+#        facility.V[1][0] = 66.9
+#        facility.V[1][1] = 64.8
+#        facility.V[1][2] = 66.6
+#        facility.V[1][3] = 66.7
+#        facility.V[2][0] = 69.7
+#        facility.V[2][1] = 66.8
+#        facility.V[2][2] = 68.8
+#        facility.V[2][3] = 69.4
+#        facility.V[3][0] = 70.0
+#        facility.V[3][1] = 39.5
+#        facility.V[3][2] = 34.5
+#        facility.V[3][3] = 57.4
+#        facility.V[4][0] = 63.3
+#        facility.V[4][1] = 53.3
+#        facility.V[4][2] = 53.3
+#        facility.V[4][3] = 56.2
+#        facility.V[5][0] = 69.5
+#        facility.V[5][1] = 58.3
+#        facility.V[5][2] = 51.7
+#        facility.V[5][3] = 56.3
+#        facility.V[6][0] = 63.3
+#        facility.V[6][1] = 53.3
+#        facility.V[6][2] = 53.3
+#        facility.V[6][3] = 54.1
+        return facility
+    elif example_problem is 21:
+        facility = Facility('RMTest/i40_mod_short.txt', 60)
+        facility.fill_outputs('RMTest/i40_mod_short.csv')
+        facility.fill_nvuv('RMTest/i40_mod_short_nvuv.csv', True)
         return facility
                 
                 

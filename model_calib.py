@@ -244,14 +244,14 @@ for el_i in xrange(fd.NS+1):  # fd.NS+1 to account for final node - no front cle
 init_time = time.time()
 # Setting objective - Minimize number of vehicles
 if use_speed_match:
-    big_lambda=70
+    big_lambda=1
     if use_full_res:
         #hcm.setObjective(gbp.quicksum(gbp.quicksum(gbp.quicksum(Vhr_delta[el_i][el_t][el_p] + big_lambda * UV(el_i,el_t,el_p) - MDv[el_p] - MF(fd.NS,el_t,el_p) for el_p in xrange(fd.P)) for el_t in xrange(fd.S)) for el_i in xrange(fd.NS)), gbp.GRB.MINIMIZE)  # +gbp.quicksum(CAFv[el_i] for el_i in xrange(fd.NS))
         obj = 0        
         for el_p in xrange(fd.P):        
-            obj = obj + MDv[el_p]            
+            #obj = obj + MDv[el_p]            
             for el_t in xrange(fd.S):
-                obj = obj+MF(fd.NS, el_t, el_p)
+                #obj = obj+MF(fd.NS, el_t, el_p)
                 for el_i in xrange(fd.NS):
                     obj = obj - Vhr_delta[el_i][el_t][el_p] - big_lambda*UV(el_i, el_t, el_p)
         hcm.setObjective(obj, gbp.GRB.MAXIMIZE)
@@ -276,21 +276,21 @@ print("Init NV done")
 hcm.addConstr(gbp.quicksum(gbp.quicksum(MF(fd.NS, el_t, el_p) + gbp.quicksum(OFRF(el_i, el_t, el_p) for el_i in xrange(fd.NS+1)) for el_t in xrange(fd.S)) for el_p in xrange(fd.P))
                 == gbp.quicksum(MDv[el_p] for el_p in xrange(fd.P))/4.0 + gbp.quicksum(gbp.quicksum(ONRDv[el_i][el_p] for el_i in xrange(fd.NS)) for el_p in xrange(fd.P))/4.0,
                 name='Demand_Flow_Conservation')
-hcm.addConstr(gbp.quicksum(MDv[el_p] for el_p in xrange(fd.P)) >= 34500)
+hcm.addConstr(gbp.quicksum(MDv[el_p] for el_p in xrange(fd.P)) >= 5000)
 
 # Off-ramp flow
 for el_i in fd.Ftilde:
     hcm.addConstr(gbp.quicksum(OFRDv[el_i][x]/4.0 - gbp.quicksum(OFRF(el_i+1,tau,x) for tau in xrange(fd.S)) for x in xrange(fd.P)) == 0.0)
     #hcm.addConstr(gbp.quicksum(OFRDv[el_i][x] for x in xrange(fd.P)) == sum(fd.OFRD[el_i]))
-    hcm.addConstr(gbp.quicksum(OFRDv[el_i][x] for x in xrange(fd.P)) >= 1000)
-    #hcm.addConstr(gbp.quicksum(OFRDv[el_i][x] for x in xrange(fd.P)) <= 4000)
+    hcm.addConstr(gbp.quicksum(OFRDv[el_i][x] for x in xrange(fd.P)) >= 200)
+    hcm.addConstr(gbp.quicksum(OFRDv[el_i][x] for x in xrange(fd.P)) <= 10000)
 
 # On-Ramp Flow
 for el_i in fd.Ntilde:
     hcm.addConstr(gbp.quicksum(ONRDv[el_i][x]/4.0 - gbp.quicksum(ONRF(el_i, tau, x) for tau in xrange(fd.S)) for x in xrange(fd.P)) == 0.0)
     #hcm.addConstr(gbp.quicksum(ONRDv[el_i][x] for x in xrange(fd.P)) == sum(fd.ONRD[el_i]))
-    hcm.addConstr(gbp.quicksum(ONRDv[el_i][x] for x in xrange(fd.P)) >= 1000)
-    #hcm.addConstr(gbp.quicksum(ONRDv[el_i][x] for x in xrange(fd.P)) <= 2000)
+    hcm.addConstr(gbp.quicksum(ONRDv[el_i][x] for x in xrange(fd.P)) >= 200)
+    hcm.addConstr(gbp.quicksum(ONRDv[el_i][x] for x in xrange(fd.P)) <= 10000)
 
 ########################################### Begin loop over all nodes #################################################
 for el_p in xrange(fd.P):

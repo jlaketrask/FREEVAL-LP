@@ -16,7 +16,7 @@ xrange = range
 #        return [0 for el in xrange(shape[0])]
 
 
-example_problem = 13
+example_problem = 8
 
 # Importing Facility
 fd = model_check.extract(example_problem)
@@ -458,6 +458,9 @@ print("Model Built: "+str(model_build_time - init_time))
 #hcm.setParam(gbp.GRB.param.ConcurrentMIP, 32)
 #hcm.setParam(gbp.GRB.param.SubMIPNodes, 5000000)
 #hcm.update()
+#hcm.presolve()
+#hcm.computeIIS()
+#hcm.write('i40_small.ilp')
 hcm.optimize()
 optimize_finish_time = time.time()
 print("Model Solved: "+str(optimize_finish_time - model_build_time))
