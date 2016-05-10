@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
-#from numpy import zeros
+from numpy import zeros
 xrange = range
 
-def zeros(shape):
-    if len(shape) == 2:
-        return [[0 for el in xrange(shape[1])] for el2 in xrange(shape[0])]
-    elif len(shape) == 3:
-        return [[[0 for el in xrange(shape[2])] for el1 in xrange(shape[1])] for el2 in xrange(shape[0])]
-    else:
-        return [0 for el in xrange(shape[0])]
+#def zeros(shape):
+#    if len(shape) == 2:
+#        return [[0 for el in xrange(shape[1])] for el2 in xrange(shape[0])]
+#    elif len(shape) == 3:
+#        return [[[0 for el in xrange(shape[2])] for el1 in xrange(shape[1])] for el2 in xrange(shape[0])]
+#    else:
+#        return [0 for el in xrange(shape[0])]
 
 #import matplotlib.pyplot as plt
 #from numpy import argsort
@@ -107,6 +107,84 @@ def extract(example_problem):
         facility.fill_outputs('model_checks/i40_full.csv')
         facility.fill_nvuv('model_checks/i40_mod_full_nvuv.csv', True)
         return facility
+    elif example_problem is 8:
+        # Modified GPEx1 with high traffic
+        facility = Facility('PaperExamples/gpex1_ht.txt', 60)
+        facility.fill_outputs('PaperExamples/gpex1_ht.csv')
+        facility.fill_nvuv('PaperExamples/gpex1_ht_nvuv.csv', True)
+        return facility
+    elif example_problem is 11:
+        # Model Check 2 (off-ramp)
+        facility = Facility('PaperExamples/modified_mc2.txt', 5)
+        facility.fill_outputs('PaperExamples/mod_mc2_5step.csv')
+        facility.fill_nvuv('PaperExamples/mod_mc2_5step_nvuv.csv', True)
+        return facility
+    elif example_problem is 12:
+        # Model Check 2 (off-ramp)
+        facility = Facility('PaperExamples/modified_mc2.txt', 60)
+        facility.fill_outputs('PaperExamples/mod_mc2_full.csv')
+        facility.fill_nvuv('PaperExamples/mod_mc2_full_nvuv.csv', True)
+        return facility
+    elif example_problem is 13:
+        facility = Facility('model_checks/model_check1.txt', 60)
+        facility.fill_outputs('PaperExamples/mod_mc1_full.csv')
+        facility.fill_nvuv('PaperExamples/mod_mc1_full_nvuv.csv', True)
+        return facility
+    elif example_problem is 14:
+        facility = Facility('PaperExamples/mod2_mc1_full.txt', 60)
+        facility.fill_outputs('PaperExamples/mod2_mc1_full.csv')
+        facility.fill_nvuv('PaperExamples/mod2_mc1_full_nvuv.csv', True)
+        return facility
+    elif example_problem is 15:
+        facility = Facility('PaperExamples/pe1_full.txt', 60)
+        facility.fill_outputs('PaperExamples/pe1_full.csv')
+        #facility.fill_nvuv('PaperExamples/pe1_full_nvuv.csv', True)
+        return facility
+    elif example_problem is 16:
+        facility = Facility('PaperExamples/i440_small.txt', 60)
+        facility.fill_outputs('PaperExamples/i440_small.csv')
+        facility.V[0][0] = 50.17
+        facility.V[0][1] = 35.05
+        facility.V[0][2] = 23.75
+        facility.V[0][3] = 19.29
+        facility.V[0][4] = 37.64
+        facility.V[1][0] = 47.85
+        facility.V[1][1] = 32.1
+        facility.V[1][2] = 22.92
+        facility.V[1][3] = 18.16
+        facility.V[1][4] = 41.96
+        facility.V[2][0] = 47.85
+        facility.V[2][1] = 32.1
+        facility.V[2][2] = 22.92
+        facility.V[2][3] = 18.16
+        facility.V[2][4] = 41.96
+        facility.V[3][0] = 47.85
+        facility.V[3][1] = 32.1
+        facility.V[3][2] = 22.92
+        facility.V[3][3] = 18.16
+        facility.V[3][4] = 41.96
+        facility.V[4][0] = 49.86
+        facility.V[4][1] = 37.34
+        facility.V[4][2] = 25.9
+        facility.V[4][3] = 21.44
+        facility.V[4][4] = 49.02
+        facility.V[5][0] = 49.86
+        facility.V[5][1] = 37.34
+        facility.V[5][2] = 25.9
+        facility.V[5][3] = 21.44
+        facility.V[5][4] = 49.02
+        facility.V[6][0] = 55.27
+        facility.V[6][1] = 38.13
+        facility.V[6][2] = 20.13
+        facility.V[6][3] = 23.2
+        facility.V[6][4] = 49.3
+        facility.V[7][0] = 55.27
+        facility.V[7][1] = 38.13
+        facility.V[7][2] = 20.13
+        facility.V[7][3] = 23.2
+        facility.V[7][4] = 49.3
+        return facility
+                
                 
 def read_facility_data_from_file(fname, NS, P):
     KB = zeros((NS, P))
@@ -463,6 +541,7 @@ class Facility:
         self.fUV = zeros((self.NS, self.S, self.P))
         self.fSF = zeros((self.NS, self.S, self.P))
         self.Vhr = zeros((self.NS, self.S, self.P))
+        self.fOFRF = zeros((self.NS, self.S, self.P))
         f = open(fname, 'r')
         f.readline()
         for line in f:
@@ -471,6 +550,7 @@ class Facility:
             per = int(tokens[1])
             step = int(tokens[2])
             self.fNV[seg][step][per] = float(tokens[3])
+            self.fOFRF[seg][step][per] = float(tokens[10])
             self.fUV[seg][step][per] = float(tokens[12])
             self.fSF[seg][step][per] = float(tokens[13])
             self.Vhr[seg][step][per] = float(tokens[13])*self.L_mi[seg]*self.Th/float(tokens[3])
@@ -484,6 +564,9 @@ class Facility:
         
     def func_ONRC(self, i, t, p):
         return self.ONRC[i][p]
+        
+    def func_TP(self, i, t, p):
+        return self.fOFRF[i][t][p]/self.SD[i][p]
         
             
     def __compute_segment_demand(self):
