@@ -7,7 +7,7 @@ __author__ = 'jltrask'
 
 xrange = range
 use_speed_match = True
-use_full_res = True
+use_full_res = False
 
 #def zeros(shape):
 #    if len(shape) == 2:
@@ -244,7 +244,7 @@ for el_i in xrange(fd.NS+1):  # fd.NS+1 to account for final node - no front cle
 init_time = time.time()
 # Setting objective - Minimize number of vehicles
 if use_speed_match:
-    big_lambda=1
+    big_lambda=0
     if use_full_res:
         #hcm.setObjective(gbp.quicksum(gbp.quicksum(gbp.quicksum(Vhr_delta[el_i][el_t][el_p] + big_lambda * UV(el_i,el_t,el_p) - MDv[el_p] - MF(fd.NS,el_t,el_p) for el_p in xrange(fd.P)) for el_t in xrange(fd.S)) for el_i in xrange(fd.NS)), gbp.GRB.MINIMIZE)  # +gbp.quicksum(CAFv[el_i] for el_i in xrange(fd.NS))
         obj = 0        
@@ -276,7 +276,7 @@ print("Init NV done")
 hcm.addConstr(gbp.quicksum(gbp.quicksum(MF(fd.NS, el_t, el_p) + gbp.quicksum(OFRF(el_i, el_t, el_p) for el_i in xrange(fd.NS+1)) for el_t in xrange(fd.S)) for el_p in xrange(fd.P))
                 == gbp.quicksum(MDv[el_p] for el_p in xrange(fd.P))/4.0 + gbp.quicksum(gbp.quicksum(ONRDv[el_i][el_p] for el_i in xrange(fd.NS)) for el_p in xrange(fd.P))/4.0,
                 name='Demand_Flow_Conservation')
-hcm.addConstr(gbp.quicksum(MDv[el_p] for el_p in xrange(fd.P)) >= 5000)
+hcm.addConstr(gbp.quicksum(MDv[el_p] for el_p in xrange(fd.P)) >= 28000)
 
 # Off-ramp flow
 for el_i in fd.Ftilde:
@@ -381,7 +381,7 @@ for el_p in xrange(fd.P):
                               name='KQ_'+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
                 hcm.addConstr(ASF[el_i][el_t][el_p] == (fd.KJ*fd.NL[el_i][el_p] - (NV(el_i, el_t-1, el_p)+NV(el_i, el_t, el_p))/(2*func_L(el_i)))*(func_SC(el_i, el_t, el_p)/(fd.NL[el_i][el_p]*(fd.KJ-fd.KC))),
                               name='ASF_'+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
-                hcm.addConstr(MO2(el_i, el_t, el_p) == ASF[el_i][el_t][el_p] - OFRF(el_i, el_t, el_p),
+                hcm.addConstr(MO2(el_i, el_t, el_p) == ASF[el_i][el_t][el_p] - ONRF(el_i, el_t, el_p),
                               name='MO2_'+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
             else:  # Assume there is no queue downstream of facility end
                 hcm.addConstr(MO2(el_i, el_t, el_p) == fd.SC[fd.NS-1][el_p]/fd.Th,

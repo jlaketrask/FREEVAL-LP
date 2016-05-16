@@ -16,8 +16,8 @@ xrange = range
 #        return [0 for el in xrange(shape[0])]
 
 
-example_problem = 8
-
+example_problem = 21
+  
 # Importing Facility
 fd = model_check.extract(example_problem)
 def func_KB(i,p):
@@ -264,8 +264,8 @@ hcm.addConstr(gbp.quicksum(gbp.quicksum(MF(fd.NS, el_t, el_p) + gbp.quicksum(OFR
                 name='Demand_Flow_Conservation')
 
 # Off-ramp flow
-for el_i in fd.Ftilde:
-    hcm.addConstr(gbp.quicksum(fd.OFRD[el_i-1][x]/4.0 - gbp.quicksum(OFRF(el_i,tau,x) for tau in xrange(fd.S)) for x in xrange(fd.P)) == 0.0)   
+#for el_i in fd.Ftilde:
+#    hcm.addConstr(gbp.quicksum(fd.OFRD[el_i-1][x]/4.0 - gbp.quicksum(OFRF(el_i,tau,x) for tau in xrange(fd.S)) for x in xrange(fd.P)) == 0.0)   
 
 # On-Ramp Flow
 for el_i in fd.Ntilde:

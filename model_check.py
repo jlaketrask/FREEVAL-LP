@@ -222,6 +222,16 @@ def extract(example_problem):
         facility.fill_outputs('RMTest/i40_mod_short.csv')
         facility.fill_nvuv('RMTest/i40_mod_short_nvuv.csv', True)
         return facility
+    elif example_problem is 22:
+        facility = Facility('RMTest/i40_mc.txt', 60)
+        facility.fill_outputs('RMTest/i40_mc.csv')
+        facility.fill_nvuv('RMTest/i40_mc_nvuv.csv', True)
+        return facility
+    elif example_problem is 23:
+        facility = Facility('RMTest/i40_hc.txt', 60)
+        facility.fill_outputs('RMTest/i40_hc.csv')
+        facility.fill_nvuv('RMTest/i40_hc_nvuv.csv', True)
+        return facility
                 
                 
 def read_facility_data_from_file(fname, NS, P):

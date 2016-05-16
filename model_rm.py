@@ -16,7 +16,7 @@ xrange = range
 #        return [0 for el in xrange(shape[0])]
 
 
-example_problem = 21
+example_problem = 22
 
 # Importing Facility
 fd = model_check.extract(example_problem)
@@ -245,6 +245,7 @@ for el_i in xrange(fd.NS+1):  # fd.NS+1 to account for final node - no front cle
 init_time = time.time()
 # Setting objective - Minimize number of vehicles
 hcm.setObjective(gbp.quicksum(gbp.quicksum(gbp.quicksum((fd.NS - el_i)/fd.NS*NV(el_i, el_t, el_p) + UV(el_i, el_t, el_p) + ONRQ(el_i, el_t, el_p) + ODEF[el_i][el_t][el_p] for el_p in xrange(fd.P)) for el_t in xrange(fd.S)) for el_i in xrange(fd.NS)), gbp.GRB.MINIMIZE)
+#hcm.setObjective(gbp.quicksum(gbp.quicksum(gbp.quicksum((fd.NS - el_i)/fd.NS*UV(el_i, el_t, el_p) + ONRQ(el_i, el_t, el_p) + ODEF[el_i][el_t][el_p] for el_p in xrange(fd.P)) for el_t in xrange(fd.S)) for el_i in xrange(fd.NS)), gbp.GRB.MINIMIZE)
 #hcm.setObjective(gbp.quicksum(gbp.quicksum(gbp.quicksum((2-(el_p*fd.S*fd.NS + el_t*fd.NS + el_i)/(fd.P*fd.S*fd.NS))*(0.5*MF(el_i, el_t, el_p) + ONRF(el_i, el_t, el_p)) for el_i in xrange(fd.NS)) for el_p in xrange(fd.P)) for el_t in xrange(fd.S)), gbp.GRB.MAXIMIZE)
 hcm.update()
 
@@ -340,7 +341,7 @@ for el_p in xrange(fd.P):
 
             ####################################### Mainline Input #####################################################
             # Step 9: Calculate Mainline Input
-            hcm.addConstr(MI[el_i][el_t][el_p] ==       # Mainline Input at node i equals
+            hcm.addConstr(MI[el_i][el_t][el_p] ==       # Mainline Input at node i equals 
                           MF(el_i-1, el_t, el_p)        # Mainline Flow at upstream node plus
                           + ONRF(el_i-1, el_t, el_p)    # ONR Flow at upstream node minus
                           - OFRF(el_i, el_t, el_p)      # OFR flow at current node i
@@ -366,7 +367,7 @@ for el_p in xrange(fd.P):
                               name='KQ_'+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
                 hcm.addConstr(ASF[el_i][el_t][el_p] == (fd.KJ*fd.NL[el_i][el_p] - (NV(el_i, el_t-1, el_p)+NV(el_i, el_t, el_p))/(2*func_L(el_i)))*(func_SC(el_i, el_t, el_p)/(fd.NL[el_i][el_p]*(fd.KJ-fd.KC))),
                               name='ASF_'+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
-                hcm.addConstr(MO2(el_i, el_t, el_p) == ASF[el_i][el_t][el_p] - OFRF(el_i, el_t, el_p),
+                hcm.addConstr(MO2(el_i, el_t, el_p) == ASF[el_i][el_t][el_p] - ONRF(el_i, el_t, el_p),
                               name='MO2_'+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
             else:  # Assume there is no queue downstream of facility end
                 hcm.addConstr(MO2(el_i, el_t, el_p) == fd.SC[fd.NS-1][el_p]/fd.Th,
