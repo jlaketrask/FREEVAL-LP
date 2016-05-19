@@ -113,6 +113,12 @@ def extract(example_problem):
         facility.fill_outputs('PaperExamples/gpex1_ht.csv')
         facility.fill_nvuv('PaperExamples/gpex1_ht_nvuv.csv', True)
         return facility
+    elif example_problem is 9:
+        # Modified GPEx1 with low traffic
+        facility = Facility('PaperExamples/gpex_lt.txt', 60)
+        facility.fill_outputs('PaperExamples/gpex_lt.csv')
+        facility.fill_nvuv('PaperExamples/gpex_lt_nvuv.csv', True)
+        return facility
     elif example_problem is 11:
         # Model Check 2 (off-ramp)
         facility = Facility('PaperExamples/modified_mc2.txt', 5)
@@ -629,6 +635,49 @@ class Facility:
         for seg in xrange(self.NS):
             for per in xrange(self.P):
                 self.ED[seg][per] = min(self.SC[seg][per], self.SD[seg][per])
+                
+
+def ExtractParamFromNVUV(fname, paramIdString, numSeg, numPer):
+    f = open(fname, 'r')
+    data = zeros((numSeg, numPer))
+    line = f.readline()
+    tokens = line.strip().split(',')
+    if (tokens.count(paramIdString) == 0):
+        return None
+    paramIdx = tokens.index(paramIdString)
+    for line in f:
+        tokens = line.split(',')
+        data[int(tokens[0])][int(tokens[1])]+=float(tokens[paramIdx])
+    return data
+    
+def CreateStatistics():
+    fd = extract(23)
+    flist = ['RMTest/i40_hc_base_nvuv.csv',
+             'RMTest/i40_hc_150_nvuv.csv',
+             'RMTest/i40_hc_100_nvuv.csv',
+             'RMTest/i40_hc_50_nvuv.csv']
+    max_aql = [150,100,50]
+    #fOut = open('i40_mc_out.csv', 'w')
+    #rm_table == zeros((3, len(flist)))
+    mean_qp = []
+    mean_ql = []
+    max_ql = []
+    for fname in flist:
+        onrq_data = ExtractParamFromNVUV(fname, 'ONRQ', fd.NS, fd.P)
+        mean_ql.append(0)
+        max_ql.append(0)
+        #print(onrq_data)
+        fIdx = len(mean_qp)-1
+        for segIdx in fd.Ntilde:
+            mean_ql[fIdx]+=onrq_data[segIdx].mean() / fd.S / fd.onr_nl[segIdx][0]
+            if (onrq_data[segIdx].max() / fd.S / fd.onr_nl[segIdx][0]) > max_ql[fIdx]:
+                max_ql[fIdx] = onrq_data[segIdx].max() / fd.S / fd.onr_nl[segIdx][0]
+        mean_ql[fIdx] = mean_ql[fIdx] / len(fd.Ntilde)
+    print('-,'+str(mean_ql[1]/max_aql[0]*100.0)+','+str(mean_ql[2]/max_aql[1]*100.0)+','+str(mean_ql[3]/max_aql[2]*100.0))
+    print(str(mean_ql[0])+','+str(mean_ql[1])+','+str(mean_ql[2])+','+str(mean_ql[3]))
+    print(str(max_ql[0])+','+str(max_ql[1])+','+str(max_ql[2])+','+str(max_ql[3]))
+        
+    
     
         
         

@@ -16,7 +16,9 @@ xrange = range
 #        return [0 for el in xrange(shape[0])]
 
 
-example_problem = 22
+example_problem = 23
+onrq_capacity_ln = 50
+out_fname='RMTest/i40_hc_'+str(onrq_capacity_ln)+'_rm_rates.csv'
 
 # Importing Facility
 fd = model_check.extract(example_problem)
@@ -333,7 +335,7 @@ for el_p in xrange(fd.P):
                 # Update ONRQ
                 hcm.addConstr(ONRQ(el_i,el_t,el_p) == gbp.quicksum(fd.ONRD[el_i][x]/4.0 - gbp.quicksum(ONRF(el_i,tau,x) for tau in xrange(fd.S)) for x in xrange(el_p)) + gbp.quicksum(fd.ONRD[el_i][el_p]/fd.Th - ONRF(el_i,tau,el_p) for tau in xrange(el_t)),
                                        name='ONRQ_'+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
-                hcm.addConstr(ONRQ(el_i,el_t,el_p) <= 150)
+                hcm.addConstr(ONRQ(el_i,el_t,el_p) <= onrq_capacity_ln*fd.onr_nl[el_i][el_p])
             else: # Segment is not ONR
                 hcm.addConstr(ONRF(el_i,el_t,el_p) == 0.0, name='ONRF'+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
                 hcm.addConstr(ONRQ(el_i,el_t,el_p) == 0.0)
@@ -467,34 +469,46 @@ hcm.optimize()
 optimize_finish_time = time.time()
 print("Model Solved: "+str(optimize_finish_time - model_build_time))
 
-f=open('gpex1_ht_out.csv','w')
-f.write('Segment, Period, Step, NV, MF, MI, MO1, MO2, MO3, ONRF, OFRF, DEF, UV, SF, KQ, ASF\n')
-varCount = 0
+#f=open(out_fname,'w')
+#f.write('Segment, Period, Step, NV, MF, MI, MO1, MO2, MO3, ONRF, OFRF, DEF, UV, SF, KQ, ASF\n')
+#varCount = 0
+#for p in xrange(fd.P):
+#    for t in xrange(fd.S):
+#        for i in xrange(fd.NS):
+#            varCount+=1
+#            #s = str(varCount)
+#            s = str(i)
+#            s += ", " + str(p)
+#            s += ", " + str(t)
+#            s += ", " + str(NV(i, t, p).X)
+#            s += ", " + str(MF(i+1, t, p).X)
+#            s += ", " + str(MI[i+1][t][p].X)
+#            s += ", " + str(MO1(i+1, t, p).X)
+#            s += ", " + str(MO2(i+1, t, p).X)
+#            s += ", " + str(MO3(i+1, t, p).X)
+#            s += ", " + str(ONRF(i+1,t, p).X)
+#            #s+= ", " + str(ONRQ(i,t, p).X)
+#            s += ", " + str(OFRF(i+1,t, p).X)
+#            s += ", " + str(DEF[i+1][t][p].X)
+#            s+= ", " + str(UV(i,t,p).X)
+#            s+=", " + str(SF(i, t, p).X)
+#            s+=", " + str(KQ[i][t][p].X)
+#            s+=", " + str(ASF[i][t][p].X)
+#            f.write(s +'\n')
+#            #print(s)
+#f.close()
+f = open(out_fname,'w')
+rm_rates = zeros((fd.NS, fd.P))
 for p in xrange(fd.P):
-    for t in xrange(fd.S):
-        for i in xrange(fd.NS):
-            varCount+=1
-            #s = str(varCount)
-            s = str(i)
-            s += ", " + str(p)
-            s += ", " + str(t)
-            s += ", " + str(NV(i, t, p).X)
-            s += ", " + str(MF(i+1, t, p).X)
-            s += ", " + str(MI[i+1][t][p].X)
-            s += ", " + str(MO1(i+1, t, p).X)
-            s += ", " + str(MO2(i+1, t, p).X)
-            s += ", " + str(MO3(i+1, t, p).X)
-            s += ", " + str(ONRF(i+1,t, p).X)
-            #s+= ", " + str(ONRQ(i,t, p).X)
-            s += ", " + str(OFRF(i+1,t, p).X)
-            s += ", " + str(DEF[i+1][t][p].X)
-            s+= ", " + str(UV(i,t,p).X)
-            s+=", " + str(SF(i, t, p).X)
-            s+=", " + str(KQ[i][t][p].X)
-            s+=", " + str(ASF[i][t][p].X)
-            f.write(s +'\n')
-            #print(s)
-f.close()
+    s = ''
+    for i in xrange(fd.NS):
+        for t in xrange(fd.S):
+            rm_rates[i][p]+=ONRF(i,t,p).X
+        s = s + str(rm_rates[i][p]*4) +','
+    f.write(s+'\n')
+f.close();
+    
+            
 
 # Computing Performance Measures
 segFlow = zeros((fd.NS, fd.P))

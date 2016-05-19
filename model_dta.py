@@ -16,7 +16,7 @@ xrange = range
 #        return [0 for el in xrange(shape[0])]
 
 
-example_problem = 21
+example_problem = 8
   
 # Importing Facility
 fd = model_check.extract(example_problem)
@@ -244,7 +244,8 @@ for el_i in xrange(fd.NS+1):  # fd.NS+1 to account for final node - no front cle
 #######################################             BEGIN MODEL BUILD            #######################################
 init_time = time.time()
 # Setting objective - Minimize number of vehicles
-hcm.setObjective(gbp.quicksum(gbp.quicksum(gbp.quicksum((fd.NS - el_i)/fd.NS*NV(el_i, el_t, el_p) + ONRQ(el_i, el_t, el_p) + ODEF[el_i][el_t][el_p] for el_p in xrange(fd.P)) for el_t in xrange(fd.S)) for el_i in xrange(fd.NS)), gbp.GRB.MINIMIZE)
+hcm.setObjective(gbp.quicksum(gbp.quicksum(gbp.quicksum((fd.NS - el_i)/fd.NS*(NV(el_i, el_t, el_p)) + ONRQ(el_i, el_t, el_p) + ODEF[el_i][el_t][el_p] for el_p in xrange(fd.P)) for el_t in xrange(fd.S)) for el_i in xrange(fd.NS)), gbp.GRB.MINIMIZE)
+#hcm.setObjective(gbp.quicksum(gbp.quicksum(gbp.quicksum((fd.NS - el_i)/fd.NS*NV(el_i, el_t, el_p) for el_p in xrange(fd.P)) for el_t in xrange(fd.S)) for el_i in xrange(fd.NS)), gbp.GRB.MINIMIZE)
 #hcm.setObjective(gbp.quicksum(gbp.quicksum(gbp.quicksum((2-(el_p*fd.S*fd.NS + el_t*fd.NS + el_i)/(fd.P*fd.S*fd.NS))*(0.5*MF(el_i, el_t, el_p) + ONRF(el_i, el_t, el_p)) for el_i in xrange(fd.NS)) for el_p in xrange(fd.P)) for el_t in xrange(fd.S)), gbp.GRB.MAXIMIZE)
 hcm.update()
 
@@ -260,7 +261,7 @@ print("Init NV done")
 ########################################## Demand/Flow Convervation ####################################################
 # Total Input/Output Conservation
 hcm.addConstr(gbp.quicksum(gbp.quicksum(MF(fd.NS, el_t, el_p) + gbp.quicksum(OFRF(el_i, el_t, el_p) for el_i in xrange(fd.NS+1)) for el_t in xrange(fd.S)) for el_p in xrange(fd.P))
-                == sum(fd.mainline_demand)/4.0 + sum(sum(fd.ONRD))/4.0,
+                <= sum(fd.mainline_demand)/4.0 + sum(sum(fd.ONRD))/4.0,
                 name='Demand_Flow_Conservation')
 
 # Off-ramp flow
@@ -269,7 +270,7 @@ hcm.addConstr(gbp.quicksum(gbp.quicksum(MF(fd.NS, el_t, el_p) + gbp.quicksum(OFR
 
 # On-Ramp Flow
 for el_i in fd.Ntilde:
-    hcm.addConstr(gbp.quicksum(gbp.quicksum(gbp.quicksum(ONRF(el_i, el_t, el_p) for el_p in xrange(fd.P)) for el_t in xrange(fd.S)) for el_i in xrange(fd.NS)) == sum(sum(fd.ONRD))/4.0,name='ONRF_Conservation') 
+     hcm.addConstr(gbp.quicksum(gbp.quicksum(gbp.quicksum(ONRF(el_i, el_t, el_p) for el_p in xrange(fd.P)) for el_t in xrange(fd.S)) for el_i in xrange(fd.NS)) == sum(sum(fd.ONRD))/4.0,name='ONRF_Conservation') 
 
 ########################################### Begin loop over all nodes #################################################
 for el_p in xrange(fd.P):
@@ -291,7 +292,7 @@ for el_p in xrange(fd.P):
                 #              name='OFRF_test2_'+str(el_i)+str(el_t)+str(el_p))
                 #hcm.addConstr(DEF[el_i][el_t][el_p] == fd.SD[el_i-1][el_p]/fd.Th - MF(el_i-1, el_t, el_p) - ONRF(el_i-1, el_t, el_p),
                 #              name='DEF_test2_'+str(el_i)+str(el_t)+str(el_p))
-                hcm.addConstr(OFRF(el_i, el_t, el_p) == fd.func_TP(el_i-1, el_t, el_p)*fd.SD[el_i-1][el_p])
+                hcm.addConstr(OFRF(el_i, el_t, el_p) == fd.func_TP(el_i-1, el_t, el_p)*(fd.SD[el_i-1][el_p])) # fd.SD[el_i-1][el_p]
             else:  # The segment is not an offramp
                 hcm.addConstr(OFRF(el_i, el_t, el_p) == 0.0, name='OFRF_'+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
                 hcm.addConstr(DEF[el_i][el_t][el_p] == 0.0, name='DEF_'+str(el_i)+'_'+str(el_t)+'_'+str(el_p))
@@ -523,6 +524,7 @@ plt.legend(loc=2)
 plt.show()
 
 
+abs_error = zeros((fd.NS,))
 for p in xrange(fd.P):
     for i in xrange(fd.NS):
         segFlow[i][p] = (fd.Th/fd.S)*sum([SF(i,tau,p).X for tau in xrange(fd.S)])
@@ -532,5 +534,18 @@ for p in xrange(fd.P):
         temp_segFlow=(fd.Th/fd.S)*sum([fd.fSF[i][tau][p] for tau in xrange(fd.S)])
         temp_numVeh = (1.0/fd.S)*sum([fd.fNV[i][tau][p] for tau in xrange(fd.S)])
         recalc_V[i][p]=temp_segFlow/(temp_numVeh/fd.L_mi[i])
+        abs_error[i]+=abs(U[i][p]-recalc_V[i][p])
+        #sum_error+=U[i][p]-recalc_V[i][p]
         print(str(i)+','+str(p)+','+"{0:.2f}".format(U[i][p])+','+"{0:.2f}".format(recalc_V[i][p])+','+"{0:.2f}".format(U[i][p]-recalc_V[i][p])) # +','+"{0:.2f}".format(KBv[i][p].X)+','+"{0:.2f}".format(CAFv[i].X)
         
+x = [el for el in xrange(1,12)]
+y = [abs_error[el]/12.0 for el in xrange(11)]
+fig = plt.figure(1)
+#plt.plot(x,y, figure = fig)
+plt.bar(x, y, figure = fig)
+plt.title('Average Absolute Speed Difference')
+plt.ylabel('Speed (mph)')
+plt.xlabel('Segment')
+plt.legend(loc=2)
+plt.savefig('gpex_avg_speed_diff.png')
+plt.show()
